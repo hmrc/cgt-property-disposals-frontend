@@ -29,8 +29,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.ChangingSubscriptionEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 
 import java.util.UUID
 import scala.concurrent.Future
@@ -69,10 +69,9 @@ class SubscriptionChangeEmailControllerSpec
     : Option[(ChangingSubscriptionEmail, ChangingSubscriptionEmail, Either[Error, Unit]) => Unit] =
     None
 
-  override lazy val controller: SubscriptionChangeEmailController =
-    instanceOf[SubscriptionChangeEmailController]
+  override lazy val controller: SubscriptionChangeEmailController = instanceOf[SubscriptionChangeEmailController]
 
-  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+  implicit val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
@@ -99,7 +98,7 @@ class SubscriptionChangeEmailControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterEmailSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

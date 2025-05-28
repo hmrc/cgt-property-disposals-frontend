@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait OtherReliefsOption extends Product with Serializable
@@ -38,7 +37,33 @@ object OtherReliefsOption {
         case value: OtherReliefs => ifOtherReliefs(value)
       }
   }
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[OtherReliefsOption] = derived.oformat()
+
+  implicit val noOtherReliefsFormat: OFormat[NoOtherReliefs.type] = OFormat[NoOtherReliefs.type](
+    Reads[NoOtherReliefs.type] {
+      case JsObject(_) => JsSuccess(NoOtherReliefs)
+      case _           => JsError("Invalid other reliefs option")
+    },
+    OWrites[NoOtherReliefs.type] { _ =>
+      Json.obj()
+    }
+  )
+
+  implicit val otherReliefsFormat: OFormat[OtherReliefs] = Json.format[OtherReliefs]
+  implicit val format: OFormat[OtherReliefsOption]       = new OFormat[OtherReliefsOption] {
+    override def reads(json: JsValue): JsResult[OtherReliefsOption] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("NoOtherReliefs", _) => JsSuccess(NoOtherReliefs)
+          case ("OtherReliefs", v)   => v.validate[OtherReliefs]
+          case (other, _)            => JsError(s"Unrecognized OtherReliefsOption type: $other")
+        }
+      case _                                    => JsError("Expected OtherReliefsOption wrapper object with a single entry")
+    }
+
+    override def writes(o: OtherReliefsOption): JsObject = o match {
+      case NoOtherReliefs  => Json.obj("NoOtherReliefs" -> Json.obj())
+      case o: OtherReliefs => Json.obj("OtherReliefs" -> Json.toJson(o))
+    }
+  }
 
 }

@@ -36,10 +36,10 @@ class RegistrationEnterIndividualNameControllerSpec
     with IndividualNameControllerSpec[IndividualSupplyingInformation]
     with ScalaCheckDrivenPropertyChecks {
 
-  override lazy val controller: RegistrationEnterIndividualNameController =
+  override val controller: RegistrationEnterIndividualNameController =
     instanceOf[RegistrationEnterIndividualNameController]
 
-  override lazy val validJourney: IndividualSupplyingInformation =
+  override val validJourney: IndividualSupplyingInformation =
     IndividualSupplyingInformation(None, None, None, None, sample[GGCredId])
 
   def isValidJourney(journey: JourneyStatus): Boolean =
@@ -72,7 +72,7 @@ class RegistrationEnterIndividualNameControllerSpec
       behave like enterNameSubmit(
         data =>
           controller.enterIndividualNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           ),
         controllers.onboarding.address.routes.RegistrationEnterAddressController
           .isUk()

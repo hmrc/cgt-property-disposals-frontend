@@ -31,7 +31,7 @@
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk
 )
 
-@(form: Form[TrustNameMatchDetails], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[TrustNameMatchDetails], backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages("enterTrn.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -40,20 +40,18 @@
 
 @layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
-  @{
-    if(form.hasGlobalErrors) {
-      viewHelpers.govukErrorSummary(ErrorSummary(
-        errorList = form.globalErrors.map { error =>
-          ErrorLink(
-            href = Some(s"#$trnKey"),
-            content = Text(messages(s"${error.message}"))
-          )
-        }
-      ))
-    } else if (form.hasErrors) {
-      errorSummary(form)
+@if(form.hasGlobalErrors) {
+  @viewHelpers.govukErrorSummary(ErrorSummary(
+    errorList = form.globalErrors.map { error =>
+      ErrorLink(
+        href = Some(s"#$trnKey"),
+        content = Text(messages(s"${error.message}"))
+      )
     }
-  }
+  ))
+} else if (form.hasErrors) {
+  @errorSummary(form)
+}
 
   <span class="govuk-caption-xl">@messages("subscription.caption")</span>
   <h1 class="govuk-heading-xl">@title</h1>

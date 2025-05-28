@@ -33,7 +33,7 @@ trait AuditService {
     ec: ExecutionContext,
     hc: HeaderCarrier,
     writes: Writes[A],
-    request: Request[_]
+    request: Request[?]
   ): Unit
 
 }
@@ -49,7 +49,7 @@ class AuditServiceImpl @Inject() (auditConnector: AuditConnector) extends AuditS
     ec: ExecutionContext,
     hc: HeaderCarrier,
     writes: Writes[A],
-    request: Request[_]
+    request: Request[?]
   ): Unit = {
     val extendedDataEvent = ExtendedDataEvent(
       auditSource = "cgt-property-disposals",

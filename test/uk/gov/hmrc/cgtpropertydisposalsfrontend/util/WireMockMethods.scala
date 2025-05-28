@@ -51,7 +51,7 @@ trait WireMockMethods {
         .pipe(headers.foldLeft(_) { case (m, (key, value)) => m.withHeader(key, equalTo(value)) })
         .pipe { mapping =>
           body match {
-            case Some(extractedBody) => mapping.withRequestBody(equalTo(extractedBody))
+            case Some(extractedBody) => mapping.withRequestBody(equalToJson(extractedBody))
             case None                => mapping
           }
         }

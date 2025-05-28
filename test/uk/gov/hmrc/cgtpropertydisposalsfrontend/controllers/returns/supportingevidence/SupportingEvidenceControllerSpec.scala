@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence
 import cats.data.EitherT
-import cats.instances.future._
+import cats.instances.future.*
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
@@ -24,17 +24,17 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
@@ -169,13 +169,13 @@ class SupportingEvidenceControllerSpec
     }
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs: _*),
+      messageFromMessageKey(pageTitleKey, titleArgs*),
       { doc =>
         doc
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs: _*
+          errorArgs*
         )
         doc.title() should startWith("Error:")
       },
@@ -269,7 +269,7 @@ class SupportingEvidenceControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.doYouWantToUploadSupportingEvidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -336,7 +336,7 @@ class SupportingEvidenceControllerSpec
         )._1
 
         def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-          testFormError(data: _*)(expectedErrorMessageKey)(
+          testFormError(data*)(expectedErrorMessageKey)(
             "supporting-evidence.do-you-want-to-upload.title"
           )(
             performAction,
@@ -1250,7 +1250,7 @@ class SupportingEvidenceControllerSpec
           val updatedUpscanSuccess =
             upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
 
-          val upscanUpload         =
+          val upscanUpload =
             sample[UpscanUpload].copy(
               uploadReference = uploadReference,
               upscanCallBack = Some(updatedUpscanSuccess)
@@ -1392,7 +1392,7 @@ class SupportingEvidenceControllerSpec
           val updatedUpscanSuccess =
             upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
 
-          val upscanUpload         =
+          val upscanUpload =
             sample[UpscanUpload].copy(
               uploadReference = uploadReference,
               upscanCallBack = Some(updatedUpscanSuccess)

@@ -35,7 +35,7 @@
     answers: CompleteMultipleDisposalsTriageAnswers,
     isATrust: Boolean,
     representeeAnswers: Option[RepresenteeAnswers]
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @representativeType = @{answers.representativeType()}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

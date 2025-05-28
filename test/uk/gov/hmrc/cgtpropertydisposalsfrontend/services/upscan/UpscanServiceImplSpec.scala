@@ -27,9 +27,9 @@ import play.api.mvc.{Call, Request}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.upscan.UpscanConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UploadRequest, UpscanUpload, UpscanUploadMeta}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -43,7 +43,7 @@ class UpscanServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDri
   private val reference            = sample[UploadReference]
   private val upload               = sample[UpscanUpload]
   implicit val hc: HeaderCarrier   = HeaderCarrier()
-  implicit val request: Request[_] = FakeRequest()
+  implicit val request: Request[?] = FakeRequest()
 
   private val emptyJsonBody = "{}"
 

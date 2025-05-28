@@ -16,10 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import cats.syntax.order._
+import cats.syntax.order.*
 import org.scalacheck.Gen
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
@@ -51,10 +53,7 @@ trait HigherPriorityYearToDateLiabilityAnswersGen extends LowerPriorityYearToDat
       case other                                                                                                    => other
     }
 
-  implicit val calculatedTaxDue: Gen[CalculatedTaxDue] = calculatedTaxDueGen
-
-  implicit val gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] =
-    gen[GainCalculatedTaxDue]
+  given gainCalculatedTaxDueGen: Gen[GainCalculatedTaxDue] = gen[GainCalculatedTaxDue]
 
   implicit val ytdLiabilityAnswersGen: Gen[YearToDateLiabilityAnswers] =
     Gen.oneOf(
@@ -68,8 +67,7 @@ trait HigherPriorityYearToDateLiabilityAnswersGen extends LowerPriorityYearToDat
 trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearToDateLiabilityAnswersGen {
   this: GenUtils =>
 
-  val calculatedTaxDueGen: Gen[CalculatedTaxDue] =
-    gen[CalculatedTaxDue]
+  given calculatedTaxDueGen: Gen[CalculatedTaxDue] = gen[CalculatedTaxDue]
 
   private val incompleteCalculatedYTDLiabilityAnswersRaw = for {
     estimatedIncome     <- Gen.option(MoneyGen.amountInPenceGen)
@@ -101,7 +99,7 @@ trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearTo
       case other => other
     }
 
-  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYTDAnswers] = {
+  implicit val completeNonCalculatedYTDLiabilityAnswersGen: Gen[CompleteNonCalculatedYTDAnswers] =
     for {
       taxableGainOrLoss              <- MoneyGen.amountInPenceGen
       hasEstimatedDetails            <- Generators.booleanGen
@@ -125,16 +123,13 @@ trait LowerPriorityYearToDateLiabilityAnswersGen extends EvenLowerPriorityYearTo
       taxableGainOrLossCalculation,
       yearToDateLiabilityCalculation
     )
-  }
 
 }
 
 trait EvenLowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
+  given mandatoryEvidenceGen: Gen[MandatoryEvidence] = gen[MandatoryEvidence]
 
-  implicit val mandatoryEvidenceGen: Gen[MandatoryEvidence] =
-    gen[MandatoryEvidence]
-
-  implicit val incompleteNonCalculatedYTDLiabilityAnswersGen: Gen[IncompleteNonCalculatedYTDAnswers] = {
+  implicit val incompleteNonCalculatedYTDLiabilityAnswersGen: Gen[IncompleteNonCalculatedYTDAnswers] =
     for {
       taxableGainOrLoss              <- Gen.option(MoneyGen.amountInPenceGen)
       hasEstimatedDetails            <- Gen.option(Generators.booleanGen)
@@ -162,6 +157,5 @@ trait EvenLowerPriorityYearToDateLiabilityAnswersGen { this: GenUtils =>
       taxableGainOrLossCalculation,
       yearToDateLiabilityCalculation
     )
-  }
 
 }

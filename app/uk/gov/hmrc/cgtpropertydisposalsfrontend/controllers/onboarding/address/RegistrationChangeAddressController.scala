@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.audit.{AuditAd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Onboarding.RegistrationReadyAddressJourney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -65,7 +65,7 @@ class RegistrationChangeAddressController @Inject() (
   def isATrust(journey: RegistrationReadyAddressJourney): Boolean = false
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Future[Result], (SessionData, RegistrationReadyAddressJourney)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) =>
@@ -79,7 +79,7 @@ class RegistrationChangeAddressController @Inject() (
     isManuallyEnteredAddress: Boolean
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] = {
     auditService.sendEvent(
       "registrationContactAddressChanged",

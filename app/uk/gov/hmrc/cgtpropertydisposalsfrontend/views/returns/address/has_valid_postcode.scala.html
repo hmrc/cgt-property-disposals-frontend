@@ -35,7 +35,7 @@
     backLink: Call,
     isSingleDisposal: Boolean,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"hasValidPostcode"}
 @journeyContext = @{ if(isSingleDisposal) "singleDisposal" else "multipleDisposals" }

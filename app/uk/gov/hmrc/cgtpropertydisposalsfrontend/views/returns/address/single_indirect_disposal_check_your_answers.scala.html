@@ -28,7 +28,7 @@ layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
   summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_indirect_disposal_summary_govuk
 )
 
-@(companyAddress: Address)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(companyAddress: Address)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @title = @{messages("companyDetails.cya.title")}
 

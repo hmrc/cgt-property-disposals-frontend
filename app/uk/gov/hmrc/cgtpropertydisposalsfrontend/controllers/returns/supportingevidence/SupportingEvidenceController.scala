@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{supportingevidence => pages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -84,7 +84,7 @@ class SupportingEvidenceController @Inject() (
       FillingOutReturn,
       SupportingEvidenceAnswers
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
@@ -210,7 +210,7 @@ class SupportingEvidenceController @Inject() (
                 val result = for {
                   _ <- returnsService.storeDraftReturn(newJourney)
                   _ <- EitherT(
-                         updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
+                         updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(newJourney)))
                        )
                 } yield ()
                 result.fold(
@@ -250,7 +250,7 @@ class SupportingEvidenceController @Inject() (
                 val result = for {
                   _ <- returnsService.storeDraftReturn(newJourney)
                   _ <- EitherT(
-                         updateSession(sessionStore, request)(
+                         updateSession(sessionStore, request.toSession)(
                            _.copy(journeyStatus = Some(newJourney))
                          )
                        )
@@ -375,7 +375,7 @@ class SupportingEvidenceController @Inject() (
     answers: IncompleteSupportingEvidenceAnswers,
     fillingOutReturn: FillingOutReturn
   )(implicit
-    request: RequestWithSessionData[_],
+    request: RequestWithSessionData[?],
     hc: HeaderCarrier
   ) = {
     val newAnswers =
@@ -404,7 +404,7 @@ class SupportingEvidenceController @Inject() (
     for {
       _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(newJourney))
              )
            )
@@ -449,7 +449,7 @@ class SupportingEvidenceController @Inject() (
         val result = for {
           _ <- returnsService.storeDraftReturn(newJourney)
           _ <- EitherT(
-                 updateSession(sessionStore, request)(
+                 updateSession(sessionStore, request.toSession)(
                    _.copy(journeyStatus = Some(newJourney))
                  )
                )
@@ -519,7 +519,7 @@ class SupportingEvidenceController @Inject() (
         val result = for {
           _ <- returnsService.storeDraftReturn(newJourney)
           _ <- EitherT(
-                 updateSession(sessionStore, request)(
+                 updateSession(sessionStore, request.toSession)(
                    _.copy(journeyStatus = Some(newJourney))
                  )
                )
@@ -537,7 +537,7 @@ class SupportingEvidenceController @Inject() (
 
   private def checkYourAnswersHandler(
     answers: SupportingEvidenceAnswers
-  )(implicit request: RequestWithSessionData[_]) =
+  )(implicit request: RequestWithSessionData[?]) =
     answers match {
       case IncompleteSupportingEvidenceAnswers(_, _, expiredEvidences) if expiredEvidences.nonEmpty =>
         Redirect(
@@ -625,7 +625,7 @@ class SupportingEvidenceController @Inject() (
             val result = for {
               _ <- returnsService.storeDraftReturn(updatedJourney)
               _ <- EitherT(
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(journeyStatus = Some(updatedJourney))
                      )
                    )

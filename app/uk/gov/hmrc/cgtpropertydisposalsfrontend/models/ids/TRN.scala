@@ -21,7 +21,7 @@ import play.api.data.Mapping
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.libs.json.{Format, Json}
 
-final case class TRN(value: String) extends AnyVal
+final case class TRN(value: String)
 
 object TRN {
 
@@ -38,7 +38,7 @@ object TRN {
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint { t: String =>
+      .verifying(Constraint { (t: String) =>
         validateTrn(t.replace(" ", ""))
       })
   }

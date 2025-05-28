@@ -23,7 +23,7 @@ import play.api.data.Forms.nonEmptyText
 import play.api.data.Mapping
 import play.api.libs.json.{Format, Json}
 
-final case class SAUTR(value: String) extends AnyVal
+final case class SAUTR(value: String)
 
 object SAUTR {
 

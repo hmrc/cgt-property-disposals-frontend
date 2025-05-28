@@ -40,7 +40,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.testonly.JourneyStatusController._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -94,7 +94,7 @@ class JourneyStatusController @Inject() (
                 disposalDate <- getDisposalDate
                 triageAnswers = toSingleDisposalTriageAnswers(answers, disposalDate)
                 _            <- EitherT(
-                                  updateSession(sessionStore, request)(
+                                  updateSession(sessionStore, request.toSession)(
                                     _.copy(journeyStatus =
                                       Some(
                                         newReturn.copy(newReturnTriageAnswers = Right(triageAnswers))
@@ -135,7 +135,7 @@ class JourneyStatusController @Inject() (
       None
     )
 
-  private def withStartingNewReturn(request: RequestWithSessionData[_])(
+  private def withStartingNewReturn(request: RequestWithSessionData[?])(
     f: (SessionData, StartingNewDraftReturn) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {

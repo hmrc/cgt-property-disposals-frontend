@@ -30,7 +30,7 @@
 )
 
 
-@(previousReturn: ReturnSummary, backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(previousReturn: ReturnSummary, backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"previousReturnExistsWithSameCompletionDate"}
 @title = @{ messages(s"$key.title") }

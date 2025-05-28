@@ -30,7 +30,7 @@
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk
 )
 
-@(form: Form[Country])(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[Country])(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("agent.enter-client-country.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name
 import cats.Eq
 import cats.instances.string._
 import cats.syntax.eq._
-import play.api.data.Forms.{nonEmptyText, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.data.{Form, Mapping}
 import play.api.libs.json.{Json, OFormat}
@@ -51,7 +51,7 @@ object IndividualName {
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint[String](validateName(_)))
+      .verifying(Constraint[String](validateName))
   }
 
   def form(firstNameKey: String, lastNameKey: String): Form[IndividualName] =
@@ -59,6 +59,6 @@ object IndividualName {
       formMapping(
         firstNameKey -> mapping,
         lastNameKey  -> mapping
-      )(IndividualName.apply)(IndividualName.unapply)
+      )(IndividualName.apply)(o => Some((o.firstName, o.lastName)))
     )
 }

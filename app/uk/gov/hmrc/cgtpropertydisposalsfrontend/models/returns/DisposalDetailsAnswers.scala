@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
 import monocle.Lens
-import monocle.macros.Lenses
-import play.api.libs.json.OFormat
+import monocle.macros.GenLens
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait DisposalDetailsAnswers extends Product with Serializable
@@ -27,7 +26,6 @@ sealed trait DisposalDetailsAnswers extends Product with Serializable
 @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object DisposalDetailsAnswers {
 
-  @Lenses
   final case class IncompleteDisposalDetailsAnswers(
     shareOfProperty: Option[ShareOfProperty],
     disposalPrice: Option[AmountInPence],
@@ -35,6 +33,11 @@ object DisposalDetailsAnswers {
   ) extends DisposalDetailsAnswers
 
   object IncompleteDisposalDetailsAnswers {
+
+    val disposalFees    = GenLens[IncompleteDisposalDetailsAnswers](_.disposalFees)
+    val disposalPrice   = GenLens[IncompleteDisposalDetailsAnswers](_.disposalPrice)
+    val shareOfProperty = GenLens[IncompleteDisposalDetailsAnswers](_.shareOfProperty)
+
     val empty: IncompleteDisposalDetailsAnswers =
       IncompleteDisposalDetailsAnswers(None, None, None)
 
@@ -71,13 +74,37 @@ object DisposalDetailsAnswers {
     def unset[A](
       fieldLens: IncompleteDisposalDetailsAnswers.type => Lens[IncompleteDisposalDetailsAnswers, Option[A]]
     ): IncompleteDisposalDetailsAnswers =
-      fieldLens(IncompleteDisposalDetailsAnswers).set(None)(
+      fieldLens(IncompleteDisposalDetailsAnswers).replace(None)(
         fold(identity, IncompleteDisposalDetailsAnswers.fromCompleteAnswers)
       )
 
   }
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[DisposalDetailsAnswers] =
-    derived.oformat[DisposalDetailsAnswers]()
+
+  implicit val completeFormat: OFormat[CompleteDisposalDetailsAnswers]     = Json.format[CompleteDisposalDetailsAnswers]
+  implicit val inCompleteFormat: OFormat[IncompleteDisposalDetailsAnswers] =
+    Json.format[IncompleteDisposalDetailsAnswers]
+
+  implicit val format: OFormat[DisposalDetailsAnswers] = new OFormat[DisposalDetailsAnswers] {
+    override def reads(json: JsValue): JsResult[DisposalDetailsAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteDisposalDetailsAnswers", value) =>
+            value.validate[IncompleteDisposalDetailsAnswers]
+          case ("CompleteDisposalDetailsAnswers", value)   =>
+            value.validate[CompleteDisposalDetailsAnswers]
+          case (other, _)                                  =>
+            JsError(s"Unrecognized DisposalDetailsAnswers type: $other")
+        }
+      case _                                    =>
+        JsError("Expected DisposalDetailsAnswers wrapper object with a single entry")
+    }
+
+    override def writes(a: DisposalDetailsAnswers): JsObject = a match {
+      case i: IncompleteDisposalDetailsAnswers =>
+        Json.obj("IncompleteDisposalDetailsAnswers" -> Json.toJson(i))
+      case c: CompleteDisposalDetailsAnswers   =>
+        Json.obj("CompleteDisposalDetailsAnswers" -> Json.toJson(c))
+    }
+  }
 
 }

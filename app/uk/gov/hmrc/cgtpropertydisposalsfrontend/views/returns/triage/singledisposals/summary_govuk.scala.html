@@ -35,7 +35,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     representeeAnswers: Option[RepresenteeAnswers]
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 

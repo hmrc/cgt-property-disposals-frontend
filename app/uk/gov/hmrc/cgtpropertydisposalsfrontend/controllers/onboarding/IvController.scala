@@ -24,14 +24,14 @@ import play.api.mvc.{Action, AnyContent, MessagesControllerComponents}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.SessionData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -68,7 +68,7 @@ class IvController @Inject() (
       if (request.sessionData.forall(_ === SessionData.empty)) {
         SeeOther(controllers.routes.StartController.start().url)
       } else {
-        updateSession(sessionStore, request)(_ => SessionData.empty).map {
+        updateSession(sessionStore, request.toSession)(_ => SessionData.empty).map {
           case Left(e) =>
             logger.warn("Could not clear session after IV success", e)
             errorHandler.errorResult()
@@ -89,41 +89,41 @@ class IvController @Inject() (
         .fold(
           { e =>
             logger.warn("Could not check IV journey error status", e)
-            Redirect(routes.IvController.getTechnicalIssue())
+            Redirect(onboardingRoutes.IvController.getTechnicalIssue())
           },
           {
             case IvErrorStatus.Incomplete           =>
               metrics.ivIncompleteCounter.inc()
-              Redirect(routes.IvController.getTechnicalIssue())
+              Redirect(onboardingRoutes.IvController.getTechnicalIssue())
             case IvErrorStatus.FailedMatching       =>
               metrics.ivFailedMatchingCounter.inc()
-              Redirect(routes.IvController.getFailedMatching())
+              Redirect(onboardingRoutes.IvController.getFailedMatching())
             case IvErrorStatus.FailedIV             =>
               metrics.ivFailedIVCounter.inc()
-              Redirect(routes.IvController.getFailedIV())
+              Redirect(onboardingRoutes.IvController.getFailedIV())
             case IvErrorStatus.InsufficientEvidence =>
               metrics.ivInsufficientEvidenceCounter.inc()
-              Redirect(routes.IvController.getInsufficientEvidence())
+              Redirect(onboardingRoutes.IvController.getInsufficientEvidence())
             case IvErrorStatus.LockedOut            =>
               metrics.ivLockedOutCounter.inc()
-              Redirect(routes.IvController.getLockedOut())
+              Redirect(onboardingRoutes.IvController.getLockedOut())
             case IvErrorStatus.UserAborted          =>
               metrics.ivUserAbortedCounter.inc()
-              Redirect(routes.IvController.getUserAborted())
+              Redirect(onboardingRoutes.IvController.getUserAborted())
             case IvErrorStatus.Timeout              =>
               metrics.ivTimeoutCounter.inc()
-              Redirect(routes.IvController.getTimedOut())
+              Redirect(onboardingRoutes.IvController.getTimedOut())
             case IvErrorStatus.TechnicalIssue       =>
               metrics.ivTechnicalIssueCounter.inc()
-              Redirect(routes.IvController.getTechnicalIssue())
+              Redirect(onboardingRoutes.IvController.getTechnicalIssue())
             case IvErrorStatus.PreconditionFailed   =>
               metrics.ivPreconditionFailedCounter.inc()
-              Redirect(routes.IvController.getPreconditionFailed())
+              Redirect(onboardingRoutes.IvController.getPreconditionFailed())
             case IvErrorStatus.Unknown(value)       =>
               metrics.ivUnknownErrorCounter.inc()
               logger
                 .warn(s"Received unknown error response status from IV: $value")
-              Redirect(routes.IvController.getTechnicalIssue())
+              Redirect(onboardingRoutes.IvController.getTechnicalIssue())
           }
         )
     }

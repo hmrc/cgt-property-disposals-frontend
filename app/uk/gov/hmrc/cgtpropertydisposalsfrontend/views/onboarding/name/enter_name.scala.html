@@ -31,7 +31,7 @@
         accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu_govuk
 )
 
-@(form: Form[IndividualName], backLink: Call, submit: Call, showAccountMenu: Boolean)(implicit request:RequestWithSessionData[_], messages: Messages)
+@(form: Form[IndividualName], backLink: Call, submit: Call, showAccountMenu: Boolean)(implicit request:RequestWithSessionData[?], messages: Messages)
 
 @firstNameKey = @{"firstName"}
 @lastNameKey = @{"lastName"}

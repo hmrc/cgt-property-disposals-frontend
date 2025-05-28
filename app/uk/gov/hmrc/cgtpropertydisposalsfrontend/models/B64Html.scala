@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class B64Html(value: String) extends AnyVal
+final case class B64Html(value: String)
 
 object B64Html {
   implicit val format: OFormat[B64Html] = Json.format[B64Html]

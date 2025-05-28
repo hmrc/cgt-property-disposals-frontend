@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,6 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics
 
-import org.scalamock.scalatest.MockFactory
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import com.codahale.metrics.MetricRegistry
 
-object MockMetrics extends MockFactory with GuiceOneServerPerSuite {
-  val metrics: Metrics = app.injector.instanceOf[Metrics]
-}
+class TestMetrics extends Metrics(new MetricRegistry) {}

@@ -39,7 +39,7 @@ object CalculatedGlarBreakdown {
     def totalReliefs: AmountInPence                       = c.privateResidentReliefs ++ c.lettingRelief
     def initialGainOrLoss: AmountInPence                  = propertyDisposalAmountLessCosts -- propertyAcquisitionAmountPlusCosts
 
-    def acquisitionOrRebased: AmountInPence = {
+    def acquisitionOrRebased: AmountInPence   = {
       val initialGainOrLossRebase = (c.shouldUseRebase, c.rebasedAcquisitionPrice) match {
         case (true, Some(rebasedAcquisitionPrice)) => rebasedAcquisitionPrice
         case (false, _)                            => c.acquisitionPrice

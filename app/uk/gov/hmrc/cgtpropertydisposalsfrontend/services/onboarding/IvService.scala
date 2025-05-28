@@ -61,7 +61,7 @@ class IvServiceImpl @Inject() (connector: IvConnector, metrics: Metrics)(implici
 
 object IvServiceImpl {
 
-  final case class IvStatusResponse(result: String) extends AnyVal
+  final case class IvStatusResponse(result: String)
 
   implicit val reads: Reads[IvStatusResponse] = Json.reads
 

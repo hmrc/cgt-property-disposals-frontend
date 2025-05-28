@@ -37,17 +37,17 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.RetrievedUserType.Trust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.{Agent, Individual, Organisation}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -63,7 +63,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData, User
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibilityUtil, ReturnsService}
-import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 
@@ -93,7 +92,7 @@ class GainOrLossAfterReliefsControllerSpec
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
-  implicit val hc: HeaderCarrier = mock[HeaderCarrier]
+//  implicit val hc: HeaderCarrier = mock[HeaderCarrier]
 
   protected override val overrideBindings: List[GuiceableModule] = List[GuiceableModule](
     bind[AuthConnector].toInstance(mockAuthConnector),
@@ -1005,7 +1004,7 @@ class GainOrLossAfterReliefsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterGainOrLossAfterReliefsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1038,7 +1037,7 @@ class GainOrLossAfterReliefsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data*),
             messageFromMessageKey(pageTitleKey),
             doc =>
               doc
@@ -1071,7 +1070,7 @@ class GainOrLossAfterReliefsControllerSpec
                 withClue(s"For test case '$userKey' and scenario $scenario: ") {
                   val data = ("gainOrLossAfterReliefs" -> "0") :: scenario.formData
 
-                  testFormError(session._1, session._2, data: _*)(
+                  testFormError(session._1, session._2, data*)(
                     s"gainOrLossAfterReliefs$userKey.title",
                     scenario.expectedErrorMessageKey
                   )
@@ -1087,7 +1086,7 @@ class GainOrLossAfterReliefsControllerSpec
                 withClue(s"For test case '$userKey' and scenario $scenario: ") {
                   val data = ("gainOrLossAfterReliefs" -> "1") :: scenario.formData
 
-                  testFormError(session._1, session._2, data: _*)(
+                  testFormError(session._1, session._2, data*)(
                     s"gainOrLossAfterReliefs$userKey.title",
                     scenario.expectedErrorMessageKey
                   )
@@ -1185,7 +1184,7 @@ class GainOrLossAfterReliefsControllerSpec
             )(Right(()))
           }
           checkIsRedirect(
-            performAction(formData: _*),
+            performAction(formData*),
             routes.GainOrLossAfterReliefsController.checkYourAnswers()
           )
         }

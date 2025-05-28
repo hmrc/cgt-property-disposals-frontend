@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.audit.CancelAmend
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{amend => pages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -216,7 +216,7 @@ class AmendReturnController @Inject() (
   }
 
   private def withStartingToAmendReturn(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   )(f: StartingToAmendReturn => Future[Result]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(s: StartingToAmendReturn) => f(s)
@@ -224,7 +224,7 @@ class AmendReturnController @Inject() (
     }
 
   private def withStartingToAmendOrFillingOutReturn(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   )(f: Either[StartingToAmendReturn, (FillingOutReturn, AmendReturnData)] => Future[Result]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(s: StartingToAmendReturn)                                   => f(Left(s))

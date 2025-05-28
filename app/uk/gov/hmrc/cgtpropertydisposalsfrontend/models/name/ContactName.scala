@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name
 import cats.Eq
 import cats.instances.string._
 import cats.syntax.eq._
-import play.api.data.Forms.{nonEmptyText, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, nonEmptyText}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.data.{Form, Mapping}
 import play.api.libs.functional.syntax._
@@ -54,7 +54,7 @@ object ContactName {
     Form(
       formMapping(
         "contactName" -> mapping
-      )(ContactName.apply)(ContactName.unapply)
+      )(ContactName.apply)(o => Some(o.value))
     )
 
 }

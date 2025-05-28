@@ -31,7 +31,7 @@
   formWrapper: FormWithCSRF
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[Boolean], backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"hasSaUtr"}
 @title = @{messages("haveAnSaUtr.title")}

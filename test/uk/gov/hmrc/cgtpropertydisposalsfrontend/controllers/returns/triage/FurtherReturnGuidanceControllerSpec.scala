@@ -27,13 +27,13 @@ import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
@@ -208,7 +208,7 @@ class FurtherReturnGuidanceControllerSpec
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
     individualUserTypeGen.filter {
       case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case _                                                                                 => false
+      case null                                                                              => false
     }
 
   val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {

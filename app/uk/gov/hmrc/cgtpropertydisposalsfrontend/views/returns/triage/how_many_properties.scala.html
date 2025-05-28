@@ -43,7 +43,7 @@
     representativeType: Option[RepresentativeType],
     isAmend: Boolean,
         isFurtherOrAmendReturn: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"numberOfProperties"}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}

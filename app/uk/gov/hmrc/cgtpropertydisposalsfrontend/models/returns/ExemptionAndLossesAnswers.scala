@@ -17,10 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.kernel.Eq
-import julienrf.json.derived
 import monocle.Lens
-import monocle.macros.Lenses
-import play.api.libs.json.OFormat
+import monocle.macros.GenLens
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ExemptionAndLossesAnswers extends Product with Serializable
@@ -28,7 +27,6 @@ sealed trait ExemptionAndLossesAnswers extends Product with Serializable
 @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object ExemptionAndLossesAnswers {
 
-  @Lenses
   final case class IncompleteExemptionAndLossesAnswers(
     inYearLosses: Option[AmountInPence],
     previousYearsLosses: Option[AmountInPence],
@@ -36,6 +34,10 @@ object ExemptionAndLossesAnswers {
   ) extends ExemptionAndLossesAnswers
 
   object IncompleteExemptionAndLossesAnswers {
+
+    val inYearLosses        = GenLens[IncompleteExemptionAndLossesAnswers](_.inYearLosses)
+    val annualExemptAmount  = GenLens[IncompleteExemptionAndLossesAnswers](_.annualExemptAmount)
+    val previousYearsLosses = GenLens[IncompleteExemptionAndLossesAnswers](_.previousYearsLosses)
 
     val empty: IncompleteExemptionAndLossesAnswers =
       IncompleteExemptionAndLossesAnswers(None, None, None)
@@ -73,7 +75,7 @@ object ExemptionAndLossesAnswers {
     def unset[A](
       fieldLens: IncompleteExemptionAndLossesAnswers.type => Lens[IncompleteExemptionAndLossesAnswers, Option[A]]
     ): IncompleteExemptionAndLossesAnswers =
-      fieldLens(IncompleteExemptionAndLossesAnswers).set(None)(
+      fieldLens(IncompleteExemptionAndLossesAnswers).replace(None)(
         fold(identity, IncompleteExemptionAndLossesAnswers.fromCompleteAnswers)
       )
 
@@ -86,7 +88,33 @@ object ExemptionAndLossesAnswers {
 
   implicit val eq: Eq[ExemptionAndLossesAnswers] = Eq.fromUniversalEquals
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[ExemptionAndLossesAnswers] = derived.oformat()
+  implicit val completeFormat: OFormat[CompleteExemptionAndLossesAnswers]     =
+    Json.format[CompleteExemptionAndLossesAnswers]
+  implicit val inCompleteFormat: OFormat[IncompleteExemptionAndLossesAnswers] =
+    Json.format[IncompleteExemptionAndLossesAnswers]
+
+  implicit val format: OFormat[ExemptionAndLossesAnswers] = new OFormat[ExemptionAndLossesAnswers] {
+    override def reads(json: JsValue): JsResult[ExemptionAndLossesAnswers] =
+      json match {
+        case JsObject(fields) if fields.size == 1 =>
+          fields.head match {
+            case ("IncompleteExemptionAndLossesAnswers", value) =>
+              value.validate[IncompleteExemptionAndLossesAnswers]
+            case ("CompleteExemptionAndLossesAnswers", value)   =>
+              value.validate[CompleteExemptionAndLossesAnswers]
+            case (other, _)                                     =>
+              JsError(s"Unrecognized ExemptionAndLossesAnswers type: $other")
+          }
+        case _                                    =>
+          JsError("Expected ExemptionAndLossesAnswers wrapper object with a single entry")
+      }
+
+    override def writes(e: ExemptionAndLossesAnswers): JsObject = e match {
+      case i: IncompleteExemptionAndLossesAnswers =>
+        Json.obj("IncompleteExemptionAndLossesAnswers" -> Json.toJson(i))
+      case c: CompleteExemptionAndLossesAnswers   =>
+        Json.obj("CompleteExemptionAndLossesAnswers" -> Json.toJson(c))
+    }
+  }
 
 }

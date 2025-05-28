@@ -32,7 +32,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, Se
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.UKAddressLookupService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.{EnteringCompanyDetails, EnteringSingleMixedUsePropertyDetails, FillingOutReturnAddressJourney}
@@ -43,7 +43,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AddressController[A <: AddressJourneyType] {
-  this: FrontendController with Logging with WithAuthAndSessionDataAction with SessionUpdates =>
+  this: FrontendController & Logging & WithAuthAndSessionDataAction & SessionUpdates =>
 
   val errorHandler: ErrorHandler
   val ukAddressLookupService: UKAddressLookupService
@@ -59,7 +59,7 @@ trait AddressController[A <: AddressJourneyType] {
   implicit val ec: ExecutionContext
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Future[Result], (SessionData, A)]
 
   def isATrust(journey: A): Boolean
@@ -70,28 +70,28 @@ trait AddressController[A <: AddressJourneyType] {
     isManuallyEnteredAddress: Boolean
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus]
 
   protected def backLinkCall: A => Call
 
-  protected val isUkCall: Call
-  protected val isUkSubmitCall: Call
-  protected val enterUkAddressCall: Call
-  protected val enterUkAddressSubmitCall: Call
-  protected val enterNonUkAddressCall: Call
-  protected val enterNonUkAddressSubmitCall: Call
-  protected val enterPostcodeCall: Call
-  protected val enterPostcodeSubmitCall: Call
-  protected val selectAddressCall: Call
-  protected val selectAddressSubmitCall: Call
-  protected val continueCall: Call
-  protected val ukAddressNotAllowedExitPageCall: Option[Call]
+  protected lazy val isUkCall: Call
+  protected lazy val isUkSubmitCall: Call
+  protected lazy val enterUkAddressCall: Call
+  protected lazy val enterUkAddressSubmitCall: Call
+  protected lazy val enterNonUkAddressCall: Call
+  protected lazy val enterNonUkAddressSubmitCall: Call
+  protected lazy val enterPostcodeCall: Call
+  protected lazy val enterPostcodeSubmitCall: Call
+  protected lazy val selectAddressCall: Call
+  protected lazy val selectAddressSubmitCall: Call
+  protected lazy val continueCall: Call
+  protected lazy val ukAddressNotAllowedExitPageCall: Option[Call]
 
   protected val enterUkAddressBackLinkCall: A => Call = backLinkCall
   protected val enterPostcodePageBackLink: A => Call  = _ => isUkCall
 
-  protected def withValidJourney(request: RequestWithSessionData[_])(
+  protected def withValidJourney(request: RequestWithSessionData[?])(
     f: (SessionData, A) => Future[Result]
   ): Future[Result] =
     validJourney(request).map[Future[Result]](f.tupled).merge
@@ -113,7 +113,7 @@ trait AddressController[A <: AddressJourneyType] {
           case _                                 => Address.isUkForm
         }
         if (sessionData.addressLookupResult.nonEmpty) {
-          updateSession(sessionStore, request)(
+          updateSession(sessionStore, request.toSession)(
             _.copy(addressLookupResult = None)
           ).map {
             case Left(e)  =>
@@ -332,7 +332,7 @@ trait AddressController[A <: AddressJourneyType] {
                   val result = for {
                     addressLookupResult <- ukAddressLookupService.lookupAddress(postcode, filter)
                     _                   <- EitherT(
-                                             updateSession(sessionStore, request)(
+                                             updateSession(sessionStore, request.toSession)(
                                                _.copy(addressLookupResult = Some(addressLookupResult))
                                              )
                                            )
@@ -420,14 +420,14 @@ trait AddressController[A <: AddressJourneyType] {
     isManuallyEnteredAddress: Boolean
   )(
     address: Address
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     val result = for {
       journeyWithUpdatedAddress <- updateAddress(currentJourneyStatus, address, isManuallyEnteredAddress)
       _                         <- if (journeyWithUpdatedAddress === toJourneyStatus(currentJourneyStatus)) {
                                      EitherT.pure[Future, Error](())
                                    } else {
                                      EitherT[Future, Error, Unit](
-                                       updateSession(sessionStore, request)(
+                                       updateSession(sessionStore, request.toSession)(
                                          _.copy(journeyStatus = Some(journeyWithUpdatedAddress))
                                        )
                                      )

@@ -38,12 +38,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAddress, UkAddress}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftSingleDisposalReturn, ReturnSummary}
@@ -259,7 +259,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCgtRefSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -349,7 +349,7 @@ class AgentAccessControllerSpec
         "the cgt reference is valid and the agent has permission to access the client " +
           "but the session data cannot be updated" in {
             val clientDetails =
-              newClientDetails(validCgtReference, sample[Address](addressGen))
+              newClientDetails(validCgtReference, sample[Address])
 
             inSequence {
               mockAuthWithNoRetrievals()
@@ -614,7 +614,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -998,7 +998,7 @@ class AgentAccessControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterClientsCountrySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1038,7 +1038,7 @@ class AgentAccessControllerSpec
             )
           }
 
-          val result = performAction(formData: _*)
+          val result = performAction(formData*)
           status(result) shouldBe BAD_REQUEST
           val content = contentAsString(result)
           content should include(

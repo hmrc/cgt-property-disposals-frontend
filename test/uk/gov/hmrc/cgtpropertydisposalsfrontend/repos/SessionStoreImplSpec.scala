@@ -47,7 +47,7 @@ class SessionStoreImplSpec
   "SessionStoreImpl" must {
 
     "be able to insert SessionData into mongo and read it back" in new TestEnvironment {
-      forAll { sessionData: SessionData =>
+      forAll { (sessionData: SessionData) =>
         val result = sessionStore.store(sessionData)
 
         await(result) should be(Right(()))

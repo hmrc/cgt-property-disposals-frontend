@@ -16,23 +16,23 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.Gen
+import org.scalacheck._
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.{CompleteDisposalDetailsAnswers, IncompleteDisposalDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty.{Full, Half}
 
 object DisposalDetailsGen extends GenUtils {
 
-  implicit val completeDisposalDetailsAnswersGen: Gen[CompleteDisposalDetailsAnswers] =
+  given completeDisposalDetailsAnswersGen: Gen[CompleteDisposalDetailsAnswers] =
     gen[CompleteDisposalDetailsAnswers]
 
-  implicit val incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
+  given incompleteDisposalDetailsAnswersGen: Gen[IncompleteDisposalDetailsAnswers] =
     gen[IncompleteDisposalDetailsAnswers]
 
-  implicit val shareOfPropertyGen: Gen[ShareOfProperty] =
-    gen[ShareOfProperty].map {
-      case a: ShareOfProperty.Other if a.percentageValue > 100 =>
-        ShareOfProperty.Full
-      case other: ShareOfProperty                              => other
-    }
-
+  given shareOfPropertyGen: Gen[ShareOfProperty] = gen[ShareOfProperty].map {
+    case a: ShareOfProperty.Other if a.percentageValue > 100 =>
+      ShareOfProperty.Full
+    case other: ShareOfProperty                              => other
+  }
 }

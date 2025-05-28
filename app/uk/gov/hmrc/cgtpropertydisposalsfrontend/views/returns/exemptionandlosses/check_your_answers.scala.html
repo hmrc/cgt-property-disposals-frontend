@@ -36,7 +36,7 @@
     representativeType: Option[RepresentativeType],
     isFurtherOrAmendReturn: Option[Boolean],
     showAnnualExemptAmount: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{
     messages("exemptionsAndLosses.cya.title")

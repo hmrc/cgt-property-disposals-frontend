@@ -21,7 +21,7 @@ import play.api.libs.json.Format
 
 import java.time.LocalDate
 
-final case class DateOfDeath(value: LocalDate) extends AnyVal
+final case class DateOfDeath(value: LocalDate)
 
 object DateOfDeath {
 

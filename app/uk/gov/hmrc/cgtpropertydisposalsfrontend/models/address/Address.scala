@@ -17,12 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.data.Forms.{nonEmptyText, number, of, optional, text, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional, text}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.data.{Form, Mapping}
 import play.api.i18n.Messages
-import play.api.libs.json.OFormat
+import play.api.libs.json._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 
 sealed trait Address extends Product with Serializable
@@ -54,7 +53,30 @@ object Address {
     country: Country
   ) extends Address
 
-  implicit val format: OFormat[Address] = derived.oformat()
+  implicit val ukAddressFormat: OFormat[UkAddress]       = Json.format[UkAddress]
+  implicit val nonUkAddressFormat: OFormat[NonUkAddress] = Json.format[NonUkAddress]
+
+  implicit val format: OFormat[Address] = new OFormat[Address] {
+    override def reads(json: JsValue): JsResult[Address] =
+      (json \ "UkAddress", json \ "NonUkAddress") match {
+        case (JsDefined(ukJson), _)    => ukJson.validate[UkAddress]
+        case (_, JsDefined(nonUkJson)) => nonUkJson.validate[NonUkAddress]
+        case _                         =>
+          (json \ "_type").validate[String] match {
+            case JsSuccess("uk", _)    => json.validate[UkAddress]
+            case JsSuccess("nonUk", _) => json.validate[NonUkAddress]
+            case JsSuccess(other, _)   => JsError(s"Unknown _type: $other")
+            case JsError(_)            =>
+              if ((json \ "countryCode").isDefined) json.validate[NonUkAddress]
+              else json.validate[UkAddress]
+          }
+      }
+
+    override def writes(address: Address): JsObject = address match {
+      case uk: UkAddress       => Json.obj("UkAddress" -> Json.toJson(uk)(ukAddressFormat))
+      case nonUk: NonUkAddress => Json.obj("NonUkAddress" -> Json.toJson(nonUk)(nonUkAddressFormat))
+    }
+  }
 
   implicit val eq: Eq[Address] = Eq.fromUniversalEquals
 
@@ -81,7 +103,7 @@ object Address {
 
     nonEmptyText
       .transform[String](_.trim, identity)
-      .verifying(Constraint[String](validateAddressLine(_)))
+      .verifying(Constraint[String](validateAddressLine))
   }
 
   val ukAddressForm: Form[UkAddress] =
@@ -92,7 +114,7 @@ object Address {
         "address-town"   -> optional(addressLineMapping),
         "address-county" -> optional(addressLineMapping),
         "postcode"       -> Postcode.mapping
-      )(UkAddress.apply)(UkAddress.unapply)
+      )(UkAddress.apply)(o => Some((o.line1, o.line2, o.town, o.county, o.postcode)))
     )
 
   val nonUkAddressForm: Form[NonUkAddress] =
@@ -104,7 +126,7 @@ object Address {
         "nonUkAddress-line4" -> optional(addressLineMapping),
         "postcode"           -> optional(text),
         "countryCode"        -> of(Country.formatter)
-      )(NonUkAddress.apply)(NonUkAddress.unapply)
+      )(NonUkAddress.apply)(o => Some((o.line1, o.line2, o.line3, o.line4, o.postcode, o.country)))
     )
 
   val isUkForm: Form[Boolean] =

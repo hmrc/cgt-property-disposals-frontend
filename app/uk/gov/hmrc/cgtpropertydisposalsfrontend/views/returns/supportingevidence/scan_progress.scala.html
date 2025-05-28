@@ -28,7 +28,7 @@
     returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk
 )
 
-@(upscanUpload : UpscanUpload)(implicit request:RequestWithSessionData[_], messages:Messages)
+@(upscanUpload : UpscanUpload)(implicit request:RequestWithSessionData[?], messages:Messages)
 
     @key = @{"supporting-evidence.scan-progress"}
     @title = @{messages(s"$key.title")}

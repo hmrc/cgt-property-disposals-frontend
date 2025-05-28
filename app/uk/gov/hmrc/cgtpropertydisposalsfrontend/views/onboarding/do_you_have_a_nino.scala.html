@@ -29,7 +29,7 @@
  formWrapper: FormWithCSRF
 )
 
-@(form: Form[Boolean])(implicit request:RequestWithSessionData [_], messages: Messages)
+@(form: Form[Boolean])(implicit request:RequestWithSessionData [?], messages: Messages)
 
 @key = @{"hasNino"}
 @title = @{messages("haveANino.title")}

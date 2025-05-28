@@ -20,46 +20,46 @@ sealed trait AutoCompleteType {
   val value: String
 }
 object AutoCompleteType {
-  final case object On extends AutoCompleteType {
+  case object On extends AutoCompleteType {
     val value: String = "on"
   }
-  final case object FirstName extends AutoCompleteType {
+  case object FirstName extends AutoCompleteType {
     val value: String = "given-name"
   }
-  final case object LastName extends AutoCompleteType {
+  case object LastName extends AutoCompleteType {
     val value: String = "family-name"
   }
-  final case object ContactName extends AutoCompleteType {
+  case object ContactName extends AutoCompleteType {
     val value: String = "name"
   }
-  final case object Email extends AutoCompleteType {
+  case object Email extends AutoCompleteType {
     val value: String = "email"
   }
-  final case object TrustName extends AutoCompleteType {
+  case object TrustName extends AutoCompleteType {
     val value: String = "organization"
   }
-  final case object StreetAddress extends AutoCompleteType {
+  case object StreetAddress extends AutoCompleteType {
     val value: String = "street-address"
   }
-  final case object AddressLine1 extends AutoCompleteType {
+  case object AddressLine1 extends AutoCompleteType {
     val value: String = "address-line1"
   }
-  final case object AddressLine2 extends AutoCompleteType {
+  case object AddressLine2 extends AutoCompleteType {
     val value: String = "address-line2"
   }
-  final case object AddressLevel2 extends AutoCompleteType {
+  case object AddressLevel2 extends AutoCompleteType {
     val value: String = "address-level2"
   }
-  final case object AddressLevel1 extends AutoCompleteType {
+  case object AddressLevel1 extends AutoCompleteType {
     val value: String = "address-level1"
   }
-  final case object Country extends AutoCompleteType {
+  case object Country extends AutoCompleteType {
     val value: String = "country"
   }
-  final case object CountryName extends AutoCompleteType {
+  case object CountryName extends AutoCompleteType {
     val value: String = "country-name"
   }
-  final case object Postcode extends AutoCompleteType {
+  case object Postcode extends AutoCompleteType {
     val value: String = "postal-code"
   }
 }

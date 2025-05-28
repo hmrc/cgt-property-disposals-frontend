@@ -47,7 +47,7 @@
     representativeType: Option[RepresentativeType],
     isAmend: Boolean,
     yearToDateLiabilityCalculation: Option[YearToDateLiabilityCalculation]
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "yearToDateLiability" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }
@@ -144,7 +144,7 @@
         )),
         errorMessage = form.error(key).map(e =>
         ErrorMessage(
-          content = Text(messages(s"${customErrorKey.getOrElse(key)}.${e.message}", e.args: _*)),
+          content = Text(messages(s"${customErrorKey.getOrElse(key)}.${e.message}", e.args *)),
           visuallyHiddenText = Some(messages("generic.error"))
         )),
         autocomplete = Some(AutoCompleteType.On.value)
@@ -167,7 +167,7 @@
         )),
         errorMessage = form.error(key).map(e =>
         ErrorMessage(
-        content = Text(messages(s"${customErrorKey.getOrElse(key)}.${e.message}", e.args: _*)),
+        content = Text(messages(s"${customErrorKey.getOrElse(key)}.${e.message}", e.args *)),
         visuallyHiddenText = Some(messages("generic.error"))
         )),
         autocomplete = Some(AutoCompleteType.On.value)

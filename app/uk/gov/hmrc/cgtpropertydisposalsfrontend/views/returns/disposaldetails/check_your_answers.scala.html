@@ -37,7 +37,7 @@
     representativeType: Option[RepresentativeType],
     isIndirectDisposal: Boolean,
     isShare: Boolean,
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("returns.disposal-details.cya.title")}
 

@@ -75,7 +75,7 @@ class ChangeRepresenteeEmailController @Inject() (
     )
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingRepresenteeEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: StartingNewDraftReturn)) =>
@@ -109,7 +109,7 @@ class ChangeRepresenteeEmailController @Inject() (
     }
 
   override def validVerificationCompleteJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingRepresenteeEmail)] =
     validJourney(request)
 
@@ -118,7 +118,7 @@ class ChangeRepresenteeEmailController @Inject() (
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] =
     if (changingRepresenteeEmail.contactDetails.emailAddress === email) {
       EitherT.pure[Future, Error](changingRepresenteeEmail.journey.merge)
@@ -169,12 +169,12 @@ class ChangeRepresenteeEmailController @Inject() (
   override def auditEmailVerifiedEvent(
     changingRepresenteeEmail: ChangingRepresenteeEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit = ()
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit = ()
 
   override def auditEmailChangeAttempt(
     ChangingRepresenteeEmail: ChangingRepresenteeEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit = ()
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit = ()
 
   override def name(
     changingRepresenteeEmail: ChangingRepresenteeEmail

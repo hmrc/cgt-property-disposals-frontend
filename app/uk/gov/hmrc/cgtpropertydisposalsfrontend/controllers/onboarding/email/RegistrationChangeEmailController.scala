@@ -61,7 +61,7 @@ class RegistrationChangeEmailController @Inject() (
     with EmailController[ChangingRegistrationEmail] {
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingRegistrationEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, r: RegistrationReady)) =>
@@ -70,7 +70,7 @@ class RegistrationChangeEmailController @Inject() (
     }
 
   override def validVerificationCompleteJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingRegistrationEmail)] =
     validJourney(request)
 
@@ -79,7 +79,7 @@ class RegistrationChangeEmailController @Inject() (
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] =
     EitherT.rightT[Future, Error](
       changingRegistrationEmail.journey.copy(
@@ -93,7 +93,7 @@ class RegistrationChangeEmailController @Inject() (
   override def auditEmailVerifiedEvent(
     changingRegistrationEmail: ChangingRegistrationEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit =
     auditService.sendEvent(
       "registrationChangeEmailAddressVerified",
       RegistrationChangeEmailAddressVerifiedEvent(
@@ -106,7 +106,7 @@ class RegistrationChangeEmailController @Inject() (
   override def auditEmailChangeAttempt(
     changingRegistrationEmail: ChangingRegistrationEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit =
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit =
     auditService.sendEvent(
       "registrationChangeEmailAddressAttempted",
       RegistrationChangeEmailAttemptedEvent(
@@ -123,21 +123,21 @@ class RegistrationChangeEmailController @Inject() (
       changingRegistrationEmail.journey.registrationDetails.name.makeSingleName
     )
 
-  override lazy protected val backLinkCall: Option[Call] = Some(
+  override protected lazy val backLinkCall: Option[Call] = Some(
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
   )
 
-  override lazy protected val enterEmailCall: Call          =
+  override protected lazy val enterEmailCall: Call          =
     routes.RegistrationChangeEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call    =
+  override protected lazy val enterEmailSubmitCall: Call    =
     routes.RegistrationChangeEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call      =
+  override protected lazy val checkYourInboxCall: Call      =
     routes.RegistrationChangeEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call =
+  override protected lazy val verifyEmailCall: UUID => Call =
     routes.RegistrationChangeEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call       =
+  override protected lazy val emailVerifiedCall: Call       =
     routes.RegistrationChangeEmailController.emailVerified()
 
-  override lazy protected val emailVerifiedContinueCall: Call =
+  override protected lazy val emailVerifiedContinueCall: Call =
     controllers.onboarding.routes.RegistrationController.checkYourAnswers()
 }

@@ -42,7 +42,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isAmendReturn: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "nonCalculatedTaxDue" }
 

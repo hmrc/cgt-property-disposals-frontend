@@ -36,19 +36,19 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, booleanGen, sample}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -173,7 +173,7 @@ class SingleDisposalsTriageControllerSpec
   }
 
   private def mockGetNextUUID(uuid: UUID) =
-    (mockUUIDGenerator.nextId _).expects().returning(uuid)
+    (() => mockUUIDGenerator.nextId()).expects().returning(uuid)
 
   private def mockGetTaxYear(
     date: LocalDate
@@ -360,7 +360,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howDidYouDisposeOfPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -535,7 +535,7 @@ class SingleDisposalsTriageControllerSpec
             )
 
           "the section is complete" in {
-            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+            forAll { (completeAnswers: CompleteSingleDisposalTriageAnswers) =>
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
                 completeAnswers.copy(disposalMethod = DisposalMethod.Sold),
@@ -797,7 +797,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.wereYouAUKResidentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -1029,7 +1029,7 @@ class SingleDisposalsTriageControllerSpec
         "the user is filling out a draft return and" when {
 
           "the section is complete" in {
-            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+            forAll { (completeAnswers: CompleteSingleDisposalTriageAnswers) =>
               val newAnswers =
                 IncompleteSingleDisposalTriageAnswers(
                   completeAnswers.individualUserType,
@@ -1298,7 +1298,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.didYouDisposeOfAResidentialPropertySubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val requiredPreviousAnswers =
@@ -1493,7 +1493,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
-            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+            forAll { (completeAnswers: CompleteSingleDisposalTriageAnswers) =>
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
                 completeAnswers.copy(
@@ -1956,7 +1956,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasDisposalDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(date: LocalDate): Seq[(String, String)] =
@@ -2039,7 +2039,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetTaxYear(today)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(today): _*))
+          checkIsTechnicalErrorPage(performAction(formData(today)*))
         }
 
       }
@@ -2291,7 +2291,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
+            forAll { (c: CompleteSingleDisposalTriageAnswers) =>
               val completeJourney = c.copy(
                 individualUserType = Some(Self),
                 disposalDate = DisposalDate(today, taxYear),
@@ -2436,7 +2436,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(today): _*),
+            performAction(formData(today)*),
             routes.CommonTriageQuestionsController.amendReturnDisposalDateDifferentTaxYear()
           )
         }
@@ -2639,7 +2639,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whenWasCompletionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(date: LocalDate) =
@@ -2989,7 +2989,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
+            forAll { (c: CompleteSingleDisposalTriageAnswers) =>
               val completionDate  =
                 CompletionDate(disposalDate.value.plusDays(1L))
               val completeAnswers = c.copy(
@@ -3041,7 +3041,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(disposalDate.value): _*),
+            performAction(formData(disposalDate.value)*),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         }
@@ -3222,7 +3222,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.countryOfResidenceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -3421,7 +3421,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the user has complete the section and has changed their answer from not in the uk to was in the uk" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
+            forAll { (c: CompleteSingleDisposalTriageAnswers) =>
               val completeAnswers = c.copy(
                 countryOfResidence = Country("CC"),
                 disposalMethod = DisposalMethod.Sold
@@ -3446,7 +3446,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the user is on an amend journey where the estimates answer should be preserved" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
+            forAll { (c: CompleteSingleDisposalTriageAnswers) =>
               val completeAnswers = c.copy(
                 countryOfResidence = Country("CC"),
                 disposalMethod = DisposalMethod.Sold
@@ -3694,7 +3694,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.assetTypeForNonUkResidentsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -4009,7 +4009,7 @@ class SingleDisposalsTriageControllerSpec
         "the user is filling out a draft return and" when {
 
           "the section is complete" in {
-            forAll { completeAnswers: CompleteSingleDisposalTriageAnswers =>
+            forAll { (completeAnswers: CompleteSingleDisposalTriageAnswers) =>
               testSuccessfulUpdateFillingOutReturn(
                 performAction,
                 completeAnswers.copy(
@@ -4341,7 +4341,7 @@ class SingleDisposalsTriageControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateOfSharesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(date: LocalDate): Seq[(String, String)] =
@@ -4424,7 +4424,7 @@ class SingleDisposalsTriageControllerSpec
             mockGetTaxYear(today)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(today): _*))
+          checkIsTechnicalErrorPage(performAction(formData(today)*))
         }
 
       }
@@ -4614,7 +4614,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
+            forAll { (c: CompleteSingleDisposalTriageAnswers) =>
               val completeJourney = c.copy(
                 individualUserType = Some(Self),
                 disposalDate = DisposalDate(today, taxYear),
@@ -4794,7 +4794,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           "the section is complete" in {
-            forAll { c: CompleteSingleDisposalTriageAnswers =>
+            forAll { (c: CompleteSingleDisposalTriageAnswers) =>
               val completeJourney = c.copy(
                 individualUserType = Some(Self),
                 disposalDate = DisposalDate(today, taxYear),
@@ -4856,7 +4856,7 @@ class SingleDisposalsTriageControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(today): _*),
+            performAction(formData(today)*),
             routes.SingleDisposalsTriageController.checkYourAnswers()
           )
         }

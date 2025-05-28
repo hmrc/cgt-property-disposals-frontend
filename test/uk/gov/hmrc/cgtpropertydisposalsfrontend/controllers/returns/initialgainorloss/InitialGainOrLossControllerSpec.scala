@@ -34,12 +34,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftSingleDisposalReturn
@@ -267,7 +267,7 @@ class InitialGainOrLossControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.submitInitialGainOrLoss()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def updateDraftReturn(
@@ -402,7 +402,7 @@ class InitialGainOrLossControllerSpec
                 .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
-                errorArgs: _*
+                errorArgs*
               ),
             BAD_REQUEST
           )
@@ -416,7 +416,7 @@ class InitialGainOrLossControllerSpec
         )(
           expectedErrorKey: String
         ): Unit =
-          testFormError(fillingOutReturn, isAgent, data: _*)(
+          testFormError(fillingOutReturn, isAgent, data*)(
             expectedErrorKey
           )(s"initialGainOrLoss$userKey.title")(performAction)
 
@@ -442,7 +442,7 @@ class InitialGainOrLossControllerSpec
                   keyWithReturn._1,
                   keyWithReturn._2,
                   keyWithReturn._3,
-                  data: _*
+                  data*
                 )(scenario.expectedErrorMessageKey)
               }
             }
@@ -458,7 +458,7 @@ class InitialGainOrLossControllerSpec
                   keyWithReturn._1,
                   keyWithReturn._2,
                   keyWithReturn._3,
-                  data: _*
+                  data*
                 )(scenario.expectedErrorMessageKey)
               }
             }
@@ -483,7 +483,7 @@ class InitialGainOrLossControllerSpec
       "redirect to check your answers" when {
 
         "initial gain or loss has been entered correctly" in {
-          forAll(Gen.choose(10L, 100L).map(AmountInPence(_))) { amountInPence: AmountInPence =>
+          forAll(Gen.choose(10L, 100L).map(AmountInPence(_))) { (amountInPence: AmountInPence) =>
             val (session, journey, draftReturn) =
               sessionWithState(Some(AmountInPence(amountInPence.value - 1L)))
             val newDraftReturn                  = updateDraftReturn(draftReturn, amountInPence)

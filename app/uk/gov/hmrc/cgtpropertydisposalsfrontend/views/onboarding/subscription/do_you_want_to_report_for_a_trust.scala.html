@@ -29,7 +29,7 @@
         yesNo: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.yes_no_govuk
 )
 
-@(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[_], messages: Messages)
+@(form: Form[Boolean], backLink: Call)(implicit request:RequestWithSessionData[?], messages: Messages)
 
 @key = @{"isReportingForATrust"}
 @title = @{messages("isReportingForATrust.title")}

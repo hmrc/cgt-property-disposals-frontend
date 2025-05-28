@@ -42,7 +42,7 @@
    representativeType: RepresentativeType,
    displayReturnToSummaryLink: Boolean,
    isAmend: Boolean
-)(implicit request:RequestWithSessionData[_], messages: Messages)
+)(implicit request:RequestWithSessionData[?], messages: Messages)
 
 @key = @{ "representee.enterName" }
 @representativeTypeInterpolator = @{

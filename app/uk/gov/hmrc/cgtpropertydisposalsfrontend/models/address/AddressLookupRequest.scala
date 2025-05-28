@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import play.api.data.Form
-import play.api.data.Forms.{optional, text, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, optional, text}
 
 final case class AddressLookupRequest(
   postcode: Postcode,
@@ -31,6 +31,6 @@ object AddressLookupRequest {
         "postcode" -> Postcode.mapping,
         "filter"   -> optional(text)
           .transform[Option[String]](_.filter(_.nonEmpty), identity)
-      )(AddressLookupRequest.apply)(AddressLookupRequest.unapply)
+      )(AddressLookupRequest.apply)(o => Some((o.postcode, o.filter)))
     )
 }

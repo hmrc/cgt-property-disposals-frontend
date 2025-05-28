@@ -31,10 +31,10 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.ReturnsServi
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Returns.ChangingRepresenteeEmail
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -63,8 +63,7 @@ trait ChangeRepresenteeEmailControllerSpec
 
   val mockUpdateEmail: Option[(ChangingRepresenteeEmail, ChangingRepresenteeEmail, Either[Error, Unit]) => Unit]
 
-  override lazy val controller: ChangeRepresenteeEmailController =
-    instanceOf[ChangeRepresenteeEmailController]
+  override lazy val controller: ChangeRepresenteeEmailController = instanceOf[ChangeRepresenteeEmailController]
 
   protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
@@ -96,7 +95,7 @@ trait ChangeRepresenteeEmailControllerSpec
     )
   }
 
-  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+  implicit val messagesApi: MessagesApi = controller.messagesApi
 
   protected def updateAnswers(
     answers: RepresenteeAnswers,
@@ -185,7 +184,7 @@ trait ChangeRepresenteeEmailControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterEmailSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())

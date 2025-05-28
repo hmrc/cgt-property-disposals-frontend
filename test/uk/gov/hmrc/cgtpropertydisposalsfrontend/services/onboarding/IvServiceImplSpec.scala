@@ -21,9 +21,10 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.onboarding.IvConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.MockMetrics
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.iv.IvErrorStatus._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.IvServiceImpl.IvStatusResponse
@@ -33,11 +34,11 @@ import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory {
+class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory with GuiceOneServerPerSuite {
 
   private val mockConnector = mock[IvConnector]
 
-  val service = new IvServiceImpl(mockConnector, MockMetrics.metrics)
+  val service = new IvServiceImpl(mockConnector, app.injector.instanceOf[Metrics])
 
   private def mockIvGetFailedJourneyStatus(
     journeyId: UUID

@@ -17,11 +17,12 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.agents.UnsuccessfulVerifierAttempts
 
-object VerifierMatchGen extends GenUtils {
+object VerifierMatchGen extends GenUtils:
 
-  implicit val unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
+  given unsuccessfulVerifierMatchAttemptsGen: Gen[UnsuccessfulVerifierAttempts] =
     gen[UnsuccessfulVerifierAttempts]
-
-}

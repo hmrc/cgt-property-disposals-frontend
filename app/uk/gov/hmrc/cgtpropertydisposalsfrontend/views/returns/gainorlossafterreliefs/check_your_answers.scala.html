@@ -34,7 +34,7 @@
         isATrust: Boolean,
         representativeType: Option[RepresentativeType],
         isMultipleDisposal: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{
     messages("gainOrLossAfterReliefs.cya.title")

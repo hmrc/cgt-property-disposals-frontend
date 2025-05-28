@@ -17,8 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait ClearingReason
 
@@ -31,6 +30,31 @@ object ClearingReason {
   case object AutomaticClearing extends ClearingReason
   case object SomeOtherClearingReason extends ClearingReason
 
-  implicit val eq: Eq[ClearingReason]          = Eq.fromUniversalEquals
-  implicit val format: OFormat[ClearingReason] = derived.oformat()
+  implicit val eq: Eq[ClearingReason]         = Eq.fromUniversalEquals
+  implicit val format: Format[ClearingReason] = new Format[ClearingReason] {
+    override def reads(json: JsValue): JsResult[ClearingReason] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "IncomingPayment"         => JsSuccess(IncomingPayment)
+          case "OutgoingPayment"         => JsSuccess(OutgoingPayment)
+          case "WriteOff"                => JsSuccess(WriteOff)
+          case "Reversal"                => JsSuccess(Reversal)
+          case "MassWriteOff"            => JsSuccess(MassWriteOff)
+          case "AutomaticClearing"       => JsSuccess(AutomaticClearing)
+          case "SomeOtherClearingReason" => JsSuccess(SomeOtherClearingReason)
+          case other                     => JsError(s"Invalid clearing reason: $other")
+        }
+      case _                                    => JsError("Expected JSON object with one ClearingReason key")
+    }
+
+    override def writes(reason: ClearingReason): JsValue = reason match {
+      case IncomingPayment         => Json.obj("IncomingPayment" -> Json.obj())
+      case OutgoingPayment         => Json.obj("OutgoingPayment" -> Json.obj())
+      case WriteOff                => Json.obj("WriteOff" -> Json.obj())
+      case Reversal                => Json.obj("Reversal" -> Json.obj())
+      case MassWriteOff            => Json.obj("MassWriteOff" -> Json.obj())
+      case AutomaticClearing       => Json.obj("AutomaticClearing" -> Json.obj())
+      case SomeOtherClearingReason => Json.obj("SomeOtherClearingReason" -> Json.obj())
+    }
+  }
 }

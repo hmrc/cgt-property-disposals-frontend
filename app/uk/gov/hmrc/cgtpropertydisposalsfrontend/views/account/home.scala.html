@@ -40,7 +40,7 @@
         viewHelpers: ViewHelpers
 )
 
-@(subscribed: Subscribed)(implicit request:RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(subscribed: Subscribed)(implicit request:RequestWithSessionData[?], messages: Messages, appConfig: ViewConfig)
 
 @title = @{messages(s"account.home.title")}
 @hasRecentlyAmendedReturn = @{subscribed.sentReturns.exists(r => r.isRecentlyAmended === true)}

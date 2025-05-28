@@ -28,7 +28,7 @@
         addressDisplay: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.address_display_govuk
 )
 
-@(details: SubscriptionDetails)(implicit request: RequestWithSubscriptionReady[_], messages: Messages)
+@(details: SubscriptionDetails)(implicit request: RequestWithSubscriptionReady[?], messages: Messages)
 @affinity = @{details.name.fold(_ => "organisation", _ => "individual")}
 @title = @{messages(s"subscription.${affinity}.title")}
 

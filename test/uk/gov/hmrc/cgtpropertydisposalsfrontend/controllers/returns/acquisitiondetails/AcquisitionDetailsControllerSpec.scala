@@ -39,18 +39,18 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.completeDisposalDetailsAnswersGen
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
@@ -119,7 +119,7 @@ class AcquisitionDetailsControllerSpec
     messageFromMessageKey(if (isAmend) "button.continue" else "button.saveAndContinue")
   def setAgentReferenceNumber(
     userType: UserType
-  ): Option[AgentReferenceNumber]                  =
+  ): Option[AgentReferenceNumber] =
     userType match {
       case UserType.Agent => Some(sample[AgentReferenceNumber])
       case _              => None
@@ -507,7 +507,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionMethodSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -530,7 +530,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String
         ): Unit =
-          testFormError(data: _*)(userType, individualUserType, assetType)(
+          testFormError(data*)(userType, individualUserType, assetType)(
             expectedErrorMessageKey
           )(
             s"$key$userKey.title"
@@ -745,7 +745,7 @@ class AcquisitionDetailsControllerSpec
             }
 
             checkIsRedirect(
-              performAction(data: _*),
+              performAction(data*),
               routes.AcquisitionDetailsController.checkYourAnswers()
             )
           }
@@ -867,7 +867,7 @@ class AcquisitionDetailsControllerSpec
             }
 
             checkIsRedirect(
-              performAction(data: _*),
+              performAction(data*),
               routes.AcquisitionDetailsController.checkYourAnswers()
             )
           }
@@ -924,14 +924,14 @@ class AcquisitionDetailsControllerSpec
               val (incompleteAnswers, completeAnswers) =
                 sample[IncompleteAcquisitionDetailsAnswers] -> sample[CompleteAcquisitionDetailsAnswers]
               List(
-                Seq(key -> "0") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Bought)),
-                Seq(key -> "1") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Inherited)),
-                Seq(key -> "2") -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Gifted)),
+                Seq(key -> "0")                             -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Bought)),
+                Seq(key -> "1")                             -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Inherited)),
+                Seq(key -> "2")                             -> incompleteAnswers.copy(acquisitionMethod = Some(AcquisitionMethod.Gifted)),
                 Seq(key -> "3", otherKey -> "other things") -> incompleteAnswers
                   .copy(acquisitionMethod = Some(AcquisitionMethod.Other("other things"))),
-                Seq(key -> "0") -> completeAnswers.copy(acquisitionMethod = AcquisitionMethod.Bought),
-                Seq(key -> "1") -> completeAnswers.copy(acquisitionMethod = AcquisitionMethod.Inherited),
-                Seq(key -> "2") -> completeAnswers.copy(acquisitionMethod = AcquisitionMethod.Gifted),
+                Seq(key -> "0")                             -> completeAnswers.copy(acquisitionMethod = AcquisitionMethod.Bought),
+                Seq(key -> "1")                             -> completeAnswers.copy(acquisitionMethod = AcquisitionMethod.Inherited),
+                Seq(key -> "2")                             -> completeAnswers.copy(acquisitionMethod = AcquisitionMethod.Gifted),
                 Seq(key -> "3", otherKey -> "other things") -> completeAnswers
                   .copy(acquisitionMethod = AcquisitionMethod.Other("other things"))
               ).foreach { case (data, answers) =>
@@ -949,7 +949,7 @@ class AcquisitionDetailsControllerSpec
                 }
 
                 checkIsRedirect(
-                  performAction(data: _*),
+                  performAction(data*),
                   routes.AcquisitionDetailsController.checkYourAnswers()
                 )
               }
@@ -1130,7 +1130,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       def formData(date: LocalDate): List[(String, String)] =
@@ -1191,7 +1191,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String
         )(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(userType, individualUserType, assetType)(
+          testFormError(data*)(userType, individualUserType, assetType)(
             expectedErrorKey
           )(s"$key$userKey.title")(
             performAction,
@@ -1225,7 +1225,7 @@ class AcquisitionDetailsControllerSpec
                         "acquisitionDate-year"  -> yearString
                       ).collect { case (id, Some(input)) => id -> input }
 
-                    test(formData: _*)(userType, individualUserType, assetType, userKey + assetTypeKey)(
+                    test(formData*)(userType, individualUserType, assetType, userKey + assetTypeKey)(
                       expectedErrorKey
                     )
                   }
@@ -1239,7 +1239,7 @@ class AcquisitionDetailsControllerSpec
               val assetTypeKey = assetTypeMessageKey(assetType)
               val userKey      = userMessageKey(individualUserType, userType)
               val tomorrow     = disposalDate.value.plusDays(1L)
-              test(formData(tomorrow): _*)(
+              test(formData(tomorrow)*)(
                 userType,
                 individualUserType,
                 assetType,
@@ -1255,7 +1255,7 @@ class AcquisitionDetailsControllerSpec
               val userKey      = userMessageKey(individualUserType, userType)
               val before1900   = LocalDate.of(1800, 1, 1)
 
-              test(formData(before1900): _*)(
+              test(formData(before1900)*)(
                 userType,
                 individualUserType,
                 assetType,
@@ -1323,7 +1323,7 @@ class AcquisitionDetailsControllerSpec
               }
 
               checkIsTechnicalErrorPage(
-                performAction(formData(acquisitionDate.value): _*)
+                performAction(formData(acquisitionDate.value)*)
               )
           }
         }
@@ -1346,7 +1346,7 @@ class AcquisitionDetailsControllerSpec
               }
 
               checkIsTechnicalErrorPage(
-                performAction(formData(acquisitionDate.value): _*)
+                performAction(formData(acquisitionDate.value)*)
               )
           }
         }
@@ -1400,7 +1400,7 @@ class AcquisitionDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(submittedAcquisitionDate): _*),
+            performAction(formData(submittedAcquisitionDate)*),
             routes.AcquisitionDetailsController.checkYourAnswers()
           )
         }
@@ -1597,7 +1597,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.periodOfAdminMarketValueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val dateOfDeath = DateOfDeath(LocalDate.ofEpochDay(0L))
@@ -1665,7 +1665,7 @@ class AcquisitionDetailsControllerSpec
 
           val formattedDateOfDeath = TimeUtils.govDisplayFormat(dateOfDeath.value)
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data*),
             messageFromMessageKey(
               s"$key.title",
               formattedDateOfDeath
@@ -1756,7 +1756,7 @@ class AcquisitionDetailsControllerSpec
 
         val scenarios = List(
           List(key -> "£1,234") -> AmountInPence(123400L),
-          List(key -> "1") -> AmountInPence(100L)
+          List(key -> "1")      -> AmountInPence(100L)
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -1796,7 +1796,7 @@ class AcquisitionDetailsControllerSpec
               }
 
               checkIsRedirect(
-                performAction(formData: _*),
+                performAction(formData*),
                 routes.AcquisitionDetailsController.checkYourAnswers()
               )
             }
@@ -1839,7 +1839,7 @@ class AcquisitionDetailsControllerSpec
               }
 
               checkIsRedirect(
-                performAction(formData: _*),
+                performAction(formData*),
                 routes.AcquisitionDetailsController.checkYourAnswers()
               )
             }
@@ -1874,7 +1874,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String
         ): Unit =
-          forAll { acquisitionMethod: AcquisitionMethod =>
+          forAll { (acquisitionMethod: AcquisitionMethod) =>
             val isAmend         = sample[Boolean]
             val acquisitionDate = sample[AcquisitionDate]
             val answers         = sample[IncompleteAcquisitionDetailsAnswers].copy(
@@ -2002,7 +2002,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2024,7 +2024,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String
         ): Unit =
-          forAll { answers: CompleteAcquisitionDetailsAnswers =>
+          forAll { (answers: CompleteAcquisitionDetailsAnswers) =>
             val scenarioSession = sessionWithState(
               answers,
               assetType,
@@ -2043,7 +2043,7 @@ class AcquisitionDetailsControllerSpec
               errorContext = Some(contextKey)
             ).foreach { scenario =>
               withClue(s"For $scenario: ") {
-                testFormError(scenario.formData: _*)(
+                testFormError(scenario.formData*)(
                   userType,
                   individualUserType,
                   assetType
@@ -2069,7 +2069,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String
         ): Unit =
-          forAll { answers: CompleteAcquisitionDetailsAnswers =>
+          forAll { (answers: CompleteAcquisitionDetailsAnswers) =>
             val scenarioSession = sessionWithState(
               answers,
               assetType,
@@ -2647,7 +2647,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.rebasedAcquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val acquisitionDate = AcquisitionDate(allResidents.minusDays(1))
@@ -2722,7 +2722,7 @@ class AcquisitionDetailsControllerSpec
 
           val formattedRebaseDate = TimeUtils.govDisplayFormat(allResidents)
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data*),
             messageFromMessageKey(
               s"$key.title",
               formattedRebaseDate
@@ -2833,7 +2833,7 @@ class AcquisitionDetailsControllerSpec
 
         val scenarios = List(
           List("rebaseAcquisitionPrice" -> "£1,234") -> AmountInPence(123400L),
-          List("rebaseAcquisitionPrice" -> "1") -> AmountInPence(100L)
+          List("rebaseAcquisitionPrice" -> "1")      -> AmountInPence(100L)
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -2876,7 +2876,7 @@ class AcquisitionDetailsControllerSpec
                   }
 
                   checkIsRedirect(
-                    performAction(formData: _*),
+                    performAction(formData*),
                     routes.AcquisitionDetailsController.checkYourAnswers()
                   )
                 }
@@ -2925,7 +2925,7 @@ class AcquisitionDetailsControllerSpec
                   }
 
                   checkIsRedirect(
-                    performAction(formData: _*),
+                    performAction(formData*),
                     routes.AcquisitionDetailsController.checkYourAnswers()
                   )
                 }
@@ -3285,7 +3285,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.improvementCostsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       val acquisitionDate = AcquisitionDate(LocalDate.ofEpochDay(0L))
@@ -3371,7 +3371,7 @@ class AcquisitionDetailsControllerSpec
           assetType: AssetType,
           userKey: String
         )(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(userType, individualUserType, assetType)(
+          testFormError(data*)(userType, individualUserType, assetType)(
             expectedErrorKey
           )(s"$key$userKey.title")(performAction)
 
@@ -3403,7 +3403,7 @@ class AcquisitionDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(userType, individualUserType, assetType, userKey)(
+                  test(data*)(userType, individualUserType, assetType, userKey)(
                     scenario.expectedErrorMessageKey
                   )
                 }
@@ -3505,7 +3505,7 @@ class AcquisitionDetailsControllerSpec
       "redirect to the check you answers page" when {
         val scenarios = List(
           List(key -> "0", valueKey -> "£1,234") -> AmountInPence(123400L),
-          List(key -> "1") -> AmountInPence.zero
+          List(key -> "1")                       -> AmountInPence.zero
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -3544,7 +3544,7 @@ class AcquisitionDetailsControllerSpec
                   }
 
                   checkIsRedirect(
-                    performAction(formData: _*),
+                    performAction(formData*),
                     routes.AcquisitionDetailsController.checkYourAnswers()
                   )
                 }
@@ -3591,7 +3591,7 @@ class AcquisitionDetailsControllerSpec
                   }
 
                   checkIsRedirect(
-                    performAction(formData: _*),
+                    performAction(formData*),
                     routes.AcquisitionDetailsController.checkYourAnswers()
                   )
                 }
@@ -3976,7 +3976,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.acquisitionFeesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -4027,7 +4027,7 @@ class AcquisitionDetailsControllerSpec
           userKey: String,
           wasUkResident: Boolean
         )(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(userType, individualUserType, assetType, wasUkResident)(
+          testFormError(data*)(userType, individualUserType, assetType, wasUkResident)(
             expectedErrorKey,
             models.TimeUtils.govDisplayFormat(mockRebasingUtil.getRebasingCutOffDate(assetType, wasUkResident))
           )(s"$key$userKey.title")(performAction)
@@ -4064,7 +4064,7 @@ class AcquisitionDetailsControllerSpec
               amountOfMoneyErrorScenarios(valueKey).foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = (key -> "0") :: scenario.formData
-                  test(data: _*)(
+                  test(data*)(
                     userType,
                     individualUserType,
                     assetType,
@@ -4174,7 +4174,7 @@ class AcquisitionDetailsControllerSpec
 
         val scenarios = List(
           List(key -> "0", valueKey -> "£1,234") -> AmountInPence(123400L),
-          List(key -> "1") -> AmountInPence.zero
+          List(key -> "1")                       -> AmountInPence.zero
         )
 
         "the price submitted is valid and the journey was incomplete" in {
@@ -4215,7 +4215,7 @@ class AcquisitionDetailsControllerSpec
                   }
 
                   checkIsRedirect(
-                    performAction(formData: _*),
+                    performAction(formData*),
                     routes.AcquisitionDetailsController.checkYourAnswers()
                   )
                 }
@@ -4256,7 +4256,7 @@ class AcquisitionDetailsControllerSpec
                   }
 
                   checkIsRedirect(
-                    performAction(formData: _*),
+                    performAction(formData*),
                     routes.AcquisitionDetailsController.checkYourAnswers()
                   )
                 }
@@ -4390,7 +4390,7 @@ class AcquisitionDetailsControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.shouldUseRebaseSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -4409,7 +4409,7 @@ class AcquisitionDetailsControllerSpec
         )(userType: UserType, individualUserType: IndividualUserType)(
           expectedErrorKey: String
         ): Unit =
-          testFormError(data: _*)(userType, individualUserType, NonResidential)(
+          testFormError(data*)(userType, individualUserType, NonResidential)(
             expectedErrorKey
           )("shouldUseRebase.title", date)(
             performAction,
@@ -4449,7 +4449,7 @@ class AcquisitionDetailsControllerSpec
         )(userType: UserType, individualUserType: IndividualUserType)(
           expectedErrorKey: String
         ): Unit =
-          testFormError(data: _*)(userType, individualUserType, Residential)(
+          testFormError(data*)(userType, individualUserType, Residential)(
             expectedErrorKey
           )("shouldUseRebase.title", date)(
             performAction,
@@ -5305,13 +5305,13 @@ class AcquisitionDetailsControllerSpec
 
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs: _*),
+      messageFromMessageKey(pageTitleKey, titleArgs*),
       { doc =>
         doc
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs: _*
+          errorArgs*
         )
         doc.title() should startWith("Error:")
       },

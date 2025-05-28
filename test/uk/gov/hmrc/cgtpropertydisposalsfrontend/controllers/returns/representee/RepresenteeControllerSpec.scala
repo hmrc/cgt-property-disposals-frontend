@@ -37,14 +37,14 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualRepresenteeNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, NINO, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, IndividualName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -59,6 +59,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.http.HeaderCarrier
+
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails._
 
 import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -75,8 +78,7 @@ class RepresenteeControllerSpec
     with NameFormValidationTests
     with ContactNameFormValidationTests {
 
-  val mockNameMatchRetryService: NameMatchRetryService =
-    mock[NameMatchRetryService]
+  val mockNameMatchRetryService: NameMatchRetryService = mock[NameMatchRetryService]
 
   protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
@@ -160,10 +162,10 @@ class RepresenteeControllerSpec
   ) =
     (
       mockNameMatchRetryService
-        .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](_: GGCredId)(
+        .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](_: GGCredId)(using
           _: Reads[IndividualRepresenteeNameMatchDetails],
           _: HeaderCarrier,
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(ggCredId, *, *, *)
@@ -186,7 +188,7 @@ class RepresenteeControllerSpec
           _: Lang
         )(
           _: HeaderCarrier,
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(
@@ -297,7 +299,7 @@ class RepresenteeControllerSpec
       def performAction: Seq[(String, String)] => Future[Result] =
         data =>
           controller.changeContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           )
 
       def formDataForContactName(
@@ -575,7 +577,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterNameSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val firstNameKey = "representeeFirstName"
@@ -973,7 +975,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterDateOfDeathSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val dayKey   = "dateOfDeath-day"
@@ -1601,7 +1603,7 @@ class RepresenteeControllerSpec
     "handling requests to submit the confirm person page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.confirmPersonSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1730,7 +1732,7 @@ class RepresenteeControllerSpec
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterIdSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       val outerKey        = "representeeReferenceIdType"
@@ -2767,7 +2769,7 @@ class RepresenteeControllerSpec
         }
 
         "the user has already answered all the questions" in {
-          forAll { completeAnswers: CompleteRepresenteeAnswers =>
+          forAll { (completeAnswers: CompleteRepresenteeAnswers) =>
             val (session, _, _) = sessionWithFillingOutReturn(
               completeAnswers,
               PersonalRepresentative
@@ -3074,7 +3076,7 @@ class RepresenteeControllerSpec
     "handling submits on the is first return page" must {
 
       def performAction(formData: Seq[(String, String)]): Future[Result] =
-        controller.isFirstReturnSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
+        controller.isFirstReturnSubmit()(FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST"))
 
       val key = "representeeIsFirstReturn"
 
@@ -3577,7 +3579,7 @@ object RepresenteeControllerSpec extends Matchers {
     doc
       .select("#address-answer")
       .text()
-      .replace(" ", "") shouldBe addressLines.mkString("")
+      .replace(" ", "") shouldBe addressLines.mkString("").replace(" ", "")
 
     doc
       .select("#email-answer")

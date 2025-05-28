@@ -47,25 +47,27 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOut
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils, PaymentsJourney}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SingleMixedUseDetailsAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SingleMixedUseDetailsAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
@@ -188,7 +190,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           _: Call
         )(
           _: HeaderCarrier,
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(cgtReference, chargeReference, amount, dueDate, returnUrl, backUrl, *, *)
@@ -1306,7 +1308,7 @@ class CheckAllAnswersAndSubmitControllerSpec
 
       lazy val submitReturnRequest = {
         val cyaPge                                                     = instanceOf[views.html.returns.check_all_answers]
-        implicit val requestWithSessionData: RequestWithSessionData[_] =
+        implicit val requestWithSessionData: RequestWithSessionData[?] =
           RequestWithSessionData(
             None,
             AuthenticatedRequest(
@@ -1341,7 +1343,7 @@ class CheckAllAnswersAndSubmitControllerSpec
         hideEstimatesQuestion: Boolean
       ): SubmitReturnRequest = {
         val cyaPge                                                     = instanceOf[views.html.returns.check_all_answers]
-        implicit val requestWithSessionData: RequestWithSessionData[_] =
+        implicit val requestWithSessionData: RequestWithSessionData[?] =
           RequestWithSessionData(
             None,
             AuthenticatedRequest(
@@ -1564,10 +1566,10 @@ class CheckAllAnswersAndSubmitControllerSpec
 
                 doc.select(".govuk-body").text shouldBe
                   s"""${messageFromMessageKey("submitReturnError.p1")} ${messageFromMessageKey(
-                    "submitReturnError.p2"
-                  )} ${messageFromMessageKey("submitReturnError.p3")} ${messageFromMessageKey(
-                    "submitReturnError.p4"
-                  )}"""
+                      "submitReturnError.p2"
+                    )} ${messageFromMessageKey("submitReturnError.p3")} ${messageFromMessageKey(
+                      "submitReturnError.p4"
+                    )}"""
 
                 doc
                   .select("#main-content ol.govuk-list--number > li:nth-child(1)")

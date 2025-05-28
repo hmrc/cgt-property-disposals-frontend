@@ -17,22 +17,33 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait EmailSource extends Product with Serializable
 
 object EmailSource {
 
-  final case object GovernmentGateway extends EmailSource
+  case object GovernmentGateway extends EmailSource
 
-  final case object BusinessPartnerRecord extends EmailSource
+  case object BusinessPartnerRecord extends EmailSource
 
-  final case object ManuallyEntered extends EmailSource
+  case object ManuallyEntered extends EmailSource
 
   implicit val eq: Eq[EmailSource] = Eq.fromUniversalEquals[EmailSource]
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[EmailSource] = derived.oformat()
+  implicit val format: Format[EmailSource] = new Format[EmailSource] {
+    override def reads(json: JsValue): JsResult[EmailSource] = json match {
+      case JsString("GovernmentGateway")     => JsSuccess(GovernmentGateway)
+      case JsString("BusinessPartnerRecord") => JsSuccess(BusinessPartnerRecord)
+      case JsString("ManuallyEntered")       => JsSuccess(ManuallyEntered)
+      case _                                 => JsError("Invalid email source")
+    }
+
+    override def writes(o: EmailSource): JsValue = o match {
+      case GovernmentGateway     => JsString("GovernmentGateway")
+      case BusinessPartnerRecord => JsString("BusinessPartnerRecord")
+      case ManuallyEntered       => JsString("ManuallyEntered")
+    }
+  }
 
 }

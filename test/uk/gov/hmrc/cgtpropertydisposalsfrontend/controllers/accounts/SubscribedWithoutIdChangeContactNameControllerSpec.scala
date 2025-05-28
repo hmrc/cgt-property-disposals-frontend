@@ -59,10 +59,10 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
       case _             => false
     }
 
-  override lazy val controller: SubscribedWithoutIdChangeContactNameController =
+  override val controller: SubscribedWithoutIdChangeContactNameController =
     instanceOf[SubscribedWithoutIdChangeContactNameController]
 
-  override lazy val validJourney: Subscribed = Subscribed(
+  override val validJourney: Subscribed = Subscribed(
     SubscribedDetails(
       Right(IndividualName("Joe", "Smith")),
       Email("joe.smith@gmail.com"),
@@ -89,7 +89,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
     )
   }
 
-  override val mockUpdateName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some({
+  override val mockUpdateName: Option[(Subscribed, Subscribed, Either[Error, Unit]) => Unit] = Some {
     case (
           oldDetails: Subscribed,
           newDetails: Subscribed,
@@ -101,7 +101,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
           oldDetails.subscribedDetails
         )
       )(r)
-  })
+  }
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
@@ -118,7 +118,7 @@ class SubscribedWithoutIdChangeContactNameControllerSpec
       behave like enterNameSubmit(
         data =>
           controller.enterIndividualNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           ),
         controllers.accounts.routes.AccountController.contactNameUpdated()
       )

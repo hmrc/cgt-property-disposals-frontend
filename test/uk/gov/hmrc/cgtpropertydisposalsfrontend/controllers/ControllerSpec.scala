@@ -25,15 +25,15 @@ import org.scalamock.scalatest.MockFactory
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api._
+import play.api.*
 import play.api.http.HttpConfiguration
-import play.api.i18n._
+import play.api.i18n.*
 import play.api.inject.bind
 import play.api.inject.guice.{GuiceApplicationBuilder, GuiceableModule}
 import play.api.mvc.{Call, Result}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, MockMetrics}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, TestMetrics}
 
 import java.net.URLEncoder
 import scala.concurrent.Future
@@ -72,7 +72,7 @@ class TestDefaultMessagesApiProvider @Inject() (
   httpConfiguration: HttpConfiguration
 ) extends DefaultMessagesApiProvider(environment, config, langs, httpConfiguration) {
 
-  override lazy val get: MessagesApi = {
+  override lazy val get: MessagesApi =
     new TestMessagesApi(
       loadAllMessages,
       langs,
@@ -81,7 +81,6 @@ class TestDefaultMessagesApiProvider @Inject() (
       langCookieHttpOnly = langCookieHttpOnly,
       httpConfiguration = httpConfiguration
     )
-  }
 }
 
 trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with MockFactory {
@@ -93,8 +92,7 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
   protected lazy val additionalConfig: Configuration = Configuration()
 
   def buildFakeApplication(): Application = {
-    val metricsBinding: GuiceableModule =
-      bind[Metrics].toInstance(MockMetrics.metrics)
+    val metricsBinding: GuiceableModule = bind[Metrics].toInstance(new TestMetrics)
 
     new GuiceApplicationBuilder()
       .configure(
@@ -109,8 +107,9 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
         ).withFallback(additionalConfig)
       )
       .disable[uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore]
-      .overrides(metricsBinding :: overrideBindings: _*)
+      .overrides(metricsBinding :: overrideBindings*)
       .overrides(bind[MessagesApi].toProvider[TestDefaultMessagesApiProvider])
+      .disable[Metrics]
       .build()
   }
 
@@ -132,7 +131,7 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
   }
 
   def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String = {
-    val m = messagesApi(messageKey, args: _*)(lang)
+    val m = messagesApi(messageKey, args*)(lang)
     if (m === messageKey) sys.error(s"Message key `$messageKey` is missing a message")
     m
   }

@@ -25,7 +25,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.test.WireMockSupport
 
 trait ConnectorSupport extends WireMockSupport with GuiceOneAppPerSuite {
-  this: Suite with TestSuite =>
+  this: Suite & TestSuite =>
   def serviceId: String
 
   val selfUrl = "https://self:999"

@@ -17,6 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.{Arbitrary, Gen}
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.amountInPenceGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.OtherReliefsOption.{NoOtherReliefs, OtherReliefs}
@@ -32,23 +33,21 @@ object ReliefDetailsGen extends HigherPriorityReliefDetailGen with GenUtils {
 
 trait HigherPriorityReliefDetailGen extends LowerPriorityReliefDetailGen { this: GenUtils =>
 
-  implicit val reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] =
-    gen[ReliefDetailsAnswers]
+  given reliefDetailsAnswersGen: Gen[ReliefDetailsAnswers] = gen[ReliefDetailsAnswers]
 
-  implicit val completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
+  given completeReliefDetailsAnswersGen: Gen[CompleteReliefDetailsAnswers] =
     gen[CompleteReliefDetailsAnswers].map {
       case a: CompleteReliefDetailsAnswers if a.otherReliefs.isEmpty =>
         a.copy(otherReliefs = Some(NoOtherReliefs))
       case other                                                     => other
     }
 
-  implicit val otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]
-
+  given otherReliefsGen: Gen[OtherReliefs] = gen[OtherReliefs]
 }
 
 trait LowerPriorityReliefDetailGen { this: GenUtils =>
 
-  implicit val incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
+  given incompleteReliefDetailsAnswersGen: Gen[IncompleteReliefDetailsAnswers] =
     gen[IncompleteReliefDetailsAnswers].map {
       case a: IncompleteReliefDetailsAnswers if a.otherReliefs.isEmpty =>
         a.copy(otherReliefs = Some(NoOtherReliefs))

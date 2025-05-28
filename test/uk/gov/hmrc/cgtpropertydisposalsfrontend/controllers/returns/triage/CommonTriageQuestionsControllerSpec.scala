@@ -31,18 +31,18 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServ
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingNewDraftReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -525,7 +525,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.whoIsIndividualRepresentingSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -579,7 +579,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey("who-are-you-reporting-for.title"),
             { doc =>
               doc
@@ -1183,7 +1183,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1256,7 +1256,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
@@ -1448,7 +1448,7 @@ class CommonTriageQuestionsControllerSpec
         "the user is filling in a return and" when {
 
           "they are on a multiple disposals journey and change the answer to one property" in {
-            forAll { c: CompleteMultipleDisposalsTriageAnswers =>
+            forAll { (c: CompleteMultipleDisposalsTriageAnswers) =>
               val answers = c.copy(
                 individualUserType = Some(IndividualUserType.Self)
               )
@@ -1592,7 +1592,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.howManyPropertiesFurtherReturnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -1657,7 +1657,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey("numberOfProperties.title"),
             { doc =>
               doc
@@ -1688,7 +1688,7 @@ class CommonTriageQuestionsControllerSpec
       "handle valid data" when {
 
         "the user is on an amend return journey" in {
-          forAll { c: SingleDisposalTriageAnswers =>
+          forAll { (c: SingleDisposalTriageAnswers) =>
             val answers = c.fold(
               _.copy(individualUserType = Some(IndividualUserType.Self)),
               _.copy(
@@ -2266,8 +2266,8 @@ class CommonTriageQuestionsControllerSpec
               { doc =>
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
                 doc.select(".govuk-warning-text__text").text()     shouldBe s"""${messageFromMessageKey(
-                  "generic.warning"
-                )} ${messageFromMessageKey(expectedWarningKey)}"""
+                    "generic.warning"
+                  )} ${messageFromMessageKey(expectedWarningKey)}"""
               }
             )
 
@@ -2996,7 +2996,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.amendsHaveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3048,7 +3048,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(
               s"$key.title",
               startDateInclusive.getYear.toString,
@@ -3268,7 +3268,7 @@ class CommonTriageQuestionsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.haveYouAlreadySentSelfAssessmentSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartWhenInvalidJourney(
@@ -3310,7 +3310,7 @@ class CommonTriageQuestionsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(
               s"$key.title",
               startDateInclusive.getYear.toString,

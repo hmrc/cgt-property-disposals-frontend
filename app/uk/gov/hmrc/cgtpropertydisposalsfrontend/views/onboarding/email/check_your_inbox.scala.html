@@ -36,7 +36,7 @@
   enterEmailSubmit: Call,
   resent: Boolean,
   emailJourneyType: EmailJourneyType
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{
   val prefix = if (resent) s"${messages("confirmEmail.resent")} " else ""
