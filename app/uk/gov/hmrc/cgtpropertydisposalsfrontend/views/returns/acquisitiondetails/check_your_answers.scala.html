@@ -40,7 +40,7 @@
     representativeType: Option[RepresentativeType],
     assetType: AssetType,
     isShare: Boolean,
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("acquisitionDetails.cya.title")}
 

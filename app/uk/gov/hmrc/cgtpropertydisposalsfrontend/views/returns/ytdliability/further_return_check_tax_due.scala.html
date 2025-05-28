@@ -38,7 +38,7 @@
     previousYearToDateLiability: AmountInPence,
     taxOwedOnOriginalReturn: Option[AmountInPence],
     isATrust: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "nonCalculatedTaxDue" }
 

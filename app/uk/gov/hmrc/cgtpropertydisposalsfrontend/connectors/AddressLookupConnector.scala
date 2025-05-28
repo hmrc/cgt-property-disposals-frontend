@@ -34,6 +34,8 @@ import java.util.Locale
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.chaining.scalaUtilChainingOps
 
+import play.api.libs.ws.writeableOf_JsValue
+
 @ImplementedBy(classOf[AddressLookupConnectorImpl])
 trait AddressLookupConnector {
   def lookupAddress(postcode: Postcode, filter: Option[String])(implicit
@@ -66,7 +68,7 @@ class AddressLookupConnectorImpl @Inject() (
     http
       .post(url"$url")
       .withBody(Json.toJson(body))
-      .setHeader(headers: _*)
+      .setHeader(headers*)
       .execute[Either[UpstreamErrorResponse, AddressLookupResponse]]
       .map(_.left.map { error =>
         logger.error(s"POST to $url failed", error)

@@ -16,22 +16,39 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait AcquisitionMethod extends Product with Serializable
 
 object AcquisitionMethod {
 
-  final case object Bought extends AcquisitionMethod
+  case object Bought extends AcquisitionMethod
 
-  final case object Inherited extends AcquisitionMethod
+  case object Inherited extends AcquisitionMethod
 
-  final case object Gifted extends AcquisitionMethod
+  case object Gifted extends AcquisitionMethod
 
   final case class Other(value: String) extends AcquisitionMethod
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[AcquisitionMethod] = derived.oformat()
+  implicit val format: Format[AcquisitionMethod] = new Format[AcquisitionMethod] {
+    override def reads(json: JsValue): JsResult[AcquisitionMethod] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("Bought", _)    => JsSuccess(Bought)
+          case ("Inherited", _) => JsSuccess(Inherited)
+          case ("Gifted", _)    => JsSuccess(Gifted)
+          case ("Other", value) => (value \ "value").validate[String].map(Other(_))
+          case (other, _)       => JsError(s"Unrecognized acquisition method: $other")
+        }
+      case _                                    => JsError("Expected JSON object with one AcquisitionMethod key")
+    }
+
+    override def writes(o: AcquisitionMethod): JsValue = o match {
+      case Bought       => Json.obj("Bought" -> Json.obj())
+      case Inherited    => Json.obj("Inherited" -> Json.obj())
+      case Gifted       => Json.obj("Gifted" -> Json.obj())
+      case Other(value) => Json.obj("Other" -> Json.obj("value" -> value))
+    }
+  }
 
 }

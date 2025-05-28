@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftReturn, Ret
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -63,7 +63,7 @@ class HomePageController @Inject() (
     authenticatedActionWithSessionData.async { implicit request: RequestWithSessionData[AnyContent] =>
       withSubscribedUser { (_, subscribed) =>
         EitherT(
-          updateSession(sessionStore, request)(
+          updateSession(sessionStore, request.toSession)(
             _.copy(journeyType = None)
           )
         ).fold(
@@ -102,7 +102,7 @@ class HomePageController @Inject() (
 
           val result = for {
             _ <- EitherT(
-                   updateSession(sessionStore, request)(
+                   updateSession(sessionStore, request.toSession)(
                      _.copy(
                        journeyStatus = Some(
                          StartingNewDraftReturn(
@@ -152,7 +152,7 @@ class HomePageController @Inject() (
           } { draftReturn =>
             val result = for {
               _ <- EitherT(
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(
                          journeyStatus = Some(
                            FillingOutReturn(
@@ -211,7 +211,7 @@ class HomePageController @Inject() (
                                   )
 
               _ <- EitherT(
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(
                          journeyStatus = Some(
                            ViewingReturn(
@@ -284,7 +284,7 @@ class HomePageController @Inject() (
     f: (SessionData, Subscribed) => Future[Result]
   )(withUplift: Boolean)(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((s: SessionData, r: StartingNewDraftReturn)) if withUplift =>
@@ -369,7 +369,7 @@ class HomePageController @Inject() (
     f: Subscribed => Future[Result]
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] = {
     val result = for {
       sentReturns                               <- returnsService.listReturns(cgtReference)
@@ -387,7 +387,7 @@ class HomePageController @Inject() (
 
       subscribed = uplift(journey, updatedDraftReturns, unsetDraftReturnFlagAndUpdatedSentReturns._2)
       _         <- EitherT(
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(journeyStatus = Some(subscribed))
                      )
                    )

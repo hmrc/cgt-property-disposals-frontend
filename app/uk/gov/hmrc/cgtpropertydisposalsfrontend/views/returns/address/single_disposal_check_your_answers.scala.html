@@ -28,7 +28,7 @@
         summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.address.single_disposal_summary_govuk
 )
 
-@(propertyAddress: UkAddress, shouldAskIfPostcodeExists: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(propertyAddress: UkAddress, shouldAskIfPostcodeExists: Boolean)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 
 @title = @{messages("returns.property-address.cya.title")}

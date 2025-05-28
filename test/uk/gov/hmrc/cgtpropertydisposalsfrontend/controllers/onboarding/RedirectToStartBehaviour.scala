@@ -32,7 +32,7 @@ import java.util.UUID
 import scala.concurrent.Future
 
 trait RedirectToStartBehaviour {
-  this: ControllerSpec with AuthSupport with SessionSupport with ScalaCheckDrivenPropertyChecks =>
+  this: ControllerSpec & AuthSupport & SessionSupport & ScalaCheckDrivenPropertyChecks =>
 
   def redirectToStartWhenInvalidJourney(
     performAction: () => Future[Result],
@@ -55,7 +55,7 @@ trait RedirectToStartBehaviour {
         implicit val journeyStatusArb: Arbitrary[JourneyStatus] =
           arb(journeyStatusGen)
 
-        forAll { j: JourneyStatus =>
+        forAll { (j: JourneyStatus) =>
           val fixture = j match {
             case f: FillingOutReturn =>
               f.copy(

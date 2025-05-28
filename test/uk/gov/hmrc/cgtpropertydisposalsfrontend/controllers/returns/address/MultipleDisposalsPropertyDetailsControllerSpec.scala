@@ -38,18 +38,18 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{NonUkAdd
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId, UUIDGenerator}
@@ -114,7 +114,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       bind[UUIDGenerator].toInstance(mockUUIDGenerator)
     ) ::: super.overrideBindings
 
-  protected override lazy val controller: PropertyDetailsController = instanceOf[PropertyDetailsController]
+  protected override val controller: PropertyDetailsController = instanceOf[PropertyDetailsController]
 
   private lazy implicit val messagesApi: MessagesApi = controller.messagesApi
 
@@ -453,7 +453,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "redirect to the enter postcode page" when {
         "the user did not dispose of a non-residential property and" when {
           "the user has not started this section before" in {
-            forAll { assetTypes: List[AssetType] =>
+            forAll { (assetTypes: List[AssetType]) =>
               whenever(
                 assetTypes.contains(AssetType.Residential) ||
                   assetTypes.toSet === Set(
@@ -478,7 +478,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           "the user has started but not completed this section" in {
-            forAll { assetTypes: List[AssetType] =>
+            forAll { (assetTypes: List[AssetType]) =>
               whenever(
                 assetTypes.contains(AssetType.Residential) ||
                   assetTypes.toSet === Set(
@@ -605,7 +605,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submits on the has a uk postcode page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleDisposalsHasUkPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -705,7 +705,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.checkUPRNSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like amendReturnToFillingOutReturnSpecBehaviour(
@@ -826,7 +826,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submits on the enter UPRN page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.multipleDisposalsEnterLandUprnSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       def formData(ukAddress: UkAddress): List[(String, String)] =
@@ -874,7 +874,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey("enterUPRN.title"),
             { doc =>
               val errors = doc.select("[data-spec='errorSummaryDisplay'] ul").first()
@@ -965,7 +965,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(newAddress): _*),
+            performAction(formData(newAddress)*),
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
@@ -1006,7 +1006,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
 
         "there is an error updating the session" in {
@@ -1023,7 +1023,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )(Left(Error("")))
           }
 
-          checkIsTechnicalErrorPage(performAction(formData(newAddress): _*))
+          checkIsTechnicalErrorPage(performAction(formData(newAddress)*))
         }
       }
     }
@@ -1045,7 +1045,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submitted addresses from enter UK address page" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterUkAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1079,7 +1079,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submitted postcodes and filters" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.enterPostcodeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1133,7 +1133,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
     "handling submitted selected addresses" must {
       def performAction(formData: Seq[(String, String)]): Future[Result] =
         controller.selectAddressSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction(Seq.empty))
@@ -1479,7 +1479,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalDateSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       def formData(d: LocalDate): List[(String, String)] =
@@ -1582,7 +1582,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkIsRedirect(
-            performAction(formData(disposalDate.value): _*),
+            performAction(formData(disposalDate.value)*),
             routes.PropertyDetailsController.checkYourAnswers()
           )
         }
@@ -1632,14 +1632,14 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(formData: _*),
+            performAction(formData*),
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
                 .select("[data-spec='errorSummaryDisplay'] a")
                 .text() shouldBe messageFromMessageKey(
                 expectedErrorMessageKey,
-                args: _*
+                args*
               ),
             BAD_REQUEST,
             messageRegexPrefix
@@ -1781,7 +1781,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             test(
-              performAction(formData(updatedDisposalDate.value): _*),
+              performAction(formData(updatedDisposalDate.value)*),
               oldDraftReturn,
               updatedDraftReturn,
               isAmend = false
@@ -1816,7 +1816,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             )
 
             test(
-              performAction(formData(updatedDisposalDate.value): _*),
+              performAction(formData(updatedDisposalDate.value)*),
               oldDraftReturn,
               updatedDraftReturn,
               isAmend = false
@@ -1857,7 +1857,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
               )
 
               test(
-                performAction(formData(disposalDate.value): _*),
+                performAction(formData(disposalDate.value)*),
                 oldDraftReturn,
                 updatedDraftReturn,
                 isAmend = true
@@ -2131,7 +2131,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.disposalPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2200,7 +2200,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data*),
             messageFromMessageKey(s"$key.title"),
             doc =>
               doc
@@ -2216,7 +2216,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           amountOfMoneyErrorScenarios(key).foreach { scenario =>
             withClue(s"For $scenario: ") {
               val data = scenario.formData
-              test(data: _*)(scenario.expectedErrorMessageKey)
+              test(data*)(scenario.expectedErrorMessageKey)
             }
           }
         }
@@ -2731,7 +2731,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.acquisitionPriceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2796,7 +2796,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
           }
 
           checkPageIsDisplayed(
-            performAction(data: _*),
+            performAction(data*),
             expectedTitle,
             doc =>
               doc
@@ -2807,11 +2807,11 @@ class MultipleDisposalsPropertyDetailsControllerSpec
         }
 
         "the data is invalid" in {
-          forAll { individualUserType: Option[IndividualUserType] =>
+          forAll { (individualUserType: Option[IndividualUserType]) =>
             whenever(!individualUserType.contains(PersonalRepresentativeInPeriodOfAdmin)) {
               amountOfMoneyErrorScenarios(key).foreach { scenario =>
                 withClue(s"For $scenario: ") {
-                  test(scenario.formData: _*)(
+                  test(scenario.formData*)(
                     sample[DraftMultipleDisposalsReturn].copy(
                       triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(individualUserType = None),
                       examplePropertyDetailsAnswers = Some(
@@ -2834,7 +2834,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
             scenario =>
               withClue(s"For $scenario: ") {
                 val data = scenario.formData
-                test(data: _*)(
+                test(data*)(
                   sample[DraftMultipleDisposalsReturn].copy(
                     triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
                       .copy(individualUserType = Some(PersonalRepresentativeInPeriodOfAdmin)),
@@ -3303,7 +3303,7 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   ): Unit =
     "redirect to the check your answers page" when {
       "the asset types being disposed of do not require us to ask if a postcode exists" in {
-        forAll { assetTypes: List[AssetType] =>
+        forAll { (assetTypes: List[AssetType]) =>
           whenever(
             assetTypes.contains(AssetType.Residential) ||
               assetTypes.toSet === Set(

@@ -25,7 +25,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{RequestWith
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 import scala.concurrent.{ExecutionContext, Future}
 
 trait IndividualNameController[J <: JourneyStatus] {
-  this: FrontendController with WithAuthAndSessionDataAction with SessionUpdates with Logging =>
+  this: FrontendController & WithAuthAndSessionDataAction & SessionUpdates & Logging =>
 
   implicit val viewConfig: ViewConfig
   implicit val ec: ExecutionContext
@@ -45,24 +45,24 @@ trait IndividualNameController[J <: JourneyStatus] {
   val errorHandler: ErrorHandler
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, J)]
 
   def updateName(journey: J, name: IndividualName)(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, J]
 
   def name(journey: J): Option[IndividualName]
 
-  protected val backLinkCall: Call
-  protected val enterNameSubmitCall: Call
-  protected val continueCall: Call
+  protected lazy val backLinkCall: Call
+  protected lazy val enterNameSubmitCall: Call
+  protected lazy val continueCall: Call
 
-  private def withValidJourney(request: RequestWithSessionData[_])(
+  private def withValidJourney(request: RequestWithSessionData[?])(
     f: (SessionData, J) => Future[Result]
   ): Future[Result] =
-    validJourney(request).fold[Future[Result]](toFuture, f.tupled)
+    validJourney(request).fold[Future[Result]](given_Conversion_Result_Future, f.tupled)
 
   private val individualNameForm = IndividualName.form("firstName", "lastName")
 
@@ -102,7 +102,7 @@ trait IndividualNameController[J <: JourneyStatus] {
               val result = for {
                 journey <- updateName(journey, contactName)
                 _       <- EitherT[Future, Error, Unit](
-                             updateSession(sessionStore, request) { s =>
+                             updateSession(sessionStore, request.toSession) { s =>
                                s.copy(journeyStatus = Some(journey))
                              }
                            )

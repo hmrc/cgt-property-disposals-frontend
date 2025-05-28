@@ -24,7 +24,7 @@ import cats.syntax.either._
 import cats.syntax.eq._
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
-import play.api.data.Forms.{of, mapping => formMapping}
+import play.api.data.Forms.{mapping => formMapping, of}
 import play.api.data.format.Formatter
 import play.api.data.{Form, FormError}
 import play.api.http.Writeable
@@ -44,7 +44,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{ConditionalRadioUtils, E
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -82,7 +82,7 @@ class DisposalDetailsController @Inject() (
       JourneyState,
       DisposalDetailsAnswers
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
@@ -162,7 +162,7 @@ class DisposalDetailsController @Inject() (
   )(
     updateAnswers: (A, DisposalDetailsAnswers, JourneyState) => JourneyState
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     if (requiredPreviousAnswer(answers).isDefined) {
       lazy val backLink = answers.fold(
@@ -187,7 +187,7 @@ class DisposalDetailsController @Inject() (
                      returnsService.storeDraftReturn(newJourney)
                    }
               _ <- EitherT[Future, Error, Unit](
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(journeyStatus = Some(newJourney))
                      )
                    )
@@ -534,7 +534,7 @@ class DisposalDetailsController @Inject() (
               val result = for {
                 _ <- returnsService.storeDraftReturn(updatedJourney)
                 _ <- EitherT(
-                       updateSession(sessionStore, request)(
+                       updateSession(sessionStore, request.toSession)(
                          _.copy(journeyStatus = Some(updatedJourney))
                        )
                      )

@@ -34,6 +34,8 @@ import java.util.Locale
 import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{ExecutionContext, Future}
 
+import play.api.libs.ws.writeableOf_JsValue
+
 @ImplementedBy(classOf[EmailVerificationConnectorImpl])
 trait EmailVerificationConnector {
   def verifyEmail(email: Email, name: ContactName, continueCall: Call, language: AcceptLanguage)(implicit

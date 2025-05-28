@@ -33,7 +33,7 @@
         govukInput: GovukInput
 )
 
-@(form: Form[CgtReference])(implicit request: RequestWithSessionData[_], messages: Messages, appConfig: ViewConfig)
+@(form: Form[CgtReference])(implicit request: RequestWithSessionData[?], messages: Messages, appConfig: ViewConfig)
 
 @key = @{"cgtReference"}
 @title = @{messages("agent.enter-client-cgt-ref.title")}

@@ -26,7 +26,7 @@
     accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.account_menu_govuk
 )
 
-@(detailChanged: SubscriptionDetail)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(detailChanged: SubscriptionDetail)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @title = @{messages(s"account.manageYourDetails.$detailChanged.changed")}
 

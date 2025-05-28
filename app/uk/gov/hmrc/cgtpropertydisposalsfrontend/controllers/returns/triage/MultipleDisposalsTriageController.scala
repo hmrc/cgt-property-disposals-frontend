@@ -51,7 +51,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error,
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{ReturnsService, TaxYearService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.triage.{disposal_date_of_shares, multipledisposals => triagePages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -302,9 +302,7 @@ class MultipleDisposalsTriageController @Inject() (
                   )
                   .contains(wereUKResident)
               ) {
-                Redirect(
-                  routes.MultipleDisposalsTriageController.checkYourAnswers()
-                )
+                Redirect(routes.MultipleDisposalsTriageController.checkYourAnswers())
               } else {
                 val updatedAnswers = answers
                   .unset(_.countryOfResidence)
@@ -685,7 +683,7 @@ class MultipleDisposalsTriageController @Inject() (
                                           returnsService.storeDraftReturn(_)
                                         )
                       _              <- EitherT(
-                                          updateSession(sessionStore, request)(
+                                          updateSession(sessionStore, request.toSession)(
                                             _.copy(journeyStatus = Some(newState.merge))
                                           )
                                         )
@@ -1018,7 +1016,7 @@ class MultipleDisposalsTriageController @Inject() (
             viewConfig.futureDatesEnabled,
             viewConfig.maxYearForDisposalsAndCompletion
           )
-          val form = {
+          val form           = {
             val blankForm = sharesDisposalDateForm(personalRepDetails, maxDateAllowed)
             answers
               .fold(_.completionDate, e => Some(e.completionDate))
@@ -1115,7 +1113,7 @@ class MultipleDisposalsTriageController @Inject() (
                                           returnsService.storeDraftReturn(_)
                                         )
                       _              <- EitherT(
-                                          updateSession(sessionStore, request)(
+                                          updateSession(sessionStore, request.toSession)(
                                             _.copy(journeyStatus = Some(newState.merge))
                                           )
                                         )
@@ -1622,7 +1620,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   private def withMultipleDisposalTriageAnswers(
     f: (SessionData, JourneyState, MultipleDisposalsTriageAnswers) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
         convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator)
@@ -1658,16 +1656,15 @@ class MultipleDisposalsTriageController @Inject() (
     f: => Result
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] = {
     val result = for {
       _ <- updatedState.fold(
              _ => EitherT.pure[Future, Error](()),
-             returnsService
-               .storeDraftReturn(_)
+             returnsService.storeDraftReturn(_)
            )
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(updatedState.merge))
              )
            )
@@ -1732,7 +1729,7 @@ class MultipleDisposalsTriageController @Inject() (
 
   private def withPersonalRepresentativeDetails(state: JourneyState)(
     f: Option[PersonalRepresentativeDetails] => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     val personalRepresentativeDetails = state.fold(
       PersonalRepresentativeDetails.fromStartingNewDraftReturn,
       { case (fillingOutReturn, _) =>
@@ -1821,7 +1818,7 @@ object MultipleDisposalsTriageController {
     Form(
       mapping(
         "multipleDisposalsTaxYear" -> Forms.number.verifying("error.before.invalid", validate(_))
-      )(TaxYearExchanged.apply)(TaxYearExchanged.unapply)
+      )(TaxYearExchanged.apply)(o => Some(o.year))
     )
   }
 

@@ -41,7 +41,7 @@
   backLink: Call,
   hasCreatedDraftReturn: Boolean,
   isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsCompletionDate"}
 @hasErrors = @{form.hasErrors}

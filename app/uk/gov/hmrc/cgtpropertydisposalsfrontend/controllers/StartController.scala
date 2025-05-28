@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.{BusinessPartnerRecordService, SubscriptionService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -102,7 +102,7 @@ class StartController @Inject() (
       request.sessionData.flatMap(_.needMoreDetailsDetails) match {
         case None          => Future.successful(Redirect(routes.StartController.start()))
         case Some(details) =>
-          updateSession(sessionStore, request)(
+          updateSession(sessionStore, request.toSession)(
             _.copy(journeyType = Some(OnBoarding))
           ).map {
             case Left(e) =>
@@ -254,7 +254,7 @@ class StartController @Inject() (
             ) -> agentsRoutes.AgentAccessController.enterClientsCgtRef()
           )
 
-        updateSession(sessionStore, request)(
+        updateSession(sessionStore, request.sessionData)(
           _.copy(
             journeyStatus = Some(journeyStatusWithRedirect._1),
             userType = Some(UserType.Agent)
@@ -301,13 +301,13 @@ class StartController @Inject() (
   private def handleNonGovernmentGatewayUser(
     nonGovernmentGatewayUser: NonGovernmentGatewayRetrievedUser
   )(implicit
-    request: RequestWithSessionDataAndRetrievedData[_]
+    request: RequestWithSessionDataAndRetrievedData[?]
   ): Future[Result] = {
     logger.warn(
       s"User logged in with unsupported provider: ${nonGovernmentGatewayUser.authProvider}"
     )
 
-    updateSession(sessionStore, request)(
+    updateSession(sessionStore, request.sessionData)(
       _.copy(
         userType = request.authenticatedRequest.userType,
         journeyStatus = Some(NonGovernmentGatewayJourney)
@@ -328,7 +328,7 @@ class StartController @Inject() (
     ggCredId: GGCredId,
     subscribedDetails: Option[SubscribedDetails]
   )(implicit
-    request: RequestWithSessionDataAndRetrievedData[_]
+    request: RequestWithSessionDataAndRetrievedData[?]
   ): Future[Result] =
     (for {
       subscribedDetails                         <-
@@ -353,7 +353,7 @@ class StartController @Inject() (
                             }
 
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.sessionData)(
                _.copy(
                  userType = request.authenticatedRequest.userType,
                  journeyStatus = Some(
@@ -378,7 +378,7 @@ class StartController @Inject() (
     ggCredId: GGCredId,
     ggEmail: Option[Email]
   )(implicit
-    request: RequestWithSessionDataAndRetrievedData[_]
+    request: RequestWithSessionDataAndRetrievedData[?]
   ): Future[Result] = {
     val newSessionData =
       request.sessionData.journeyStatus match {
@@ -388,7 +388,7 @@ class StartController @Inject() (
             .DeterminingIfOrganisationIsTrust(ggCredId, ggEmail, None, None)
       }
 
-    updateSession(sessionStore, request)(
+    updateSession(sessionStore, request.sessionData)(
       _.copy(
         userType = request.authenticatedRequest.userType,
         journeyStatus = Some(newSessionData),
@@ -432,7 +432,7 @@ class StartController @Inject() (
               SubscriptionStatus
                 .TryingToGetIndividualsFootprint(None, None, ggEmail, ggCredId)
 
-            updateSession(sessionStore, request)(s =>
+            updateSession(sessionStore, request.sessionData)(s =>
               s.copy(
                 userType = request.authenticatedRequest.userType,
                 journeyStatus = Some(subscriptionStatus),
@@ -471,7 +471,7 @@ class StartController @Inject() (
     trust: Trust
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionDataAndRetrievedData[_]
+    request: RequestWithSessionDataAndRetrievedData[?]
   ): Future[Result] = {
     val result =
       for {
@@ -591,7 +591,7 @@ class StartController @Inject() (
   }
 
   private def handleSubscriptionMissingData(s: SubscriptionMissingData)(implicit
-    request: RequestWithSessionDataAndRetrievedData[_]
+    request: RequestWithSessionDataAndRetrievedData[?]
   ): Future[Result] =
     SubscriptionDetails(
       s.businessPartnerRecord,
@@ -612,7 +612,7 @@ class StartController @Inject() (
         }
       },
       subscriptionDetails =>
-        updateSession(sessionStore, request)(
+        updateSession(sessionStore, request.sessionData)(
           _.copy(
             userType = request.authenticatedRequest.userType,
             journeyStatus = Some(
@@ -625,7 +625,7 @@ class StartController @Inject() (
 
   private def buildIndividualSubscriptionData(individual: Individual)(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionDataAndRetrievedData[_]
+    request: RequestWithSessionDataAndRetrievedData[?]
   ): Future[Result] = {
     val result = for {
       bprResponse              <- bprService.getBusinessPartnerRecord(
@@ -709,13 +709,13 @@ class StartController @Inject() (
     ggCredId: GGCredId,
     affinityGroup: AffinityGroup
   )(implicit
-    request: RequestWithSessionDataAndRetrievedData[_]
+    request: RequestWithSessionDataAndRetrievedData[?]
   ): EitherT[Future, Error, Unit] =
     EitherT[Future, Error, Unit](
       x.fold(
         {
           case BuildSubscriptionDataError.DataMissing(bpr) =>
-            updateSession(sessionStore, request)(
+            updateSession(sessionStore, request.sessionData)(
               _.copy(
                 journeyStatus = Some(
                   SubscriptionStatus
@@ -732,7 +732,7 @@ class StartController @Inject() (
           case BuildSubscriptionDataError.AlreadySubscribedToCGT(
                 cgtReference
               ) =>
-            updateSession(sessionStore, request)(
+            updateSession(sessionStore, request.sessionData)(
               _.copy(
                 journeyStatus = Some(
                   AlreadySubscribedWithDifferentGGAccount(
@@ -744,7 +744,7 @@ class StartController @Inject() (
             )
 
           case BuildSubscriptionDataError.NewEnrolmentCreatedForMissingEnrolment(subscribedDetails) =>
-            updateSession(sessionStore, request)(
+            updateSession(sessionStore, request.sessionData)(
               _.copy(
                 journeyStatus = Some(
                   NewEnrolmentCreatedForMissingEnrolment(
@@ -757,7 +757,7 @@ class StartController @Inject() (
 
         },
         subscriptionDetails =>
-          updateSession(sessionStore, request)(
+          updateSession(sessionStore, request.sessionData)(
             _.copy(
               journeyStatus = Some(
                 SubscriptionStatus

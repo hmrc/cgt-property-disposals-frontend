@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.bpr
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{NINO, SAUTR, TRN}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.EitherUtils.eitherFormat
@@ -39,5 +38,23 @@ object BusinessPartnerRecordRequest {
     createNewEnrolmentIfMissing: Boolean
   ) extends BusinessPartnerRecordRequest
 
-  implicit val format: OFormat[BusinessPartnerRecordRequest] = derived.oformat()
+  implicit val trustFormat: OFormat[TrustBusinessPartnerRecordRequest]           = Json.format[TrustBusinessPartnerRecordRequest]
+  implicit val individualFormat: OFormat[IndividualBusinessPartnerRecordRequest] =
+    Json.format[IndividualBusinessPartnerRecordRequest]
+
+  implicit val format: OFormat[BusinessPartnerRecordRequest] = new OFormat[BusinessPartnerRecordRequest] {
+    override def reads(json: JsValue): JsResult[BusinessPartnerRecordRequest] =
+      (json \ "IndividualBusinessPartnerRecordRequest", json \ "TrustBusinessPartnerRecordRequest") match {
+        case (JsDefined(individualJson), _) => individualJson.validate[IndividualBusinessPartnerRecordRequest]
+        case (_, JsDefined(trustJson))      => trustJson.validate[TrustBusinessPartnerRecordRequest]
+        case _                              => JsError("Could not determine BusinessPartnerRecordRequest subtype from JSON")
+      }
+
+    override def writes(bpr: BusinessPartnerRecordRequest): JsObject = bpr match {
+      case i: IndividualBusinessPartnerRecordRequest =>
+        Json.obj("IndividualBusinessPartnerRecordRequest" -> Json.toJson(i)(individualFormat))
+      case t: TrustBusinessPartnerRecordRequest      =>
+        Json.obj("TrustBusinessPartnerRecordRequest" -> Json.toJson(t)(trustFormat))
+    }
+  }
 }

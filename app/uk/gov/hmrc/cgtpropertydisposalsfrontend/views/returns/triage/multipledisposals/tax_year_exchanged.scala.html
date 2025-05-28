@@ -41,7 +41,7 @@
     hasCreatedDraftReturn: Boolean,
     isAmend: Boolean,
     availableTaxYears: List[Int]
-)(implicit request: RequestWithSessionData[_], messages:Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages:Messages, viewConfig: ViewConfig)
 
 @key = @{"multipleDisposalsTaxYear"}
 @inPageTitle = @{messages(s"$key.title")}

@@ -34,11 +34,11 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscriptio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UnsuccessfulNameMatchAttempts.NameMatchDetails.IndividualSautrNameMatchDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.BusinessPartnerRecordGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameMatchGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, GGCredId, SAUTR}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -85,10 +85,10 @@ class InsufficientConfidenceLevelControllerSpec
       mockBprNameMatchService
         .getNumberOfUnsuccessfulAttempts[IndividualSautrNameMatchDetails](
           _: GGCredId
-        )(
+        )(using
           _: Reads[IndividualSautrNameMatchDetails],
           _: HeaderCarrier,
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(ggCredId, *, *, *)
@@ -114,7 +114,7 @@ class InsufficientConfidenceLevelControllerSpec
           _: Lang
         )(
           _: HeaderCarrier,
-          _: Request[_]
+          _: Request[?]
         )
       )
       .expects(
@@ -204,7 +204,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveNINOSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
@@ -502,7 +502,7 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.doYouHaveSaUtrSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
@@ -820,13 +820,13 @@ class InsufficientConfidenceLevelControllerSpec
 
       def performAction(formData: (String, String)*): Future[Result] =
         controller.enterSautrAndNameSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withCSRFToken.withMethod("POST")
         )
 
       behave like commonBehaviour(() => performAction())
 
       behave like nameFormValidationTests(
-        data => performAction(data :+ ("saUtr" -> validSautr.value): _*),
+        data => performAction(data :+ ("saUtr" -> validSautr.value)*),
         () =>
           inSequence {
             mockAuthWithNoRetrievals()

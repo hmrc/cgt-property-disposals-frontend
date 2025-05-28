@@ -17,21 +17,29 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait UserType extends Product with Serializable
 
 object UserType {
 
-  final case object Individual extends UserType
-  final case object Organisation extends UserType
-  final case object NonGovernmentGatewayUser extends UserType
-  final case object Agent extends UserType
+  case object Individual extends UserType
+  case object Organisation extends UserType
+  case object NonGovernmentGatewayUser extends UserType
+  case object Agent extends UserType
 
   implicit val eq: Eq[UserType] = Eq.fromUniversalEquals
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[UserType] = derived.oformat()
+  implicit val format: Format[UserType] = new Format[UserType] {
+    override def reads(json: JsValue): JsResult[UserType] = json match {
+      case JsString("Individual")               => JsSuccess(Individual)
+      case JsString("Organisation")             => JsSuccess(Organisation)
+      case JsString("NonGovernmentGatewayUser") => JsSuccess(NonGovernmentGatewayUser)
+      case JsString("Agent")                    => JsSuccess(Agent)
+      case _                                    => JsError("Invalid user type")
+    }
+
+    override def writes(o: UserType): JsValue = JsString(o.toString)
+  }
 
 }

@@ -24,10 +24,11 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes.{AmendReturnController => amendRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
@@ -37,7 +38,7 @@ import java.time.{Clock, LocalDate}
 import java.util.UUID
 
 trait StartingToAmendToFillingOutReturnSpecBehaviour {
-  this: ControllerSpec with SessionSupport with AuthSupport with MockFactory =>
+  this: ControllerSpec & SessionSupport & AuthSupport & MockFactory =>
 
   def amendReturnToFillingOutReturnSpecBehaviour(
     performAction: Action[AnyContent],
@@ -77,7 +78,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(SessionData.empty.copy(journeyStatus = Some(startingToAmend)))
-          (mockUUIDGenerator.nextId _).expects().returning(expectedDraftReturn.id)
+          (() => mockUUIDGenerator.nextId()).expects().returning(expectedDraftReturn.id)
           mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(Right(()))
         }
 
@@ -219,7 +220,7 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
         inSequence {
           mockAuthWithNoRetrievals()
           mockGetSession(SessionData.empty.copy(journeyStatus = Some(startingToAmend)))
-          (mockUUIDGenerator.nextId _).expects().returning(draftReturn.id)
+          (() => mockUUIDGenerator.nextId()).expects().returning(draftReturn.id)
           mockStoreSession(SessionData.empty.copy(journeyStatus = Some(fillingOutReturn)))(Left(Error("")))
         }
 

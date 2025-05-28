@@ -43,7 +43,7 @@
     representativeType: Option[RepresentativeType],
     dateOfDeath: Option[DateOfDeath],
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "singleMixedUseDisposalsAcquisitionPrice" }
 @isAgent = @{ request.userType.contains(UserType.Agent) }

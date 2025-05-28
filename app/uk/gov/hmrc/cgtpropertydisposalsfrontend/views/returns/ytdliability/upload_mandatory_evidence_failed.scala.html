@@ -26,7 +26,7 @@
         formWrapper: FormWithCSRF
 )
 
-@()(implicit request:RequestWithSessionData[_], messages:Messages)
+@()(implicit request:RequestWithSessionData[?], messages:Messages)
 
 @key = @{"mandatoryEvidence.failed"}
 @title = @{messages(s"$key.title")}

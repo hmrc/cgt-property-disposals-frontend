@@ -56,7 +56,7 @@ class SubscriptionChangeContactNameController @Inject() (
   override val isSubscribedJourney: Boolean = false
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, SubscriptionReady)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: SubscriptionReady)) => Right(sessionData -> s)
@@ -68,7 +68,7 @@ class SubscriptionChangeContactNameController @Inject() (
     contactName: ContactName
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, SubscriptionReady] = {
     auditService.sendEvent(
       "subscriptionContactNameChanged",

@@ -33,7 +33,7 @@ import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with SessionUpdates with Logging =>
+trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController & SessionUpdates & Logging =>
 
   def convertFromStartingAmendToFillingOutReturn(
     startingToAmendReturn: StartingToAmendReturn,
@@ -41,10 +41,10 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
     errorHandler: ErrorHandler,
     uuidGenerator: UUIDGenerator,
     redirectUrlOverride: Option[String] = None
-  )(implicit request: RequestWithSessionData[_], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?], hc: HeaderCarrier, ec: ExecutionContext): Future[Result] = {
     val fillingOutReturn = toFillingOutReturn(startingToAmendReturn, uuidGenerator)
 
-    updateSession(sessionStore, request)(
+    updateSession(sessionStore, request.toSession)(
       _.copy(
         journeyStatus = Some(fillingOutReturn)
       )
@@ -65,11 +65,11 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController with
     sessionStore: SessionStore,
     errorHandler: ErrorHandler
   )(implicit
-    request: RequestWithSessionData[_],
+    request: RequestWithSessionData[?],
     hc: HeaderCarrier,
     ec: ExecutionContext
   ): Future[Result] =
-    updateSession(sessionStore, request)(
+    updateSession(sessionStore, request.toSession)(
       _.copy(journeyStatus = Some(startingToAmendReturn.copy(unmetDependencyFieldUrl = Some(request.uri))))
     ).map {
       case Left(e) =>

@@ -33,7 +33,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Subscribed
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.Email
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.ManagingSubscription.ChangingAccountEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedUpdateDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
@@ -45,6 +45,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+
 class SubscribedChangeEmailControllerSpec
     extends EmailControllerSpec[ChangingAccountEmail]
     with ScalaCheckDrivenPropertyChecks
@@ -61,8 +62,7 @@ class SubscribedChangeEmailControllerSpec
   override val validVerificationCompleteJourneyStatus: ChangingAccountEmail =
     validJourneyStatus
 
-  override lazy val controller: SubscribedChangeEmailController =
-    instanceOf[SubscribedChangeEmailController]
+  override lazy val controller: SubscribedChangeEmailController = instanceOf[SubscribedChangeEmailController]
 
   override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
@@ -92,7 +92,7 @@ class SubscribedChangeEmailControllerSpec
   }
 
   override val mockUpdateEmail: Option[(ChangingAccountEmail, ChangingAccountEmail, Either[Error, Unit]) => Unit] =
-    Some({
+    Some {
       case (
             oldDetails: ChangingAccountEmail,
             newDetails: ChangingAccountEmail,
@@ -104,9 +104,9 @@ class SubscribedChangeEmailControllerSpec
             oldDetails.journey.subscribedDetails
           )
         )(r)
-    })
+    }
 
-  implicit lazy val messagesApi: MessagesApi = controller.messagesApi
+  implicit val messagesApi: MessagesApi = controller.messagesApi
 
   def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
     redirectToStartWhenInvalidJourney(
@@ -133,7 +133,7 @@ class SubscribedChangeEmailControllerSpec
 
       def performAction(data: (String, String)*): Future[Result] =
         controller.enterEmailSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -149,8 +149,7 @@ class SubscribedChangeEmailControllerSpec
 
     "handling requests to display the check your inbox page" must {
 
-      def performAction(): Future[Result] =
-        controller.checkYourInbox()(FakeRequest())
+      def performAction(): Future[Result] = controller.checkYourInbox()(FakeRequest())
 
       behave like redirectToStartBehaviour(() => performAction())
 

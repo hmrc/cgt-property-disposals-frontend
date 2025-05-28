@@ -17,14 +17,12 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MixedUsePropertyDetailsAnswers.{CompleteMixedUsePropertyDetailsAnswers, IncompleteMixedUsePropertyDetailsAnswers}
 
-object SingleMixedUseDetailsAnswersGen extends GenUtils {
+object SingleMixedUseDetailsAnswersGen extends GenUtils:
 
-  implicit val incompleteMixedUsePropertyDetailsAnswers: Gen[IncompleteMixedUsePropertyDetailsAnswers] =
-    gen[IncompleteMixedUsePropertyDetailsAnswers]
-
-  implicit val completeMixedUsePropertyDetailsAnswers: Gen[CompleteMixedUsePropertyDetailsAnswers] =
-    gen[CompleteMixedUsePropertyDetailsAnswers]
-
-}
+  given Gen[IncompleteMixedUsePropertyDetailsAnswers] = gen[IncompleteMixedUsePropertyDetailsAnswers]
+  given Gen[CompleteMixedUsePropertyDetailsAnswers]   = gen[CompleteMixedUsePropertyDetailsAnswers]

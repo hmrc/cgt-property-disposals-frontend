@@ -58,7 +58,12 @@ object UnsuccessfulNameMatchAttempts {
     implicit val individualRepresenteeNameMatchDetailsFormat: OFormat[IndividualRepresenteeNameMatchDetails] =
       Json.format[IndividualRepresenteeNameMatchDetails]
 
+    implicit val nameMatchDetailsFormat: OFormat[NameMatchDetails] = Json.format[NameMatchDetails]
   }
+
+  implicit def unsuccessfulNameMatchAttemptsFormat[A <: NameMatchDetails : OFormat]
+    : OFormat[UnsuccessfulNameMatchAttempts[A]] = Json.format[UnsuccessfulNameMatchAttempts[A]]
+
   implicit def unsuccessfulNameMatchAttemptsReads[A <: NameMatchDetails : Reads]
     : Reads[UnsuccessfulNameMatchAttempts[A]] =
     Json.reads[UnsuccessfulNameMatchAttempts[A]]

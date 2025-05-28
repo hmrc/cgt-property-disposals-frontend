@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExamplePropertyDetailsAnswers.{CompleteExamplePropertyDetailsAnswers, IncompleteExamplePropertyDetailsAnswers}
 
@@ -28,7 +28,7 @@ class ExamplePropertyDetailsAnswersSpec extends AnyWordSpec with Matchers with S
   "IncompleteExamplePropertyDetailsAnswers" must {
 
     "have a method which converts incomplete answers to complete answers" in {
-      forAll { completeAnswers: CompleteExamplePropertyDetailsAnswers =>
+      forAll { (completeAnswers: CompleteExamplePropertyDetailsAnswers) =>
         IncompleteExamplePropertyDetailsAnswers.fromCompleteAnswers(
           completeAnswers
         ) shouldBe IncompleteExamplePropertyDetailsAnswers(

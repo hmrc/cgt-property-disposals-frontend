@@ -30,7 +30,7 @@ cyaRow: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_row_g
 cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_change_govuk,
 )
 
-@(answers: AmountInPence, isATrust: Boolean, representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages)
+@(answers: AmountInPence, isATrust: Boolean, representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[?], messages: Messages)
 @isAgent = @{request.userType.contains(UserType.Agent)}
 
 @userKey = @{

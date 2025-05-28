@@ -17,10 +17,12 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend
 
 import play.api.mvc.Result
-
 import scala.concurrent.Future
+import scala.language.implicitConversions
 
 package object util {
+
+  given Conversion[Result, Future[Result]] = (r: Result) => Future.successful(r)
 
   implicit def toFuture: Result => Future[Result] = r => Future.successful(r)
 

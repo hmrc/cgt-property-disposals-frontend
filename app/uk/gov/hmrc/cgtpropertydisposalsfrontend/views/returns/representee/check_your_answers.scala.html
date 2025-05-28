@@ -35,7 +35,7 @@
     answers: CompleteRepresenteeAnswers,
     representativeType: RepresentativeType,
     backLink: Call
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 
 @title = @{messages("representee.cya.title")}

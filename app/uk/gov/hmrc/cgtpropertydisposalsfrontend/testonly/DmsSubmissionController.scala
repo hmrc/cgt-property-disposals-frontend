@@ -42,7 +42,7 @@ class DmsSubmissionController @Inject() (
     with SessionUpdates
     with Logging {
 
-  private def withSubscribedUser(request: RequestWithSessionData[_])(
+  private def withSubscribedUser(request: RequestWithSessionData[?])(
     f: (SessionData, Subscribed) => Future[Result]
   ): Future[Result] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {

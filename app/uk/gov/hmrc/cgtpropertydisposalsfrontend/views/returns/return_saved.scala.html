@@ -28,7 +28,7 @@ govukButton: GovukButton,
 govukWarningText: GovukWarningText
 )
 
-@(draftReturn: DraftReturn, isATrust: Boolean)(implicit request: RequestWithSessionData[_], messages:Messages)
+@(draftReturn: DraftReturn, isATrust: Boolean)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{"draftReturnSaved"}
 

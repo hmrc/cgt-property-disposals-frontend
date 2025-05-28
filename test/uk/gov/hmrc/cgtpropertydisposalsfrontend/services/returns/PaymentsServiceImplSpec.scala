@@ -68,7 +68,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
   val service = new PaymentsServiceImpl(mockConnector, stub[AuditService])
 
   implicit val hc: HeaderCarrier   = HeaderCarrier()
-  implicit val request: Request[_] = FakeRequest()
+  implicit val request: Request[?] = FakeRequest()
 
   private val emptyJsonBody = "{}"
 

@@ -33,7 +33,7 @@
 @(
         answers: CompleteMixedUsePropertyDetailsAnswers,
         representativeType: Option[RepresentativeType],
-        dateOfDeath: Option[DateOfDeath])(implicit request: RequestWithSessionData[_], messages:Messages)
+        dateOfDeath: Option[DateOfDeath])(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @title = @{messages("singleMixedUse.cya.title")}
 

@@ -36,7 +36,7 @@
    isATrust: Boolean,
    representeeAnswers: Option[RepresenteeAnswers],
    firstTimeVisiting: Boolean,
-)(implicit request:RequestWithSessionData[_], messages:Messages)
+)(implicit request:RequestWithSessionData[?], messages:Messages)
 
 @title = @{messages("multipleDisposals.triage.cya.title")}
 

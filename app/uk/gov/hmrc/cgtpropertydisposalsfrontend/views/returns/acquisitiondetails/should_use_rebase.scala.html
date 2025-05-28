@@ -45,7 +45,7 @@
         isAmend: Boolean,
         isATrust: Boolean,
         wasAUkResident: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{ "shouldUseRebase" }
 @assetTypeKey = @{assetType match {

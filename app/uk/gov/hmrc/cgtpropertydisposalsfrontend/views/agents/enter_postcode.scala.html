@@ -31,7 +31,7 @@
         govukErrorSummary: GovukErrorSummary,
 )
 
-@(form: Form[Postcode])(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[Postcode])(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"postcode"}
 @title = @{messages("agent.enter-client-postcode.title")}
@@ -39,9 +39,8 @@
 
 @layout(title, hasErrors = hasErrors, backLinkUrl = Some(routes.AgentAccessController.enterClientsCgtRef().url)) {
 
-  @{
-    if(form.hasGlobalErrors) {
-      govukErrorSummary(ErrorSummary(
+    @if(form.hasGlobalErrors) {
+      @govukErrorSummary(ErrorSummary(
         title = Text(messages("error.summary.heading")),
         attributes = Map("data-spec" -> "errorSummaryDisplay"),
         errorList = form.globalErrors.map { error =>
@@ -52,9 +51,8 @@
         }
       ))
     } else if (form.hasErrors) {
-      errorSummary(form)
+      @errorSummary(form)
     }
-  }
 
  @formWrapper(routes.AgentAccessController.enterClientsPostcodeSubmit(), Symbol("novalidate") -> "novalidate") {
   @govukInput(Input(

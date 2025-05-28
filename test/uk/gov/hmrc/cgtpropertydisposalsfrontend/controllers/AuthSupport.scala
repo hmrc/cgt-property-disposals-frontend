@@ -17,11 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import play.api.Configuration
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.authorise.{EmptyPredicate, Predicate}
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.{Credentials, EmptyRetrieval, Retrieval, ~}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.EnrolmentConfig.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.AuthenticatedActionWithRetrievedData
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.SAUTR
@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthSupport {
-  this: ControllerSpec with SessionSupport =>
+  this: ControllerSpec & SessionSupport =>
 
   val mockAuthConnector: AuthConnector = mock[AuthConnector]
 
@@ -73,14 +73,12 @@ trait AuthSupport {
     retrievedCredentials: Option[Credentials]
   ): Unit =
     mockAuth(EmptyPredicate, expectedRetrievals)(
-      Future successful (
-        new ~(retrievedConfidenceLevel, retrievedAffinityGroup) and
-          retrievedNino and
-          retrievedSautr and
-          retrievedEmail and
-          Enrolments(retrievedEnrolments) and
-          retrievedCredentials
-      )
+      Future successful new ~(retrievedConfidenceLevel, retrievedAffinityGroup)
+        .and(retrievedNino)
+        .and(retrievedSautr)
+        .and(retrievedEmail)
+        .and(Enrolments(retrievedEnrolments))
+        .and(retrievedCredentials)
     )
 
   def mockAuthWithCl200AndWithAllIndividualRetrievals(

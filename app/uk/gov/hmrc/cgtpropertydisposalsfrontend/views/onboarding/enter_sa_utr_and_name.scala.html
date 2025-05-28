@@ -30,7 +30,7 @@
  viewHelpers: ViewHelpers
 )
 
-@(form: Form[IndividualSautrNameMatchDetails], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[IndividualSautrNameMatchDetails], backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("enterSaUtr.title")}
 @hasErrors = @{form.hasErrors || form.hasGlobalErrors}
@@ -40,20 +40,18 @@
 
 @layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
- @{
-   if(form.hasGlobalErrors) {
-    viewHelpers.govukErrorSummary(ErrorSummary(
-     errorList = form.globalErrors.map { error =>
-      ErrorLink(
-       href = Some(s"#$saUtrKey"),
-       content = Text(messages(s"${error.message}"))
-      )
-     }
-    ))
-   } else if (form.hasErrors) {
-    errorSummary(form)
-   }
- }
+@if(form.hasGlobalErrors) {
+ @viewHelpers.govukErrorSummary(ErrorSummary(
+  errorList = form.globalErrors.map { error =>
+   ErrorLink(
+    href = Some(s"#$saUtrKey"),
+    content = Text(messages(s"${error.message}"))
+   )
+  }
+ ))
+} else if (form.hasErrors) {
+ @errorSummary(form)
+}
 
  <span class="govuk-caption-xl">@messages("subscription.caption")</span>
  <h1 class="govuk-heading-xl">@title</h1>

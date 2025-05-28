@@ -37,7 +37,7 @@
         govukInput: GovukInput
 )
 
-@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType], isAmend: Boolean)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[UkAddress], backLink: Call, submit: Call, enterPostcode: Call, addressJourneyType: AddressJourneyType, isATrust: Boolean, representativeType: Option[RepresentativeType], isAmend: Boolean)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"address"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

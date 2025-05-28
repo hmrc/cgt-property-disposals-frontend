@@ -17,8 +17,8 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability
 
 import cats.data.EitherT
-import cats.instances.future._
-import cats.syntax.order._
+import cats.instances.future.*
+import cats.syntax.order.*
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
@@ -39,31 +39,32 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Country}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalMethodGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalMethodGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CalculatedTaxDue.GainCalculatedTaxDue
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
@@ -75,10 +76,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{CompleteReturnWithSummary, Error, SessionData, TaxYear, TimeUtils, UserType}
@@ -848,7 +848,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the estimated income page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.estimatedIncomeSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -872,7 +872,7 @@ class YearToDateLiabilityControllerSpec
           AmountOfMoneyErrorScenarios
             .amountOfMoneyErrorScenarios("estimatedIncome")
             .foreach { scenario =>
-              testFormError(scenario.formData: _*)(
+              testFormError(scenario.formData*)(
                 scenario.expectedErrorMessageKey
               )("estimatedIncome.title")(
                 performAction
@@ -1257,7 +1257,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the personal allowance page" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.personalAllowanceSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -1348,7 +1348,7 @@ class YearToDateLiabilityControllerSpec
             )
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
-                testFormError(scenario.formData: _*)(
+                testFormError(scenario.formData*)(
                   scenario.expectedErrorMessageKey,
                   args.getOrElse(scenario.expectedErrorMessageKey, Nil)
                 )(
@@ -1998,7 +1998,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the has estimated details page" when {
       def performAction(data: (String, String)*): Future[Result] =
         controller.hasEstimatedDetailsSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like markUnmetDependencyBehaviour(controller.hasEstimatedDetailsSubmit())
@@ -2059,7 +2059,7 @@ class YearToDateLiabilityControllerSpec
           )._1
 
           def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-            testFormError(data: _*)(expectedErrorMessageKey)(
+            testFormError(data*)(expectedErrorMessageKey)(
               "hasEstimatedDetails.title"
             )(performAction, currentSession)
 
@@ -2220,7 +2220,7 @@ class YearToDateLiabilityControllerSpec
           )._1
 
           def test(data: (String, String)*)(expectedErrorMessageKey: String): Unit =
-            testFormError(data: _*)(expectedErrorMessageKey)(
+            testFormError(data*)(expectedErrorMessageKey)(
               "hasEstimatedDetails.title"
             )(performAction, currentSession)
 
@@ -2810,7 +2810,7 @@ class YearToDateLiabilityControllerSpec
     "handling submitted answers to the tax due page for a calculated journey" must {
       def performAction(data: (String, String)*): Future[Result] =
         controller.taxDueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(data: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(data*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -2963,7 +2963,7 @@ class YearToDateLiabilityControllerSpec
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
                 val formData = ("agreeWithCalculation" -> "1") :: scenario.formData
-                testFormError(formData: _*)(
+                testFormError(formData*)(
                   scenario.expectedErrorMessageKey
                 )("taxDue.title")(
                   performAction,
@@ -3339,7 +3339,7 @@ class YearToDateLiabilityControllerSpec
 
         "show the page" when {
           "the section is complete" in {
-            forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
+            forAll { (completeAnswers: CompleteCalculatedYTDAnswers) =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3367,7 +3367,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user is on an amend journey where the estimates question should be hidden" in {
-            forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
+            forAll { (completeAnswers: CompleteCalculatedYTDAnswers) =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3410,7 +3410,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user is period of admin on an amend journey where the income and allowance question should be hidden" in {
-            forAll { completeAnswers: CompleteCalculatedYTDAnswers =>
+            forAll { (completeAnswers: CompleteCalculatedYTDAnswers) =>
               inSequence {
                 mockAuthWithNoRetrievals()
                 mockGetSession(
@@ -3814,7 +3814,7 @@ class YearToDateLiabilityControllerSpec
           }
 
           "the user is on an amend journey where the estimates question should be hidden" in {
-            forAll { completeAnswers: CompleteNonCalculatedYTDAnswers =>
+            forAll { (completeAnswers: CompleteNonCalculatedYTDAnswers) =>
               val (session, fillingOutReturn, _) =
                 sessionWithSingleDisposalState(
                   Some(completeAnswers),
@@ -4886,7 +4886,7 @@ class YearToDateLiabilityControllerSpec
     "handling submits on the taxable gain or net loss page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.taxableGainOrLossSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -4930,7 +4930,7 @@ class YearToDateLiabilityControllerSpec
           )._1
 
           def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-            testFormError(data: _*)(
+            testFormError(data*)(
               expectedErrorKey
             )("taxableGainOrLoss.pageTitle")(performAction, currentSession)
 
@@ -4944,7 +4944,7 @@ class YearToDateLiabilityControllerSpec
               .foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = ("taxableGainOrLoss" -> "0") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey)
+                  test(data*)(scenario.expectedErrorMessageKey)
                 }
               }
           }
@@ -4962,7 +4962,7 @@ class YearToDateLiabilityControllerSpec
               .foreach { scenario =>
                 withClue(s"For $scenario: ") {
                   val data = ("taxableGainOrLoss" -> "1") :: scenario.formData
-                  test(data: _*)(scenario.expectedErrorMessageKey)
+                  test(data*)(scenario.expectedErrorMessageKey)
                 }
               }
           }
@@ -4979,7 +4979,7 @@ class YearToDateLiabilityControllerSpec
           def test(
             state: (SessionData, FillingOutReturn)
           )(data: (String, String)*)(expectedTitleKey: String, expectedErrorKey: String): Unit =
-            testFormError(data: _*)(
+            testFormError(data*)(
               expectedErrorKey
             )(expectedTitleKey)(
               performAction,
@@ -5039,7 +5039,7 @@ class YearToDateLiabilityControllerSpec
                 .foreach { scenario =>
                   withClue(s"For user key '$userKey' and $scenario: ") {
                     val data = ("taxableGainOrLoss" -> "0") :: scenario.formData
-                    test(session)(data: _*)(
+                    test(session)(data*)(
                       s"taxableGainOrLoss$userKey.furtherReturn.title",
                       scenario.expectedErrorMessageKey
                     )
@@ -5069,7 +5069,7 @@ class YearToDateLiabilityControllerSpec
                 .foreach { scenario =>
                   withClue(s"For user key '$userKey' and $scenario: ") {
                     val data = ("taxableGainOrLoss" -> "1") :: scenario.formData
-                    test(session)(data: _*)(
+                    test(session)(data*)(
                       s"taxableGainOrLoss$userKey.furtherReturn.title",
                       scenario.expectedErrorMessageKey
                     )
@@ -5564,7 +5564,7 @@ class YearToDateLiabilityControllerSpec
                 doc
                   .select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd")
                   .text() shouldBe s"- ${MoneyUtils
-                  .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
+                    .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
                 doc
                   .select("#main-content dl.govuk-summary-list > div.sum-total > dd")
@@ -5673,7 +5673,7 @@ class YearToDateLiabilityControllerSpec
               performAction(),
               messageFromMessageKey(s"nonCalculatedTaxDue.furtherReturn.enterTaxDue.title"),
               { doc =>
-                doc.select("#nonCalculatedTaxDue-hint") contains expectedP1Key
+                doc.select("#nonCalculatedTaxDue-hint").contains(expectedP1Key)
                 doc
                   .select("#main-content form")
                   .attr("action") shouldBe routes.YearToDateLiabilityController
@@ -5800,7 +5800,7 @@ class YearToDateLiabilityControllerSpec
                   .formatAmountOfMoneyWithPoundSign(yearToDateLiability.inPounds())
 
                 doc.select("#main-content dl.govuk-summary-list > div:nth-child(2) > dd").text() shouldBe s"${MoneyUtils
-                  .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
+                    .formatAmountOfMoneyWithPoundSign(previousYearToDateLiability.inPounds())}"
 
                 doc.select("#main-content dl.govuk-summary-list > div.sum-total > dd").text() shouldBe formattedTaxDue
 
@@ -5883,7 +5883,7 @@ class YearToDateLiabilityControllerSpec
               messageFromMessageKey(s"nonCalculatedTaxDue.amendReturn.enterTaxDue$userKey.title"),
               { doc =>
                 doc.select("#back, .govuk-back-link").attr("href") shouldBe expectedBackLink.url
-                doc.select("#nonCalculatedTaxDue-form-hint") contains expectedP1Key
+                doc.select("#nonCalculatedTaxDue-form-hint").contains(expectedP1Key)
                 doc
                   .select("#content > article > form, #main-content form")
                   .attr("action")                                  shouldBe routes.YearToDateLiabilityController
@@ -5987,7 +5987,7 @@ class YearToDateLiabilityControllerSpec
     "handling submits on the non calculated enter tax due page" must {
       def performAction(formData: (String, String)*): Future[Result] =
         controller.nonCalculatedEnterTaxDueSubmit()(
-          FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST")
+          FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST")
         )
 
       behave like redirectToStartBehaviour(() => performAction())
@@ -6039,7 +6039,7 @@ class YearToDateLiabilityControllerSpec
         )._1
 
         def test(data: (String, String)*)(expectedErrorKey: String): Unit =
-          testFormError(data: _*)(
+          testFormError(data*)(
             expectedErrorKey
           )("nonCalculatedTaxDue.title")(performAction, currentSession)
 
@@ -6048,7 +6048,7 @@ class YearToDateLiabilityControllerSpec
             .amountOfMoneyErrorScenarios("nonCalculatedTaxDue")
             .foreach { scenario =>
               withClue(s"For $scenario: ") {
-                test(scenario.formData: _*)(scenario.expectedErrorMessageKey)
+                test(scenario.formData*)(scenario.expectedErrorMessageKey)
               }
             }
         }
@@ -6512,8 +6512,8 @@ class YearToDateLiabilityControllerSpec
             wasUkResident = sample[Boolean]
           )
 
-        val fileName       = "file"
-        val callback       = sample[UpscanSuccess]
+        val fileName = "file"
+        val callback = sample[UpscanSuccess]
           .copy(uploadDetails = Map("fileName" -> fileName))
 
         val newAnswers     = answers.copy(
@@ -7752,7 +7752,7 @@ class YearToDateLiabilityControllerSpec
 
     "handling submits on the year to date liability page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.yearToDateLiabilitySubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
+        controller.yearToDateLiabilitySubmit()(FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST"))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -7831,10 +7831,10 @@ class YearToDateLiabilityControllerSpec
           expectedTitleKey: String,
           expectedTitleArgs: String*
         )(expectedErrorKey: String, expectedErrorArgs: String*): Unit =
-          testFormError(data: _*)(
+          testFormError(data*)(
             expectedErrorKey,
             expectedErrorArgs
-          )(expectedTitleKey, expectedTitleArgs: _*)(
+          )(expectedTitleKey, expectedTitleArgs*)(
             performAction,
             sessionData,
             _ => mockFurtherReturnCalculationEligibilityCheck(fillingOutReturn)(Right(sample[Ineligible]))
@@ -7892,7 +7892,7 @@ class YearToDateLiabilityControllerSpec
               .filter(s => s.input.exists(_.nonEmpty))
               .foreach { scenario =>
                 withClue(s"For user key '$userKey' and $scenario: ") {
-                  test(session._1, session._2)(scenario.formData: _*)(
+                  test(session._1, session._2)(scenario.formData*)(
                     s"yearToDateLiability$userKey.title",
                     taxYearStart,
                     taxYearEnd
@@ -8282,7 +8282,7 @@ class YearToDateLiabilityControllerSpec
 
     "handling submits on the repayment page" must {
       def performAction(formData: (String, String)*): Future[Result] =
-        controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData: _*).withMethod("POST"))
+        controller.repaymentSubmit()(FakeRequest().withFormUrlEncodedBody(formData*).withMethod("POST"))
 
       behave like redirectToStartBehaviour(() => performAction())
 
@@ -8340,7 +8340,7 @@ class YearToDateLiabilityControllerSpec
         )(
           data: (String, String)*
         )(expectedTitleKey: String, expectedErrorKey: String): Unit =
-          testFormError(data: _*)(
+          testFormError(data*)(
             expectedErrorKey
           )(expectedTitleKey)(performAction, sessionData)
 
@@ -8891,13 +8891,13 @@ class YearToDateLiabilityControllerSpec
     }
     checkPageIsDisplayed(
       performAction(data),
-      messageFromMessageKey(pageTitleKey, titleArgs: _*),
+      messageFromMessageKey(pageTitleKey, titleArgs*),
       { doc =>
         doc
           .select("[data-spec='errorSummaryDisplay'] a")
           .text() shouldBe messageFromMessageKey(
           expectedErrorMessageKey,
-          errorArgs: _*
+          errorArgs*
         )
         doc.title() should startWith("Error:")
       },

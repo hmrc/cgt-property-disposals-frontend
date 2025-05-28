@@ -42,7 +42,7 @@ class TestOnlyDraftReturnsConnectorImpl @Inject() (
   implicit val hc: HeaderCarrier = HeaderCarrier()
   private val baseUrl            = servicesConfig.baseUrl("cgt-property-disposals")
 
-  def deleteDraftReturnsUrl(cgtReference: String) =
+  def deleteDraftReturnsUrl(cgtReference: String): String =
     s"$baseUrl/test-only/cgt-property-disposals/draftReturn/$cgtReference"
 
   def deleteDraftReturn(

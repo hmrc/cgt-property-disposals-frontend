@@ -43,7 +43,7 @@
     representativeType: Option[RepresentativeType],
     assetType: AssetType,
     isAmend: Boolean
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @key = @{"acquisitionMethod"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

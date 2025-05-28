@@ -17,8 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 
 sealed trait NumberOfProperties extends Product with Serializable
 
@@ -30,7 +29,17 @@ object NumberOfProperties {
 
   implicit val eq: Eq[NumberOfProperties] = Eq.fromUniversalEquals
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[NumberOfProperties] = derived.oformat()
+  implicit val format: Format[NumberOfProperties] = new Format[NumberOfProperties] {
+    override def reads(json: JsValue): JsResult[NumberOfProperties] = json match {
+      case JsString("One")         => JsSuccess(One)
+      case JsString("MoreThanOne") => JsSuccess(MoreThanOne)
+      case _                       => JsError("Invalid number of properties")
+    }
+
+    override def writes(o: NumberOfProperties): JsValue = o match {
+      case One         => JsString("One")
+      case MoreThanOne => JsString("MoreThanOne")
+    }
+  }
 
 }

@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.prop.Tables.Table
@@ -26,15 +26,15 @@ import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.draftReturnGen
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen.{taxableGainOrLossCalculationGen, taxableGainOrLossCalculationRequestGen, yearToDateLiabilityCalculationGen, yearToDateLiabilityCalculationRequestGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnAPIGen.{calculateCgtTaxDueRequestGen, listReturnsResponseGen, submitReturnRequestGen, submitReturnResponseGen}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.taxYearGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.calculatedTaxDueGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse, taxYearResponseFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
@@ -232,7 +232,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
 
           result shouldBe
             Left(Error(s"GET to http://localhost:$wireMockPort/returns/CGT12345678/${date.format(dateFormatter)}/${date
-              .format(dateFormatter)} came back with with status $status"))
+                .format(dateFormatter)} came back with with status $status"))
         }
       }
     }

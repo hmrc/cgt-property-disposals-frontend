@@ -37,7 +37,7 @@
         representativeType: Option[RepresentativeType],
         wasUkResident: Boolean,
         hideEstimatesQuestion: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 
 @title = @{messages("ytdLiability.cya.title")}

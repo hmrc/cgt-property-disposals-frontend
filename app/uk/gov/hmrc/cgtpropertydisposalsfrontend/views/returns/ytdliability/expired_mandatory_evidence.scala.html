@@ -27,7 +27,7 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk
 )
 
-@(expired : MandatoryEvidence, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[_], messages: Messages)
+@(expired : MandatoryEvidence, isFurtherOrAmendReturn: Option[Boolean])(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{ "mandatoryEvidenceExpired" }
 @title = @{ messages(s"$key.title") }

@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding
 
-import julienrf.json.derived
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.NeedMoreDetailsDetails.AffinityGroup
 
 final case class NeedMoreDetailsDetails(
@@ -35,9 +34,18 @@ object NeedMoreDetailsDetails {
 
     case object Organisation extends AffinityGroup
 
-    @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-    implicit val format: OFormat[AffinityGroup] = derived.oformat()
+    implicit val format: Format[AffinityGroup] = new Format[AffinityGroup] {
+      override def reads(json: JsValue): JsResult[AffinityGroup] = json match {
+        case JsString("Individual")   => JsSuccess(Individual)
+        case JsString("Organisation") => JsSuccess(Organisation)
+        case _                        => JsError("Invalid affinity group")
+      }
 
+      override def writes(o: AffinityGroup): JsValue = o match {
+        case Individual   => JsString("Individual")
+        case Organisation => JsString("Organisation")
+      }
+    }
   }
 
   implicit val format: OFormat[NeedMoreDetailsDetails] = Json.format

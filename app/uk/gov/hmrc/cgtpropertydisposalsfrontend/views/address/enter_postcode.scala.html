@@ -44,7 +44,7 @@
     addressJourneyType: AddressJourneyType,
     isATrust: Boolean,
     representativeType: Option[RepresentativeType]
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"postcode"}
 @isAgent = @{ request.userType.contains(UserType.Agent) }

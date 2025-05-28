@@ -16,10 +16,9 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
 import monocle.Lens
-import monocle.macros.Lenses
-import play.api.libs.json.OFormat
+import monocle.macros.GenLens
+import play.api.libs.json._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanUpload
 
@@ -32,9 +31,11 @@ object YearToDateLiabilityAnswers {
 
   sealed trait NonCalculatedYTDAnswers extends YearToDateLiabilityAnswers
 
+  import CalculatedYTDAnswers.*
+  import NonCalculatedYTDAnswers.*
+
   object NonCalculatedYTDAnswers {
 
-    @Lenses
     final case class IncompleteNonCalculatedYTDAnswers(
       taxableGainOrLoss: Option[AmountInPence],
       hasEstimatedDetails: Option[Boolean],
@@ -51,6 +52,16 @@ object YearToDateLiabilityAnswers {
     ) extends NonCalculatedYTDAnswers
 
     object IncompleteNonCalculatedYTDAnswers {
+      val taxDue                         = GenLens[IncompleteNonCalculatedYTDAnswers](_.taxDue)
+      val expiredEvidence                = GenLens[IncompleteNonCalculatedYTDAnswers](_.expiredEvidence)
+      val checkForRepayment              = GenLens[IncompleteNonCalculatedYTDAnswers](_.checkForRepayment)
+      val mandatoryEvidence              = GenLens[IncompleteNonCalculatedYTDAnswers](_.mandatoryEvidence)
+      val taxableGainOrLoss              = GenLens[IncompleteNonCalculatedYTDAnswers](_.taxableGainOrLoss)
+      val yearToDateLiability            = GenLens[IncompleteNonCalculatedYTDAnswers](_.yearToDateLiability)
+      val pendingUpscanUpload            = GenLens[IncompleteNonCalculatedYTDAnswers](_.pendingUpscanUpload)
+      val hasEstimatedDetails            = GenLens[IncompleteNonCalculatedYTDAnswers](_.hasEstimatedDetails)
+      val yearToDateLiabilityCalculation = GenLens[IncompleteNonCalculatedYTDAnswers](_.yearToDateLiabilityCalculation)
+
       val empty: IncompleteNonCalculatedYTDAnswers =
         IncompleteNonCalculatedYTDAnswers(None, None, None, None, None, None, None, None, None, None, None, None)
 
@@ -71,6 +82,8 @@ object YearToDateLiabilityAnswers {
           c.taxableGainOrLossCalculation,
           c.yearToDateLiabilityCalculation
         )
+
+      implicit val format: OFormat[IncompleteNonCalculatedYTDAnswers] = Json.format[IncompleteNonCalculatedYTDAnswers]
     }
 
     final case class CompleteNonCalculatedYTDAnswers(
@@ -102,7 +115,7 @@ object YearToDateLiabilityAnswers {
       def unset[A](
         fieldLens: IncompleteNonCalculatedYTDAnswers.type => Lens[IncompleteNonCalculatedYTDAnswers, Option[A]]
       ): IncompleteNonCalculatedYTDAnswers =
-        fieldLens(IncompleteNonCalculatedYTDAnswers).set(None)(
+        fieldLens(IncompleteNonCalculatedYTDAnswers).replace(None)(
           fold(identity, IncompleteNonCalculatedYTDAnswers.fromCompleteAnswers)
         )
     }
@@ -111,7 +124,6 @@ object YearToDateLiabilityAnswers {
 
   object CalculatedYTDAnswers {
 
-    @Lenses
     final case class IncompleteCalculatedYTDAnswers(
       estimatedIncome: Option[AmountInPence],
       personalAllowance: Option[AmountInPence],
@@ -124,6 +136,15 @@ object YearToDateLiabilityAnswers {
     ) extends CalculatedYTDAnswers
 
     object IncompleteCalculatedYTDAnswers {
+      val taxDue              = GenLens[IncompleteCalculatedYTDAnswers](_.taxDue)
+      val calculatedTaxDue    = GenLens[IncompleteCalculatedYTDAnswers](_.calculatedTaxDue)
+      val estimatedIncome     = GenLens[IncompleteCalculatedYTDAnswers](_.estimatedIncome)
+      val expiredEvidence     = GenLens[IncompleteCalculatedYTDAnswers](_.expiredEvidence)
+      val mandatoryEvidence   = GenLens[IncompleteCalculatedYTDAnswers](_.mandatoryEvidence)
+      val personalAllowance   = GenLens[IncompleteCalculatedYTDAnswers](_.personalAllowance)
+      val hasEstimatedDetails = GenLens[IncompleteCalculatedYTDAnswers](_.hasEstimatedDetails)
+      val pendingUpscanUpload = GenLens[IncompleteCalculatedYTDAnswers](_.pendingUpscanUpload)
+
       val empty: IncompleteCalculatedYTDAnswers =
         IncompleteCalculatedYTDAnswers(
           None,
@@ -177,7 +198,7 @@ object YearToDateLiabilityAnswers {
       def unset[A](
         fieldLens: IncompleteCalculatedYTDAnswers.type => Lens[IncompleteCalculatedYTDAnswers, Option[A]]
       ): IncompleteCalculatedYTDAnswers =
-        fieldLens(IncompleteCalculatedYTDAnswers).set(None)(
+        fieldLens(IncompleteCalculatedYTDAnswers).replace(None)(
           fold(identity, IncompleteCalculatedYTDAnswers.fromCompleteAnswers)
         )
 
@@ -205,7 +226,38 @@ object YearToDateLiabilityAnswers {
 
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[YearToDateLiabilityAnswers] = derived.oformat()
+  implicit val completeCalculatedFormat: OFormat[CompleteCalculatedYTDAnswers]     =
+    Json.format[CompleteCalculatedYTDAnswers]
+  implicit val inCompleteCalculatedFormat: OFormat[IncompleteCalculatedYTDAnswers] =
+    Json.format[IncompleteCalculatedYTDAnswers]
+  implicit val calculatedFormat: OFormat[CalculatedYTDAnswers]                     = Json.format[CalculatedYTDAnswers]
+
+  implicit val completeNonCalculatedFormat: OFormat[CompleteNonCalculatedYTDAnswers]     =
+    Json.format[CompleteNonCalculatedYTDAnswers]
+  implicit val inCompleteNonCalculatedFormat: OFormat[IncompleteNonCalculatedYTDAnswers] =
+    Json.format[IncompleteNonCalculatedYTDAnswers]
+  implicit val nonCalculatedFormat: OFormat[NonCalculatedYTDAnswers]                     = Json.format[NonCalculatedYTDAnswers]
+
+  implicit val format: OFormat[YearToDateLiabilityAnswers] = new OFormat[YearToDateLiabilityAnswers] {
+    override def reads(json: JsValue): JsResult[YearToDateLiabilityAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("CompleteCalculatedYTDAnswers", value)      => value.validate[CompleteCalculatedYTDAnswers]
+          case ("IncompleteCalculatedYTDAnswers", value)    => value.validate[IncompleteCalculatedYTDAnswers]
+          case ("CompleteNonCalculatedYTDAnswers", value)   => value.validate[CompleteNonCalculatedYTDAnswers]
+          case ("IncompleteNonCalculatedYTDAnswers", value) => value.validate[IncompleteNonCalculatedYTDAnswers]
+          case (other, _)                                   => JsError(s"Unknown YearToDateLiabilityAnswers subtype: $other")
+        }
+      case _                                    =>
+        JsError("Expected wrapper object with one YearToDateLiabilityAnswers subtype key")
+    }
+
+    override def writes(o: YearToDateLiabilityAnswers): JsObject = o match {
+      case c: CompleteCalculatedYTDAnswers      => Json.obj("CompleteCalculatedYTDAnswers" -> Json.toJson(c))
+      case i: IncompleteCalculatedYTDAnswers    => Json.obj("IncompleteCalculatedYTDAnswers" -> Json.toJson(i))
+      case c: CompleteNonCalculatedYTDAnswers   => Json.obj("CompleteNonCalculatedYTDAnswers" -> Json.toJson(c))
+      case i: IncompleteNonCalculatedYTDAnswers => Json.obj("IncompleteNonCalculatedYTDAnswers" -> Json.toJson(i))
+    }
+  }
 
 }

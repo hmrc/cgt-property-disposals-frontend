@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 
 sealed trait RepresenteeAnswers extends Product with Serializable
@@ -72,6 +71,24 @@ object RepresenteeAnswers {
 
   }
 
-  implicit val format: OFormat[RepresenteeAnswers] = derived.oformat()
+  implicit val completeFormat: OFormat[CompleteRepresenteeAnswers]     = Json.format[CompleteRepresenteeAnswers]
+  implicit val incompleteFormat: OFormat[IncompleteRepresenteeAnswers] = Json.format[IncompleteRepresenteeAnswers]
+
+  implicit val format: OFormat[RepresenteeAnswers] = new OFormat[RepresenteeAnswers] {
+    override def reads(json: JsValue): JsResult[RepresenteeAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteRepresenteeAnswers", value) => value.validate[IncompleteRepresenteeAnswers]
+          case ("CompleteRepresenteeAnswers", value)   => value.validate[CompleteRepresenteeAnswers]
+          case (other, _)                              => JsError(s"Unrecognized RepresenteeAnswers type: $other")
+        }
+      case _                                    => JsError("Expected RepresenteeAnswers wrapper object with a single entry")
+    }
+
+    override def writes(r: RepresenteeAnswers): JsObject = r match {
+      case i: IncompleteRepresenteeAnswers => Json.obj("IncompleteRepresenteeAnswers" -> Json.toJson(i))
+      case c: CompleteRepresenteeAnswers   => Json.obj("CompleteRepresenteeAnswers" -> Json.toJson(c))
+    }
+  }
 
 }

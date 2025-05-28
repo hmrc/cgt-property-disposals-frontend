@@ -39,7 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, UKAddressLookupService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.address.AddressJourneyType.Returns.EnteringCompanyDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
@@ -83,11 +83,11 @@ class CompanyDetailsController @Inject() (
     journey.journey.subscribedDetails.isATrust
 
   def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Future[Result], (SessionData, EnteringCompanyDetails)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((_, s: StartingToAmendReturn)) =>
-        implicit val r: RequestWithSessionData[_] = request
+        implicit val r: RequestWithSessionData[?] = request
         Left(convertFromStartingAmendToFillingOutReturn(s, sessionStore, errorHandler, uuidGenerator))
 
       case Some(
@@ -143,7 +143,7 @@ class CompanyDetailsController @Inject() (
     isManuallyEnteredAddress: Boolean
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] = {
     val isFurtherOrAmendReturn = journey.journey.isFurtherOrAmendReturn.contains(true)
 
@@ -318,7 +318,7 @@ class CompanyDetailsController @Inject() (
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
-                             updateSession(sessionStore, request)(
+                             updateSession(sessionStore, request.toSession)(
                                _.copy(journeyStatus = Some(updatedJourney))
                              )
                            )
@@ -422,7 +422,7 @@ class CompanyDetailsController @Inject() (
                     val result             = for {
                       _ <- returnsService.storeDraftReturn(updatedJourney)
                       _ <- EitherT(
-                             updateSession(sessionStore, request)(
+                             updateSession(sessionStore, request.toSession)(
                                _.copy(journeyStatus = Some(updatedJourney))
                              )
                            )
@@ -485,7 +485,9 @@ class CompanyDetailsController @Inject() (
 
                 val result = for {
                   _ <- returnsService.storeDraftReturn(updatedJourney)
-                  _ <- EitherT(updateSession(sessionStore, request)(_.copy(journeyStatus = Some(updatedJourney))))
+                  _ <- EitherT(
+                         updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(updatedJourney)))
+                       )
                 } yield ()
 
                 result.fold(

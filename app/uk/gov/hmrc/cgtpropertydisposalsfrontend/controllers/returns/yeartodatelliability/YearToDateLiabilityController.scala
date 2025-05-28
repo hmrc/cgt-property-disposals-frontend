@@ -57,7 +57,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCa
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{ytdliability => pages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -107,7 +107,7 @@ class YearToDateLiabilityController @Inject() (
       FillingOutReturn,
       YearToDateLiabilityAnswers
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     def emptyNonCalculatedAnswers(fillingOutReturn: FillingOutReturn): IncompleteNonCalculatedYTDAnswers =
       fillingOutReturn.amendReturnData.fold(
         IncompleteNonCalculatedYTDAnswers.empty
@@ -233,7 +233,7 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn
   )(
     f: CalculatedTaxDue => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     answers match {
       case complete: CompleteCalculatedYTDAnswers =>
         f(complete.calculatedTaxDue)
@@ -261,7 +261,7 @@ class YearToDateLiabilityController @Inject() (
                                         )
                                       )
                 _                <- EitherT(
-                                      updateSession(sessionStore, request)(
+                                      updateSession(sessionStore, request.toSession)(
                                         _.copy(
                                           journeyStatus = Some(
                                             fillingOutReturn.copy(draftReturn =
@@ -468,7 +468,7 @@ class YearToDateLiabilityController @Inject() (
   )(
     updateAnswers: (A, D) => D
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers).isDefined) {
       lazy val backLink = currentAnswers match {
@@ -499,7 +499,7 @@ class YearToDateLiabilityController @Inject() (
                      returnsService.storeDraftReturn(newJourney)
                    }
               _ <- EitherT(
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(journeyStatus = Some(newJourney))
                      )
                    )
@@ -775,7 +775,7 @@ class YearToDateLiabilityController @Inject() (
                         if (existingPersonalAllowance.contains(personalAllowance)) {
                           draftReturn
                         } else {
-                          val newAnswers = {
+                          val newAnswers =
                             answers match {
                               case calculatedAnswers: CalculatedYTDAnswers =>
                                 calculatedAnswers
@@ -802,7 +802,6 @@ class YearToDateLiabilityController @Inject() (
                                     n.fold(_.taxableGainOrLossCalculation, _.taxableGainOrLossCalculation)
                                 )
                             }
-                          }
 
                           draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
 
@@ -911,7 +910,7 @@ class YearToDateLiabilityController @Inject() (
     fillingOutReturn: FillingOutReturn,
     calculatedAnswers: CalculatedYTDAnswers,
     estimatedIncome: Option[AmountInPence]
-  )(implicit request: RequestWithSessionData[_]) =
+  )(implicit request: RequestWithSessionData[?]) =
     commonDisplayBehaviour(calculatedAnswers)(
       form = _.fold(
         _.hasEstimatedDetails
@@ -980,7 +979,7 @@ class YearToDateLiabilityController @Inject() (
     calculatedAnswers: CalculatedYTDAnswers,
     draftReturn: DraftSingleDisposalReturn,
     fillingOutReturn: FillingOutReturn
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     if (isATrust(fillingOutReturn) || isPeriodOfAdmin(fillingOutReturn)) {
       estimatedDetailsSubmit(
         calculatedAnswers,
@@ -1004,7 +1003,7 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn,
     fillingOutReturn: FillingOutReturn,
     estimatedIncome: Option[AmountInPence]
-  )(implicit request: RequestWithSessionData[_]) =
+  )(implicit request: RequestWithSessionData[?]) =
     commonSubmitBehaviour(fillingOutReturn, draftReturn, calculatedAnswers)(
       form = hasEstimatedDetailsForm
     )(
@@ -1051,7 +1050,7 @@ class YearToDateLiabilityController @Inject() (
     nonCalculatedAnswers: NonCalculatedYTDAnswers,
     draftReturn: DraftReturn,
     fillingOutReturn: FillingOutReturn
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherReturnCalculationEligibility =>
       commonSubmitBehaviour(fillingOutReturn, draftReturn, nonCalculatedAnswers)(
         form = hasEstimatedDetailsForm
@@ -1161,7 +1160,7 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn,
     estimatedIncome: AmountInPence,
     personalAllowance: AmountInPence
-  )(implicit request: RequestWithSessionData[_]) =
+  )(implicit request: RequestWithSessionData[?]) =
     withHasEstimatedDetails(calculatedAnswers) { _ =>
       withCompleteJourneys(draftReturn) {
         (
@@ -1264,7 +1263,7 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn,
     estimatedIncome: AmountInPence,
     personalAllowance: AmountInPence
-  )(implicit request: RequestWithSessionData[_]) =
+  )(implicit request: RequestWithSessionData[?]) =
     withHasEstimatedDetails(calculatedAnswers) { _ =>
       withCompleteJourneys(draftReturn) {
         (
@@ -1446,7 +1445,7 @@ class YearToDateLiabilityController @Inject() (
     currentJourney: FillingOutReturn,
     upscanUpload: UpscanUpload
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, Error, Unit] = {
     val newAnswers = currentAnswers match {
       case c: CalculatedYTDAnswers    =>
@@ -1465,7 +1464,7 @@ class YearToDateLiabilityController @Inject() (
     for {
       _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(_.copy(journeyStatus = Some(newJourney)))
+             updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(newJourney)))
            )
     } yield ()
   }
@@ -1474,8 +1473,8 @@ class YearToDateLiabilityController @Inject() (
     fillingOutReturn: FillingOutReturn
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
-  ): EitherT[Future, Error, Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]]               =
+    request: RequestWithSessionData[?]
+  ): EitherT[Future, Error, Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]] =
     for {
       requiredAnswers <-
         EitherT.fromEither[Future](
@@ -1512,7 +1511,7 @@ class YearToDateLiabilityController @Inject() (
     taxYear: TaxYear
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, Error, (Option[TaxableGainOrLossCalculation], (Form[BigDecimal], Call) => play.twirl.api.Html)] =
     if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
       getFurtherReturnTaxableGainOrLossCalculationData(fillingOutReturn)
@@ -1662,7 +1661,7 @@ class YearToDateLiabilityController @Inject() (
                   logger.warn("Could not determine page to be used", e)
                   errorHandler.errorResult()
                 }
-                .semiflatMap((submitBehaviour _).tupled)
+                .semiflatMap(submitBehaviour.tupled)
                 .merge
             }
         }
@@ -1871,7 +1870,7 @@ class YearToDateLiabilityController @Inject() (
     previousYearToDateLiability: AmountInPence,
     yearToDateLiability: AmountInPence,
     fillingOutReturn: FillingOutReturn
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     if (nonCalculatedAnswers.fold(_.yearToDateLiability, c => c.yearToDateLiability).isEmpty) {
       Redirect(routes.YearToDateLiabilityController.yearToDateLiability())
     } else {
@@ -1890,7 +1889,7 @@ class YearToDateLiabilityController @Inject() (
       if (nonCalculatedAnswers.fold(_.taxDue, c => Some(c.taxDue)).contains(taxDue)) {
         Redirect(routes.YearToDateLiabilityController.checkYourAnswers())
       } else {
-        val newAnswers = {
+        val newAnswers =
           if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
             nonCalculatedAnswers
               .unset(_.checkForRepayment)
@@ -1905,7 +1904,6 @@ class YearToDateLiabilityController @Inject() (
               .unset(_.pendingUpscanUpload)
               .copy(taxDue = Some(taxDue))
           }
-        }
 
         val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
         val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
@@ -1913,7 +1911,7 @@ class YearToDateLiabilityController @Inject() (
         val result = for {
           _ <- returnsService.storeDraftReturn(newJourney)
           _ <- EitherT(
-                 updateSession(sessionStore, request)(
+                 updateSession(sessionStore, request.toSession)(
                    _.copy(journeyStatus = Some(newJourney))
                  )
                )
@@ -2095,7 +2093,7 @@ class YearToDateLiabilityController @Inject() (
     ytdAnswers: NonCalculatedYTDAnswers
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, Error, (FurtherReturnCalculationEligibility, Option[YearToDateLiabilityCalculation])] = {
     def requiredAnswers(
       taxableGainOrLoss: AmountInPence,
@@ -2168,7 +2166,7 @@ class YearToDateLiabilityController @Inject() (
     taxYear: TaxYear
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[
     Future,
     Error,
@@ -2410,7 +2408,7 @@ class YearToDateLiabilityController @Inject() (
     answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
     fillingOutReturn: FillingOutReturn
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, Error, Unit] = {
     val newAnswers     = answers.fold(
       _.copy(pendingUpscanUpload = None),
@@ -2422,7 +2420,7 @@ class YearToDateLiabilityController @Inject() (
     for {
       _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(newJourney))
              )
            )
@@ -2435,7 +2433,7 @@ class YearToDateLiabilityController @Inject() (
     answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers],
     fillingOutReturn: FillingOutReturn
   )(implicit
-    request: RequestWithSessionData[_],
+    request: RequestWithSessionData[?],
     hc: HeaderCarrier
   ): EitherT[Future, Error, Unit] = {
     val newAnswers =
@@ -2468,7 +2466,7 @@ class YearToDateLiabilityController @Inject() (
     for {
       _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(newJourney))
              )
            )
@@ -2530,7 +2528,7 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftReturn,
     taxYear: TaxYear,
     wasUkResident: Boolean
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherReturnEligibility =>
       answers match {
         case IncompleteNonCalculatedYTDAnswers(
@@ -2639,7 +2637,7 @@ class YearToDateLiabilityController @Inject() (
           val result = for {
             _ <- returnsService.storeDraftReturn(updatedJourney)
             _ <- EitherT(
-                   updateSession(sessionStore, request)(
+                   updateSession(sessionStore, request.toSession)(
                      _.copy(journeyStatus = Some(updatedJourney))
                    )
                  )
@@ -2734,7 +2732,7 @@ class YearToDateLiabilityController @Inject() (
     draftReturn: DraftSingleDisposalReturn,
     taxYear: TaxYear,
     wasUkResident: Boolean
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     answers match {
       case c: CompleteCalculatedYTDAnswers =>
         Ok(
@@ -2873,7 +2871,7 @@ class YearToDateLiabilityController @Inject() (
     m: Option[MandatoryEvidence],
     taxYear: TaxYear,
     wasUkResident: Boolean
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     val completeAnswers = CompleteCalculatedYTDAnswers(e, p, h, c, t, m)
     val newDraftReturn  =
       draftReturn.copy(yearToDateLiabilityAnswers = Some(completeAnswers))
@@ -2882,7 +2880,7 @@ class YearToDateLiabilityController @Inject() (
     val result = for {
       _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(newJourney))
              )
            )
@@ -2925,7 +2923,7 @@ class YearToDateLiabilityController @Inject() (
 
   private def withFurtherReturnCalculationEligibilityCheck(fillingOutReturn: FillingOutReturn)(
     f: Option[FurtherReturnCalculationEligibility] => Future[Result]
-  )(implicit r: RequestWithSessionData[_], hc: HeaderCarrier): Future[Result] = {
+  )(implicit r: RequestWithSessionData[?], hc: HeaderCarrier): Future[Result] = {
     val result =
       if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
         furtherReturnCalculationEligibilityUtil

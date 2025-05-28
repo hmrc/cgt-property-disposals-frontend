@@ -20,12 +20,11 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import play.api.i18n.MessagesApi
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
-import shapeless.{Lens, lens}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ContactNameControllerSpec, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.SubscriptionReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{ContactName, ContactNameSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
 
@@ -42,10 +41,10 @@ class SubscriptionChangeContactNameControllerSpec
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
 
   override val validJourney: SubscriptionReady = {
-    val contactNameSourceLens: Lens[SubscriptionReady, ContactNameSource] =
-      lens[SubscriptionReady].subscriptionDetails.contactNameSource
-    contactNameSourceLens.set(sample[SubscriptionReady])(
-      ContactNameSource.DerivedFromBusinessPartnerRecord
+    val subscriptionReady = sample[SubscriptionReady]
+
+    subscriptionReady.copy(subscriptionDetails =
+      subscriptionReady.subscriptionDetails.copy(contactNameSource = ContactNameSource.DerivedFromBusinessPartnerRecord)
     )
   }
 
@@ -80,7 +79,7 @@ class SubscriptionChangeContactNameControllerSpec
       behave like enterContactNameSubmit(
         data =>
           controller.enterContactNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           ),
         controllers.onboarding.routes.SubscriptionController.checkYourDetails()
       )

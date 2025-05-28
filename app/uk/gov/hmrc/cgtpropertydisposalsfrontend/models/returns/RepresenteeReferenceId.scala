@@ -16,8 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{CgtReference, NINO, SAUTR}
 
 sealed trait RepresenteeReferenceId extends Product with Serializable
@@ -32,6 +31,40 @@ object RepresenteeReferenceId {
 
   case object NoReferenceId extends RepresenteeReferenceId
 
-  implicit val format: OFormat[RepresenteeReferenceId] = derived.oformat()
+  implicit val noIdFormat: OFormat[NoReferenceId.type] = OFormat[NoReferenceId.type](
+    Reads[NoReferenceId.type] {
+      case JsObject(_) => JsSuccess(NoReferenceId)
+      case _           => JsError("Invalid reference id")
+    },
+    OWrites[NoReferenceId.type] { _ =>
+      Json.obj()
+    }
+  )
+
+  implicit val ninoFormat: OFormat[RepresenteeNino]           = Json.format[RepresenteeNino]
+  implicit val saUtrFormat: OFormat[RepresenteeSautr]         = Json.format[RepresenteeSautr]
+  implicit val cgtRefFormat: OFormat[RepresenteeCgtReference] = Json.format[RepresenteeCgtReference]
+
+  implicit val format: OFormat[RepresenteeReferenceId] = new OFormat[RepresenteeReferenceId] {
+    override def reads(json: JsValue): JsResult[RepresenteeReferenceId] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("RepresenteeNino", value)         => value.validate[RepresenteeNino]
+          case ("RepresenteeSautr", value)        => value.validate[RepresenteeSautr]
+          case ("RepresenteeCgtReference", value) => value.validate[RepresenteeCgtReference]
+          case ("NoReferenceId", value)           => value.validate[NoReferenceId.type]
+          case (other, _)                         => JsError(s"Unrecognized RepresenteeReferenceId: $other")
+        }
+      case _                                    =>
+        JsError("Expected a RepresenteeReferenceId wrapper object with a single entry")
+    }
+
+    override def writes(o: RepresenteeReferenceId): JsObject = o match {
+      case n: RepresenteeNino         => Json.obj("RepresenteeNino" -> Json.toJson(n))
+      case s: RepresenteeSautr        => Json.obj("RepresenteeSautr" -> Json.toJson(s))
+      case c: RepresenteeCgtReference => Json.obj("RepresenteeCgtReference" -> Json.toJson(c))
+      case NoReferenceId              => Json.obj("NoReferenceId" -> Json.toJson(NoReferenceId))
+    }
+  }
 
 }

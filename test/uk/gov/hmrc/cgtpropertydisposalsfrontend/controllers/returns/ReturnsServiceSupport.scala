@@ -39,13 +39,13 @@ trait ReturnsServiceSupport { this: MockFactory =>
     fillingOutReturn: FillingOutReturn
   )(
     result: Either[Error, Unit]
-  ): CallHandler3[FillingOutReturn, HeaderCarrier, Request[_], EitherT[Future, Error, Unit]] =
+  ): CallHandler3[FillingOutReturn, HeaderCarrier, Request[?], EitherT[Future, Error, Unit]] =
     (mockReturnsService
       .storeDraftReturn(
         _: FillingOutReturn
       )(
         _: HeaderCarrier,
-        _: Request[_]
+        _: Request[?]
       ))
       .expects(fillingOutReturn, *, *)
       .returning(EitherT.fromEither[Future](result))

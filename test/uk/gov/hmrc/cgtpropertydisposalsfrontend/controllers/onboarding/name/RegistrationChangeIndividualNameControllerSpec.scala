@@ -24,9 +24,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.RegistrationStatus.RegistrationReady
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.IndividualName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, JourneyStatus}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 
 class RegistrationChangeIndividualNameControllerSpec
     extends ControllerSpec
@@ -43,10 +43,10 @@ class RegistrationChangeIndividualNameControllerSpec
 
   override val mockUpdateName: Option[(RegistrationReady, RegistrationReady, Either[Error, Unit]) => Unit] = None
 
-  override lazy val controller: RegistrationChangeIndividualNameController =
+  override val controller: RegistrationChangeIndividualNameController =
     instanceOf[RegistrationChangeIndividualNameController]
 
-  override lazy val validJourney: RegistrationReady = sample[RegistrationReady]
+  override val validJourney: RegistrationReady = sample[RegistrationReady]
 
   override def updateName(
     name: IndividualName,
@@ -69,7 +69,7 @@ class RegistrationChangeIndividualNameControllerSpec
       behave like enterNameSubmit(
         data =>
           controller.enterIndividualNameSubmit()(
-            FakeRequest().withFormUrlEncodedBody(data: _*).withCSRFToken.withMethod("POST")
+            FakeRequest().withFormUrlEncodedBody(data*).withCSRFToken.withMethod("POST")
           ),
         controllers.onboarding.routes.RegistrationController.checkYourAnswers()
       )

@@ -17,8 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import julienrf.json.derived
-import play.api.libs.json.OFormat
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TaxYear
 
 final case class TaxYearExchanged(year: Int) extends Product with Serializable
@@ -32,6 +31,6 @@ object TaxYearExchanged {
 
   val differentTaxYears: TaxYearExchanged = TaxYearExchanged(-1)
 
-  implicit val format: OFormat[TaxYearExchanged] = derived.oformat()
+  implicit val format: OFormat[TaxYearExchanged] = Json.format[TaxYearExchanged]
   implicit val eq: Eq[TaxYearExchanged]          = Eq.fromUniversalEquals
 }

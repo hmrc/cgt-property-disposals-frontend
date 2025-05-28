@@ -46,7 +46,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{acquisitiondetails => pages}
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -93,7 +93,7 @@ class AcquisitionDetailsController @Inject() (
       JourneyState,
       AcquisitionDetailsAnswers
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     def defaultAnswers(
       triageAnswers: SingleDisposalTriageAnswers,
       representeeAnswers: Option[RepresenteeAnswers],
@@ -261,7 +261,7 @@ class AcquisitionDetailsController @Inject() (
   )(
     updateState: (A, AcquisitionDetailsAnswers, JourneyState) => JourneyState
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     if (requiredPreviousAnswer(currentAnswers)) {
       lazy val backLink = currentAnswers.fold(
@@ -285,7 +285,7 @@ class AcquisitionDetailsController @Inject() (
                      returnsService.storeDraftReturn(newJourney)
                    }
               _ <- EitherT(
-                     updateSession(sessionStore, request)(
+                     updateSession(sessionStore, request.toSession)(
                        _.copy(journeyStatus = Some(newJourney))
                      )
                    )
@@ -757,7 +757,7 @@ class AcquisitionDetailsController @Inject() (
                     )
                   }
                 )(
-                  requiredPreviousAnswer = answers => {
+                  requiredPreviousAnswer = answers =>
                     if (wasUkResident) {
                       noAnswersRequired
                     } else {
@@ -767,8 +767,7 @@ class AcquisitionDetailsController @Inject() (
                           c => Some(c.acquisitionPrice)
                         )
                         .isDefined
-                    }
-                  },
+                    },
                   redirectToIfNoRequiredPreviousAnswer = routes.AcquisitionDetailsController.acquisitionPrice()
                 )(
                   updateState = { (p, answers, draftReturn) =>
@@ -1355,7 +1354,7 @@ class AcquisitionDetailsController @Inject() (
     fillingOutReturn: FillingOutReturn,
     assetType: AssetType,
     wasAUkResident: Boolean
-  )(implicit request: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit request: RequestWithSessionData[?]): Future[Result] = {
     val newDraftReturn =
       state.fold(
         _.copy(acquisitionDetailsAnswers = Some(completeAnswers)),
@@ -1367,7 +1366,7 @@ class AcquisitionDetailsController @Inject() (
     val result = for {
       _ <- returnsService.storeDraftReturn(newJourney)
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(newJourney))
              )
            )

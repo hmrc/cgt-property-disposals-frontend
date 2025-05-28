@@ -30,7 +30,7 @@
 )
 
 @(answers: AmountInPence, isATrust: Boolean,
-        representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[_], messages: Messages)
+        representativeType: Option[RepresentativeType])(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @title = @{messages("initialGainOrLoss.cya.title")}
 

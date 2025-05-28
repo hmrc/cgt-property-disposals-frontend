@@ -35,7 +35,7 @@ cyaChange: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.cya_ch
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     isMultipleDisposal: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @isAgent = @{request.userType.contains(UserType.Agent)}
 

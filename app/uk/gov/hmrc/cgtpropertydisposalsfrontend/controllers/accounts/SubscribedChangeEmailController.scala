@@ -65,7 +65,7 @@ class SubscribedChangeEmailController @Inject() (
     with EmailController[ChangingAccountEmail] {
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingAccountEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: Subscribed)) =>
@@ -74,7 +74,7 @@ class SubscribedChangeEmailController @Inject() (
     }
 
   override def validVerificationCompleteJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, ChangingAccountEmail)] =
     validJourney(request)
 
@@ -83,7 +83,7 @@ class SubscribedChangeEmailController @Inject() (
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] = {
     val journey                 = changingAccountEmail.journey
     val journeyWithUpdatedEmail =
@@ -105,7 +105,7 @@ class SubscribedChangeEmailController @Inject() (
   override def auditEmailVerifiedEvent(
     changingAccountEmail: ChangingAccountEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit = {
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit = {
     val journey = changingAccountEmail.journey
     auditService.sendEvent(
       "changeEmailAddressVerified",
@@ -123,7 +123,7 @@ class SubscribedChangeEmailController @Inject() (
   override def auditEmailChangeAttempt(
     changingAccountEmail: ChangingAccountEmail,
     email: Email
-  )(implicit hc: HeaderCarrier, request: Request[_]): Unit = {
+  )(implicit hc: HeaderCarrier, request: Request[?]): Unit = {
     val journey = changingAccountEmail.journey
     auditService.sendEvent(
       "changeEmailAddressAttempted",
@@ -141,20 +141,20 @@ class SubscribedChangeEmailController @Inject() (
   override def name(changingAccountEmail: ChangingAccountEmail): ContactName =
     changingAccountEmail.journey.subscribedDetails.contactName
 
-  override lazy protected val backLinkCall: Option[Call]      = Some(
+  override protected lazy val backLinkCall: Option[Call]      = Some(
     controllers.accounts.routes.AccountController.manageYourDetails()
   )
-  override lazy protected val enterEmailCall: Call            =
+  override protected lazy val enterEmailCall: Call            =
     routes.SubscribedChangeEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call      =
+  override protected lazy val enterEmailSubmitCall: Call      =
     routes.SubscribedChangeEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call        =
+  override protected lazy val checkYourInboxCall: Call        =
     routes.SubscribedChangeEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call   =
+  override protected lazy val verifyEmailCall: UUID => Call   =
     routes.SubscribedChangeEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call         =
+  override protected lazy val emailVerifiedCall: Call         =
     routes.SubscribedChangeEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call =
+  override protected lazy val emailVerifiedContinueCall: Call =
     controllers.accounts.routes.AccountController.contactEmailUpdated()
 
 }

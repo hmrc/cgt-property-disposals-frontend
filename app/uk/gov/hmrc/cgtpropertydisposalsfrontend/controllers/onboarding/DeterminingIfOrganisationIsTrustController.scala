@@ -27,7 +27,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController.NameMatchError.{ServiceError, ValidationError}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.DeterminingIfOrganisationIsTrustController._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.{routes => onboardingRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.Metrics
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.SubscriptionStatus.DeterminingIfOrganisationIsTrust
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{AlreadySubscribedWithDifferentGGAccount, NewEnrolmentCreatedForMissingEnrolment, SubscriptionStatus}
@@ -42,7 +42,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error,
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.{AuditService, NameMatchRetryService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -72,7 +72,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
     with Logging {
 
   def withValidUser(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   )(f: DeterminingIfOrganisationIsTrust => Future[Result]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(d: DeterminingIfOrganisationIsTrust) => f(d)
@@ -111,7 +111,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                 )
               ),
             isReportingForTrust =>
-              updateSession(sessionStore, request)(
+              updateSession(sessionStore, request.toSession)(
                 _.copy(
                   journeyStatus = Some(
                     DeterminingIfOrganisationIsTrust(
@@ -130,13 +130,13 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                 case Right(_) =>
                   if (isReportingForTrust) {
                     Redirect(
-                      routes.DeterminingIfOrganisationIsTrustController
+                      onboardingRoutes.DeterminingIfOrganisationIsTrustController
                         .doYouHaveATrn()
                     )
                   } else {
                     metrics.nonTrustOrganisationCounter.inc()
                     Redirect(
-                      routes.DeterminingIfOrganisationIsTrustController
+                      onboardingRoutes.DeterminingIfOrganisationIsTrustController
                         .reportWithCorporateTax()
                     )
                   }
@@ -151,7 +151,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
         if (determiningIfOrganisationIsTrust.isReportingForTrust.contains(false)) {
           Ok(
             reportWithCorporateTaxPage(
-              routes.DeterminingIfOrganisationIsTrustController
+              onboardingRoutes.DeterminingIfOrganisationIsTrustController
                 .doYouWantToReportForATrust()
             )
           )
@@ -172,7 +172,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
           Ok(
             doYouHaveATrnPage(
               form,
-              routes.DeterminingIfOrganisationIsTrustController
+              onboardingRoutes.DeterminingIfOrganisationIsTrustController
                 .doYouWantToReportForATrust()
             )
           )
@@ -193,12 +193,12 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                 BadRequest(
                   doYouHaveATrnPage(
                     formWithError,
-                    routes.DeterminingIfOrganisationIsTrustController
+                    onboardingRoutes.DeterminingIfOrganisationIsTrustController
                       .doYouWantToReportForATrust()
                   )
                 ),
               hasTrn =>
-                updateSession(sessionStore, request)(
+                updateSession(sessionStore, request.toSession)(
                   _.copy(journeyStatus =
                     Some(
                       determiningIfOrganisationIsTrust
@@ -213,13 +213,13 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   case Right(_) =>
                     if (hasTrn) {
                       Redirect(
-                        routes.DeterminingIfOrganisationIsTrustController
+                        onboardingRoutes.DeterminingIfOrganisationIsTrustController
                           .enterTrn()
                       )
                     } else {
                       metrics.unregisteredTrustCounter.inc()
                       Redirect(
-                        routes.DeterminingIfOrganisationIsTrustController
+                        onboardingRoutes.DeterminingIfOrganisationIsTrustController
                           .registerYourTrust()
                       )
                     }
@@ -246,7 +246,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                   Ok(
                     enterTrnAndNamePage(
                       enterTrnAndNameForm,
-                      routes.DeterminingIfOrganisationIsTrustController
+                      onboardingRoutes.DeterminingIfOrganisationIsTrustController
                         .doYouHaveATrn()
                     )
                   )
@@ -294,7 +294,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                     BadRequest(
                       enterTrnAndNamePage(
                         formWithErrors,
-                        routes.DeterminingIfOrganisationIsTrustController
+                        onboardingRoutes.DeterminingIfOrganisationIsTrustController
                           .doYouHaveATrn()
                       )
                     )
@@ -314,7 +314,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                       ),
                       "access-with-wrong-gg-account"
                     )
-                    Redirect(routes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
+                    Redirect(onboardingRoutes.SubscriptionController.alreadySubscribedWithDifferentGGAccount())
 
                   case _ =>
                     Redirect(controllers.routes.StartController.start())
@@ -332,7 +332,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
       withValidUser(request) { _ =>
         Ok(
           registerYourTrustPage(
-            routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+            onboardingRoutes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
           )
         )
       }
@@ -353,7 +353,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
               handleNameMatchServiceError(otherNameMatchError)
             case Right(_)                                                  =>
               Redirect(
-                routes.DeterminingIfOrganisationIsTrustController.enterTrn()
+                onboardingRoutes.DeterminingIfOrganisationIsTrustController.enterTrn()
               )
           }
       }
@@ -366,7 +366,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
     previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, NameMatchServiceError[
     TrustNameMatchDetails
   ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
@@ -393,7 +393,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                 }
                               }
       _                  <- EitherT(
-                              updateSession(sessionStore, request)(
+                              updateSession(sessionStore, request.toSession)(
                                 _.copy(journeyStatus =
                                   Some(
                                     bprWithBprResponse._2.cgtReference.fold[JourneyStatus](
@@ -416,13 +416,13 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
                                 )
                               )
                             ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
-                              NameMatchServiceError.BackendError
+                              NameMatchServiceError.BackendError.apply
                             )
     } yield bprWithBprResponse
 
   private def handleNameMatchServiceError(
     nameMatchError: NameMatchServiceError[TrustNameMatchDetails]
-  )(implicit request: RequestWithSessionData[_]): Result =
+  )(implicit request: RequestWithSessionData[?]): Result =
     nameMatchError match {
       case NameMatchServiceError.BackendError(error) =>
         logger.warn("Could not get BPR with entered TRN", error)
@@ -435,13 +435,13 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
         BadRequest(
           enterTrnAndNamePage(
             form,
-            routes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
+            onboardingRoutes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
           )
         )
 
       case NameMatchServiceError.TooManyUnsuccessfulAttempts() =>
         Redirect(
-          routes.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
+          onboardingRoutes.DeterminingIfOrganisationIsTrustController.tooManyAttempts()
         )
     }
 

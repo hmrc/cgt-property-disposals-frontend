@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.AuditService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -241,7 +241,7 @@ class AgentAccessController @Inject() (
                                   }
 
             _ <- EitherT(
-                   updateSession(sessionStore, request)(
+                   updateSession(sessionStore, request.toSession)(
                      _.copy(
                        journeyStatus = Some(
                          Subscribed(
@@ -291,7 +291,7 @@ class AgentAccessController @Inject() (
     ggCredId: GGCredId
   )(implicit
     hc: HeaderCarrier,
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Future[Result] =
     authorisedFunctions
       .authorised(
@@ -325,7 +325,7 @@ class AgentAccessController @Inject() (
                        )
 
           _ <- EitherT(
-                 updateSession(sessionStore, request)(
+                 updateSession(sessionStore, request.toSession)(
                    _.copy(
                      journeyStatus = Some(
                        AgentSupplyingClientDetails(
@@ -384,11 +384,11 @@ class AgentAccessController @Inject() (
       UnsuccessfulVerifierAttempts
     ]
   )(implicit
-    request: RequestWithSessionData[_],
+    request: RequestWithSessionData[?],
     toEither: V => Either[Country, Postcode]
   ): Future[Result] = {
     lazy val handleMatchedVerifier: Future[Result] =
-      updateSession(sessionStore, request)(
+      updateSession(sessionStore, request.toSession)(
         _.copy(
           journeyStatus = Some(
             currentAgentSupplyingClientDetails.copy(
@@ -509,7 +509,7 @@ class AgentAccessController @Inject() (
 
   private def withAgentSupplyingClientDetails(
     f: AgentSupplyingClientDetails => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(a: AgentStatus.AgentSupplyingClientDetails) => f(a)
       case _                                                => Redirect(controllers.routes.StartController.start())
@@ -521,7 +521,7 @@ class AgentAccessController @Inject() (
       VerifierMatchingDetails,
       Option[UnsuccessfulVerifierAttempts]
     ) => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(a @ AgentStatus.AgentSupplyingClientDetails(_, _, Some(v))) =>
         agentVerifierMatchRetryStore

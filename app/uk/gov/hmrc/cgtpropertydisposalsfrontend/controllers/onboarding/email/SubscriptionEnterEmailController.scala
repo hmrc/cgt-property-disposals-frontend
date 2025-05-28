@@ -19,7 +19,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.email
 import cats.data.EitherT
 import com.google.inject.{Inject, Singleton}
 import play.api.mvc.{Call, MessagesControllerComponents, Request, Result}
-import shapeless.lens
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{EmailController, SessionUpdates}
@@ -60,7 +59,7 @@ class SubscriptionEnterEmailController @Inject() (
     with EmailController[EnteringSubscriptionEmail] {
 
   override def validJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, EnteringSubscriptionEmail)] =
     request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
       case Some((sessionData, s: SubscriptionMissingData)) =>
@@ -69,23 +68,21 @@ class SubscriptionEnterEmailController @Inject() (
     }
 
   override def validVerificationCompleteJourney(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): Either[Result, (SessionData, EnteringSubscriptionEmail)] =
     validJourney(request)
-
-  private val subscriptionMissingDataEmailLens =
-    lens[SubscriptionMissingData].businessPartnerRecord.emailAddress
 
   override def updateEmail(
     enteringSubscriptionEmail: EnteringSubscriptionEmail,
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, JourneyStatus] =
     EitherT.rightT[Future, Error](
-      subscriptionMissingDataEmailLens
-        .set(enteringSubscriptionEmail.journey)(Some(email))
+      enteringSubscriptionEmail.journey.copy(
+        businessPartnerRecord = enteringSubscriptionEmail.journey.businessPartnerRecord.copy(emailAddress = Some(email))
+      )
     )
 
   override def auditEmailVerifiedEvent(
@@ -93,7 +90,7 @@ class SubscriptionEnterEmailController @Inject() (
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): Unit = ()
 
   override def auditEmailChangeAttempt(
@@ -101,7 +98,7 @@ class SubscriptionEnterEmailController @Inject() (
     email: Email
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): Unit = ()
 
   override def name(
@@ -112,18 +109,18 @@ class SubscriptionEnterEmailController @Inject() (
         .fold(_.value, n => n.makeSingleName)
     )
 
-  override lazy protected val backLinkCall: Option[Call]      = None
-  override lazy protected val enterEmailCall: Call            =
+  override protected lazy val backLinkCall: Option[Call]      = None
+  override protected lazy val enterEmailCall: Call            =
     routes.SubscriptionEnterEmailController.enterEmail()
-  override lazy protected val enterEmailSubmitCall: Call      =
+  override protected lazy val enterEmailSubmitCall: Call      =
     routes.SubscriptionEnterEmailController.enterEmailSubmit()
-  override lazy protected val checkYourInboxCall: Call        =
+  override protected lazy val checkYourInboxCall: Call        =
     routes.SubscriptionEnterEmailController.checkYourInbox()
-  override lazy protected val verifyEmailCall: UUID => Call   =
+  override protected lazy val verifyEmailCall: UUID => Call   =
     routes.SubscriptionEnterEmailController.verifyEmail
-  override lazy protected val emailVerifiedCall: Call         =
+  override protected lazy val emailVerifiedCall: Call         =
     routes.SubscriptionEnterEmailController.emailVerified()
-  override lazy protected val emailVerifiedContinueCall: Call =
+  override protected lazy val emailVerifiedContinueCall: Call =
     controllers.routes.StartController.start()
 
 }

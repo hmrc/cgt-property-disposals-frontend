@@ -31,7 +31,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.RepresenteeController.NameMatchError.{ServiceError, ValidationError}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.routes
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee.{routes => representeeRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage.{routes => triageRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingNewDraftReturn}
@@ -48,7 +48,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.NameMatchRetryService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{representee => representeePages}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -85,7 +85,7 @@ class RepresenteeController @Inject() (
   import RepresenteeController._
 
   private def withCapacitorOrPersonalRepresentativeAnswers(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   )(
     f: (
       RepresentativeType,
@@ -137,7 +137,7 @@ class RepresenteeController @Inject() (
 
   private def withNotTooManyUnsuccessfulNameMatchAttempts(ggCredId: GGCredId)(
     f: Option[UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]] => Future[Result]
-  )(implicit request: RequestWithSessionData[_]): Future[Result] =
+  )(implicit request: RequestWithSessionData[?]): Future[Result] =
     nameMatchRetryService
       .getNumberOfUnsuccessfulAttempts[IndividualRepresenteeNameMatchDetails](
         ggCredId
@@ -152,7 +152,7 @@ class RepresenteeController @Inject() (
   ): Future[Result] =
     answers
       .fold(_.isFirstReturn, c => Some(c.isFirstReturn))
-      .fold[Future[Result]](Redirect(routes.RepresenteeController.checkYourAnswers()))(f)
+      .fold[Future[Result]](Redirect(representeeRoutes.RepresenteeController.checkYourAnswers()))(f)
 
   def enterName(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -162,8 +162,8 @@ class RepresenteeController @Inject() (
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             val backLink = answers.fold(
-              _ => routes.RepresenteeController.isFirstReturn(),
-              _ => routes.RepresenteeController.checkYourAnswers()
+              _ => representeeRoutes.RepresenteeController.isFirstReturn(),
+              _ => representeeRoutes.RepresenteeController.checkYourAnswers()
             )
 
             val form = answers
@@ -192,8 +192,8 @@ class RepresenteeController @Inject() (
             journey.fold(_.ggCredId, _.ggCredId)
           ) { _ =>
             lazy val backLink = answers.fold(
-              _ => routes.RepresenteeController.isFirstReturn(),
-              _ => routes.RepresenteeController.checkYourAnswers()
+              _ => representeeRoutes.RepresenteeController.isFirstReturn(),
+              _ => representeeRoutes.RepresenteeController.checkYourAnswers()
             )
 
             nameForm
@@ -218,7 +218,7 @@ class RepresenteeController @Inject() (
                       logger.warn("Could not update draft return", e)
                       errorHandler.errorResult()
                     },
-                    _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+                    _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
                   )
                 }
               )
@@ -246,12 +246,12 @@ class RepresenteeController @Inject() (
                 name,
                 journey.isRight,
                 confirmPersonForm,
-                routes.RepresenteeController.enterId(),
+                representeeRoutes.RepresenteeController.enterId(),
                 journey.fold(_ => false, _.isAmendReturn)
               )
             )
 
-          case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+          case _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
         }
       }
     }
@@ -280,7 +280,7 @@ class RepresenteeController @Inject() (
                         name,
                         journey.isRight,
                         formWithErrors,
-                        routes.RepresenteeController.enterId(),
+                        representeeRoutes.RepresenteeController.enterId(),
                         journey.fold(_ => false, _.isAmendReturn)
                       )
                     ),
@@ -304,13 +304,13 @@ class RepresenteeController @Inject() (
                         },
                         _ =>
                           Redirect(
-                            routes.RepresenteeController.checkYourAnswers()
+                            representeeRoutes.RepresenteeController.checkYourAnswers()
                           )
                       )
                   }
                 )
 
-            case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+            case _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
           }
         }
       }
@@ -326,7 +326,7 @@ class RepresenteeController @Inject() (
           _ =>
             controllers.returns.triage.routes.CommonTriageQuestionsController
               .whoIsIndividualRepresenting(),
-          _ => routes.RepresenteeController.checkYourAnswers()
+          _ => representeeRoutes.RepresenteeController.checkYourAnswers()
         )
         Ok(
           isFirstReturnPage(
@@ -351,7 +351,7 @@ class RepresenteeController @Inject() (
                 _ =>
                   controllers.returns.triage.routes.CommonTriageQuestionsController
                     .whoIsIndividualRepresenting(),
-                _ => routes.RepresenteeController.checkYourAnswers()
+                _ => representeeRoutes.RepresenteeController.checkYourAnswers()
               )
 
               BadRequest(
@@ -366,7 +366,7 @@ class RepresenteeController @Inject() (
             },
             isFirstReturn =>
               if (answers.fold(_.isFirstReturn, c => Some(c.isFirstReturn)).contains(isFirstReturn)) {
-                Redirect(routes.RepresenteeController.checkYourAnswers())
+                Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
               } else {
                 val newAnswers = IncompleteRepresenteeAnswers.empty.copy(isFirstReturn = Some(isFirstReturn))
 
@@ -378,7 +378,7 @@ class RepresenteeController @Inject() (
                     logger.warn("Could not update session or draft return", e)
                     errorHandler.errorResult()
                   },
-                  _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+                  _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
                 )
               }
           )
@@ -395,11 +395,11 @@ class RepresenteeController @Inject() (
             val backLink = answers.fold(
               _ =>
                 representativeType match {
-                  case Capacitor                                                      => routes.RepresenteeController.enterName()
+                  case Capacitor                                                      => representeeRoutes.RepresenteeController.enterName()
                   case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
-                    routes.RepresenteeController.enterDateOfDeath()
+                    representeeRoutes.RepresenteeController.enterDateOfDeath()
                 },
-              _ => routes.RepresenteeController.checkYourAnswers()
+              _ => representeeRoutes.RepresenteeController.checkYourAnswers()
             )
             val form     =
               answers.fold(_.id, c => Some(c.id)).fold(idForm)(idForm.fill)
@@ -418,17 +418,17 @@ class RepresenteeController @Inject() (
           withNotTooManyUnsuccessfulNameMatchAttempts(ggCredId) { unsuccessfulNameMatchAttempts =>
             answers.fold(_.name, c => Some(c.name)) match {
               case None =>
-                Redirect(routes.RepresenteeController.checkYourAnswers())
+                Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
 
               case Some(name) =>
                 lazy val backLink = answers.fold(
                   _ =>
                     representativeType match {
-                      case Capacitor                                                      => routes.RepresenteeController.enterName()
+                      case Capacitor                                                      => representeeRoutes.RepresenteeController.enterName()
                       case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
-                        routes.RepresenteeController.enterDateOfDeath()
+                        representeeRoutes.RepresenteeController.enterDateOfDeath()
                     },
-                  _ => routes.RepresenteeController.checkYourAnswers()
+                  _ => representeeRoutes.RepresenteeController.checkYourAnswers()
                 )
 
                 val result = for {
@@ -450,7 +450,7 @@ class RepresenteeController @Inject() (
                                          unsuccessfulNameMatchAttempts,
                                          request.messages.lang
                                        )
-                                       .leftMap(ServiceError)
+                                       .leftMap(ServiceError.apply)
                                  )
                   _         <- updateDraftReturnAndSession(
                                  IncompleteRepresenteeAnswers.empty.copy(
@@ -477,7 +477,7 @@ class RepresenteeController @Inject() (
                     case ServiceError(e)                 =>
                       handleNameMatchServiceError(e)
                   },
-                  _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+                  _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
                 )
             }
           }
@@ -497,7 +497,7 @@ class RepresenteeController @Inject() (
               case NameMatchServiceError.TooManyUnsuccessfulAttempts() => Ok(tooManyNameMatchFailuresPage())
               case other                                               => handleNameMatchServiceError(other)
             },
-            _ => Redirect(routes.RepresenteeController.enterName())
+            _ => Redirect(representeeRoutes.RepresenteeController.enterName())
           )
       }
     }
@@ -508,7 +508,7 @@ class RepresenteeController @Inject() (
         withIsFirstReturn(answers) { _ =>
           representativeType match {
             case Capacitor                                                      =>
-              Redirect(routes.RepresenteeController.checkYourAnswers())
+              Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
             case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
               val allowedDateOfDeath = TimeUtils.getMaximumDateForDisposalsAndCompletion(
                 viewConfig.futureDatesEnabled,
@@ -519,8 +519,8 @@ class RepresenteeController @Inject() (
                   .fold(_.dateOfDeath, c => c.dateOfDeath)
                   .fold(dateOfDeathForm(allowedDateOfDeath))(dateOfDeathForm(allowedDateOfDeath).fill(_))
               val backLink           = answers.fold(
-                _ => routes.RepresenteeController.enterName(),
-                _ => routes.RepresenteeController.checkYourAnswers()
+                _ => representeeRoutes.RepresenteeController.enterName(),
+                _ => representeeRoutes.RepresenteeController.checkYourAnswers()
               )
               Ok(enterDateOfDeathPage(form, backLink, journey.isRight, journey.fold(_ => false, _.isAmendReturn)))
           }
@@ -534,11 +534,11 @@ class RepresenteeController @Inject() (
         withIsFirstReturn(answers) { isFirstReturn =>
           representativeType match {
             case Capacitor                                                      =>
-              Redirect(routes.RepresenteeController.checkYourAnswers())
+              Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
             case PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin =>
               lazy val backLink      = answers.fold(
-                _ => routes.RepresenteeController.enterName(),
-                _ => routes.RepresenteeController.checkYourAnswers()
+                _ => representeeRoutes.RepresenteeController.enterName(),
+                _ => representeeRoutes.RepresenteeController.checkYourAnswers()
               )
               val allowedDateOfDeath = TimeUtils.getMaximumDateForDisposalsAndCompletion(
                 viewConfig.futureDatesEnabled,
@@ -562,7 +562,7 @@ class RepresenteeController @Inject() (
                         .fold(_.dateOfDeath, c => c.dateOfDeath)
                         .contains(dateOfDeath)
                     ) {
-                      Redirect(routes.RepresenteeController.checkYourAnswers())
+                      Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
                     } else {
                       val newAnswers =
                         IncompleteRepresenteeAnswers.empty.copy(
@@ -577,7 +577,7 @@ class RepresenteeController @Inject() (
                         },
                         _ =>
                           Redirect(
-                            routes.RepresenteeController.checkYourAnswers()
+                            representeeRoutes.RepresenteeController.checkYourAnswers()
                           )
                       )
                     }
@@ -593,11 +593,11 @@ class RepresenteeController @Inject() (
         answers
           .fold(i => i.contactDetails, c => Some(c.contactDetails)) match {
           case None =>
-            Redirect(routes.RepresenteeController.checkYourAnswers())
+            Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
           case _    =>
             val backLink = answers.fold(
-              _ => routes.RepresenteeController.checkContactDetails(),
-              _ => routes.RepresenteeController.checkYourAnswers()
+              _ => representeeRoutes.RepresenteeController.checkContactDetails(),
+              _ => representeeRoutes.RepresenteeController.checkYourAnswers()
             )
 
             Ok(
@@ -616,8 +616,8 @@ class RepresenteeController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (_, journey, answers) =>
         val backLink = answers.fold(
-          _ => routes.RepresenteeController.checkContactDetails(),
-          _ => routes.RepresenteeController.checkYourAnswers()
+          _ => representeeRoutes.RepresenteeController.checkContactDetails(),
+          _ => representeeRoutes.RepresenteeController.checkYourAnswers()
         )
         ContactName.form
           .bindFromRequest()
@@ -640,7 +640,7 @@ class RepresenteeController @Inject() (
                   )
                   .contains(contactName)
               ) {
-                Redirect(routes.RepresenteeController.checkYourAnswers())
+                Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
               } else {
                 val newAnswers =
                   answers.fold(
@@ -672,7 +672,7 @@ class RepresenteeController @Inject() (
                     logger.warn("Could not update draft return", e)
                     errorHandler.errorResult()
                   },
-                  _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+                  _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
                 )
               }
           )
@@ -729,10 +729,10 @@ class RepresenteeController @Inject() (
                 logger.warn("Could not update draft return or session", e)
                 errorHandler.errorResult()
               },
-              _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+              _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
             )
 
-          case _ => Redirect(routes.RepresenteeController.checkYourAnswers())
+          case _ => Redirect(representeeRoutes.RepresenteeController.checkYourAnswers())
         }
       }
     }
@@ -745,7 +745,7 @@ class RepresenteeController @Inject() (
   def nameMatchErrorSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCapacitorOrPersonalRepresentativeAnswers(request) { (_, _, _) =>
-        Redirect(routes.RepresenteeController.enterName())
+        Redirect(representeeRoutes.RepresenteeController.enterName())
       }
     }
 
@@ -754,7 +754,7 @@ class RepresenteeController @Inject() (
     currentJourney: Either[StartingNewDraftReturn, FillingOutReturn],
     clearDraftReturn: Boolean = true
   )(implicit
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   ): EitherT[Future, Error, Unit] = {
     val newJourney =
       currentJourney.bimap(
@@ -801,7 +801,7 @@ class RepresenteeController @Inject() (
              returnsService.storeDraftReturn(_)
            )
       _ <- EitherT(
-             updateSession(sessionStore, request)(
+             updateSession(sessionStore, request.toSession)(
                _.copy(journeyStatus = Some(newJourney.merge))
              )
            )
@@ -813,16 +813,16 @@ class RepresenteeController @Inject() (
       withCapacitorOrPersonalRepresentativeAnswers(request) { (representativeType, journey, answers) =>
         answers match {
           case IncompleteRepresenteeAnswers(_, _, _, _, _, _, None) =>
-            Redirect(routes.RepresenteeController.isFirstReturn())
+            Redirect(representeeRoutes.RepresenteeController.isFirstReturn())
 
           case IncompleteRepresenteeAnswers(None, _, _, _, _, _, _) =>
-            Redirect(routes.RepresenteeController.enterName())
+            Redirect(representeeRoutes.RepresenteeController.enterName())
 
           case IncompleteRepresenteeAnswers(_, _, None, _, _, _, _) if representativeType =!= Capacitor =>
-            Redirect(routes.RepresenteeController.enterDateOfDeath())
+            Redirect(representeeRoutes.RepresenteeController.enterDateOfDeath())
 
           case IncompleteRepresenteeAnswers(_, None, _, _, _, _, _) =>
-            Redirect(routes.RepresenteeController.enterId())
+            Redirect(representeeRoutes.RepresenteeController.enterId())
 
           case IncompleteRepresenteeAnswers(
                 Some(_),
@@ -833,7 +833,7 @@ class RepresenteeController @Inject() (
                 _,
                 _
               ) =>
-            Redirect(routes.RepresenteeController.confirmPerson())
+            Redirect(representeeRoutes.RepresenteeController.confirmPerson())
 
           case IncompleteRepresenteeAnswers(
                 _,
@@ -844,7 +844,7 @@ class RepresenteeController @Inject() (
                 hasConfirmedContactDetails,
                 _
               ) if contactDetails.isEmpty || !hasConfirmedContactDetails =>
-            Redirect(routes.RepresenteeController.checkContactDetails())
+            Redirect(representeeRoutes.RepresenteeController.checkContactDetails())
 
           case IncompleteRepresenteeAnswers(
                 Some(name),
@@ -909,8 +909,8 @@ class RepresenteeController @Inject() (
     }
 
   private def handleNameMatchServiceError(
-    nameMatchError: NameMatchServiceError[_]
-  )(implicit request: RequestWithSessionData[_]): Result =
+    nameMatchError: NameMatchServiceError[?]
+  )(implicit request: RequestWithSessionData[?]): Result =
     nameMatchError match {
       case NameMatchServiceError.BackendError(error) =>
         logger
@@ -921,10 +921,10 @@ class RepresenteeController @Inject() (
         logger.info(
           s"Name match failed: ${u.unsuccessfulAttempts.toString} attempts made out of a maximum ${u.maximumAttempts.toString}"
         )
-        Redirect(routes.RepresenteeController.nameMatchError())
+        Redirect(representeeRoutes.RepresenteeController.nameMatchError())
 
       case NameMatchServiceError.TooManyUnsuccessfulAttempts() =>
-        Redirect(routes.RepresenteeController.tooManyNameMatchAttempts())
+        Redirect(representeeRoutes.RepresenteeController.tooManyNameMatchAttempts())
     }
 }
 
@@ -1018,7 +1018,7 @@ object RepresenteeController {
         CgtReference.mapping
           .withPrefix(cgtReferenceId)
           .bind(data)
-          .map(RepresenteeCgtReference)
+          .map(RepresenteeCgtReference.apply)
       )
 
     val formatter =

@@ -17,10 +17,9 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import julienrf.json.derived
 import monocle.Lens
-import monocle.macros.Lenses
-import play.api.libs.json.OFormat
+import monocle.macros.GenLens
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 
 sealed trait ReliefDetailsAnswers extends Product with Serializable
@@ -28,7 +27,6 @@ sealed trait ReliefDetailsAnswers extends Product with Serializable
 @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
 object ReliefDetailsAnswers {
 
-  @Lenses
   final case class IncompleteReliefDetailsAnswers(
     privateResidentsRelief: Option[AmountInPence],
     lettingsRelief: Option[AmountInPence],
@@ -36,6 +34,11 @@ object ReliefDetailsAnswers {
   ) extends ReliefDetailsAnswers
 
   object IncompleteReliefDetailsAnswers {
+
+    val otherReliefs           = GenLens[IncompleteReliefDetailsAnswers](_.otherReliefs)
+    val lettingsRelief         = GenLens[IncompleteReliefDetailsAnswers](_.lettingsRelief)
+    val privateResidentsRelief = GenLens[IncompleteReliefDetailsAnswers](_.privateResidentsRelief)
+
     val empty: IncompleteReliefDetailsAnswers =
       IncompleteReliefDetailsAnswers(None, None, None)
 
@@ -69,7 +72,7 @@ object ReliefDetailsAnswers {
     def unset[A](
       fieldLens: IncompleteReliefDetailsAnswers.type => Lens[IncompleteReliefDetailsAnswers, Option[A]]
     ): IncompleteReliefDetailsAnswers =
-      fieldLens(IncompleteReliefDetailsAnswers).set(None)(
+      fieldLens(IncompleteReliefDetailsAnswers).replace(None)(
         fold(identity, IncompleteReliefDetailsAnswers.fromCompleteAnswers)
       )
 
@@ -84,6 +87,30 @@ object ReliefDetailsAnswers {
 
   implicit val eq: Eq[ReliefDetailsAnswers] = Eq.fromUniversalEquals
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  implicit val format: OFormat[ReliefDetailsAnswers] = derived.oformat()
+  implicit val completeFormat: OFormat[CompleteReliefDetailsAnswers]     = Json.format[CompleteReliefDetailsAnswers]
+  implicit val inCompleteFormat: OFormat[IncompleteReliefDetailsAnswers] = Json.format[IncompleteReliefDetailsAnswers]
+
+  implicit val format: OFormat[ReliefDetailsAnswers] = new OFormat[ReliefDetailsAnswers] {
+    import play.api.libs.json._
+    override def reads(json: JsValue): JsResult[ReliefDetailsAnswers] = json match {
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head match {
+          case ("IncompleteReliefDetailsAnswers", value) =>
+            value.validate[IncompleteReliefDetailsAnswers]
+          case ("CompleteReliefDetailsAnswers", value)   =>
+            value.validate[CompleteReliefDetailsAnswers]
+          case (other, _)                                =>
+            JsError(s"Unrecognized ReliefDetailsAnswers type: $other")
+        }
+      case _                                    =>
+        JsError("Expected ReliefDetailsAnswers wrapper object with a single entry")
+    }
+
+    override def writes(a: ReliefDetailsAnswers): JsObject = a match {
+      case i: IncompleteReliefDetailsAnswers =>
+        Json.obj("IncompleteReliefDetailsAnswers" -> Json.toJson(i))
+      case c: CompleteReliefDetailsAnswers   =>
+        Json.obj("CompleteReliefDetailsAnswers" -> Json.toJson(c))
+    }
+  }
 }

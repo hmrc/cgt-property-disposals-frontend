@@ -52,7 +52,7 @@
         taxYear: TaxYear,
         isAmend: Boolean,
         taxableGainOrLossCalculation: Option[(TaxableGainOrLossCalculation, CompleteExemptionAndLossesAnswers)]
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 @key = @{ "taxableGainOrLoss" }
 @gainKey = @{ "taxableGain" }
 @lossKey = @{ "netLoss" }

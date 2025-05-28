@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,21 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
+import org.scalacheck.Arbitrary
+import io.github.martinhh.derived.scalacheck.*
+import io.github.martinhh.derived.scalacheck.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.{RegistrationDetails, SubscribedUpdateDetails, SubscriptionDetails}
 
 object OnboardingDetailsGen extends GenUtils {
 
-  implicit val registrationDetailsArb: Gen[RegistrationDetails] =
-    gen[RegistrationDetails]
+  given registrationDetailsGen: Gen[RegistrationDetails] = gen[RegistrationDetails]
 
-  implicit val subscriptionDetailsArb: Gen[SubscriptionDetails] =
-    gen[SubscriptionDetails]
+  given subscriptionDetailsGen: Gen[SubscriptionDetails] = gen[SubscriptionDetails]
 
-  implicit val subscribedUpdateDetailsGen: Gen[SubscribedUpdateDetails] =
-    gen[SubscribedUpdateDetails]
+  given subscribedUpdateDetailsGen: Gen[SubscribedUpdateDetails] = gen[SubscribedUpdateDetails]
 
 }

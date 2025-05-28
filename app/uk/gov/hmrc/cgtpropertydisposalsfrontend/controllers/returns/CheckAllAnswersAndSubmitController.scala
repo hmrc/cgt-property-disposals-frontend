@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, toFuture}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
@@ -71,7 +71,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   private def withFurtherReturnCalculationEligibilityCheck(fillingOutReturn: FillingOutReturn)(
     f: Option[FurtherReturnCalculationEligibility] => Future[Result]
-  )(implicit r: RequestWithSessionData[_]): Future[Result] = {
+  )(implicit r: RequestWithSessionData[?]): Future[Result] = {
     val furtherReturnCalculationEligibilityCheck =
       if (fillingOutReturn.isFurtherOrAmendReturn.contains(true)) {
         furtherReturnCalculationEligibilityUtil
@@ -134,7 +134,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
             val result =
               for {
                 _               <- EitherT(
-                                     updateSession(sessionStore, request)(
+                                     updateSession(sessionStore, request.toSession)(
                                        _.copy(journeyStatus =
                                          Some(
                                            SubmittingReturn(
@@ -174,7 +174,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                                        )
                                    }
                 _               <- EitherT(
-                                     updateSession(sessionStore, request)(
+                                     updateSession(sessionStore, request.toSession)(
                                        _.copy(journeyStatus = Some(newJourneyStatus))
                                      )
                                    )
@@ -227,8 +227,8 @@ class CheckAllAnswersAndSubmitController @Inject() (
         language
       )
       .bimap(
-        SubmitReturnError,
-        SubmitReturnSuccess
+        SubmitReturnError.apply,
+        SubmitReturnSuccess.apply
       )
       .merge
 
@@ -282,7 +282,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     }
 
   private def withJustSubmittedReturn(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   )(f: JustSubmittedReturn => Future[Result]): Future[Result] =
     request.sessionData.flatMap(_.journeyStatus) match {
       case Some(j: JustSubmittedReturn) => f(j)
@@ -290,7 +290,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     }
 
   private def withSubmitReturnFailesOrSubscribed(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   )(
     f: Either[SubmitReturnFailed, Subscribed] => Future[Result]
   ): Future[Result] =
@@ -302,7 +302,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
 
   private def withGeneratedCGTReference(
     completeReturn: CompleteReturn
-  )(f: CompleteReturn => Future[Result])(implicit request: RequestWithSessionData[_]) =
+  )(f: CompleteReturn => Future[Result])(implicit request: RequestWithSessionData[?]) =
     completeReturn.representeeAnswers match {
       case Some(a @ CompleteRepresenteeAnswers(_, NoReferenceId, _, _, _)) =>
         subscriptionService
@@ -333,7 +333,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
     }
 
   private def withCompleteDraftReturn(
-    request: RequestWithSessionData[_]
+    request: RequestWithSessionData[?]
   )(
     f: (SessionData, FillingOutReturn, CompleteReturn) => Future[Result]
   ): Future[Result] =

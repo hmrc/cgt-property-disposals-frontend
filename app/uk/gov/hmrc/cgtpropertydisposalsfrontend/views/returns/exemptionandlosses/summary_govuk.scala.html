@@ -39,7 +39,7 @@
     representativeType: Option[RepresentativeType],
     isFurtherOrAmendReturn: Option[Boolean],
     showAnnualExemptAmount: Boolean
-)(implicit messages: Messages, request: RequestWithSessionData[_])
+)(implicit messages: Messages, request: RequestWithSessionData[?])
 
 @furtherReturnKey = @{ if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else "" }
 

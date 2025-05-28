@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids
 
 import play.api.libs.json.{Json, OFormat}
 
-final case class AgentReferenceNumber(value: String) extends AnyVal
+final case class AgentReferenceNumber(value: String)
 
 object AgentReferenceNumber {
 

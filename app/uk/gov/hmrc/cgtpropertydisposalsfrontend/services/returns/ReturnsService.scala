@@ -53,7 +53,7 @@ trait ReturnsService {
     fillingOutReturn: FillingOutReturn
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, Unit]
 
   def getDraftReturns(
@@ -100,7 +100,7 @@ class ReturnsServiceImpl @Inject() (
     fillingOutReturn: FillingOutReturn
   )(implicit
     hc: HeaderCarrier,
-    request: Request[_]
+    request: Request[?]
   ): EitherT[Future, Error, Unit] =
     if (fillingOutReturn.isAmendReturn) {
       EitherT.pure(())

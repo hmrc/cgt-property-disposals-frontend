@@ -119,7 +119,7 @@ class UKAddressLookupServiceImpl @Inject() (
       )
   }
 
-  def mkString(p: RawAddress) = p.lines.mkString(" ").toLowerCase()
+  def mkString(p: RawAddress): String = p.lines.mkString(" ").toLowerCase()
 
   // Find numbers in proposed address in order of significance, from rightmost to leftmost.
   // Pad with None to ensure we never return an empty sequence

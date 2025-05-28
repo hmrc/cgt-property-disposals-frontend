@@ -30,7 +30,7 @@
         viewHelpers: ViewHelpers,
         govukRadios: GovukRadios
 )
-@(form: Form[EntityType], backLink: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[EntityType], backLink: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @toMessage(entityType: EntityType) = @{
   entityType match {

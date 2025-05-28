@@ -17,20 +17,20 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
+import io.github.martinhh.derived.scalacheck.given
+
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{AcquisitionDate, AcquisitionMethod}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
 
 object AcquisitionDetailsGen extends GenUtils {
 
-  implicit val completeAcquisitionDetailsAnswersGen: Gen[CompleteAcquisitionDetailsAnswers] =
+  given completeAcquisitionDetailsAnswersGen: Gen[CompleteAcquisitionDetailsAnswers] =
     gen[CompleteAcquisitionDetailsAnswers]
 
-  implicit val incompleteAcquisitionDetailsAnswersGen: Gen[IncompleteAcquisitionDetailsAnswers] =
+  given incompleteAcquisitionDetailsAnswersGen: Gen[IncompleteAcquisitionDetailsAnswers] =
     gen[IncompleteAcquisitionDetailsAnswers]
 
-  implicit val acquisitionMethodGen: Gen[AcquisitionMethod] =
-    gen[AcquisitionMethod]
+  given acquisitionMethodGen: Gen[AcquisitionMethod] = gen[AcquisitionMethod]
 
-  implicit val acquisitionDateGen: Gen[AcquisitionDate] = gen[AcquisitionDate]
-
+  given acquisitionDateGen: Gen[AcquisitionDate] = gen[AcquisitionDate]
 }

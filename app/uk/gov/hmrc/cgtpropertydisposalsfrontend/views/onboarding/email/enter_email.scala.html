@@ -31,7 +31,7 @@
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk
 )
 
-@(form: Form[SubmitEmailDetails], emailJourneyType: EmailJourneyType, backLink: Option[Call], submit: Call)(implicit request: RequestWithSessionData[_], messages: Messages)
+@(form: Form[SubmitEmailDetails], emailJourneyType: EmailJourneyType, backLink: Option[Call], submit: Call)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"email"}
 @title = @{ messages("email.title") }

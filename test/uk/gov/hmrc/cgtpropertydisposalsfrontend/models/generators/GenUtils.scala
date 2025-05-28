@@ -16,12 +16,12 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.{Arbitrary, Gen, ScalacheckShapeless}
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.stringGen
 
 import java.time.{Instant, LocalDate, LocalDateTime, ZoneId}
 
-trait GenUtils extends ScalacheckShapeless {
+trait GenUtils {
   def gen[A](implicit arb: Arbitrary[A]): Gen[A] = arb.arbitrary
 
   // define our own Arbitrary instance for String to generate more legible strings

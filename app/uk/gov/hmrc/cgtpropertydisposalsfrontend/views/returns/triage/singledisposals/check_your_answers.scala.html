@@ -36,7 +36,7 @@
     isATrust: Boolean,
     representativeType: Option[RepresentativeType],
     representeeAnswers: Option[RepresenteeAnswers]
-)(implicit request: RequestWithSessionData[_], messages:Messages)
+)(implicit request: RequestWithSessionData[?], messages:Messages)
 
 @title = @{messages("triage.check-your-answers.title")}
 

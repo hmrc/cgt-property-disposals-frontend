@@ -43,7 +43,7 @@
         isATrust: Boolean,
         wasUkResident: Boolean,
         isMultiple: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages, viewConfig: ViewConfig)
+)(implicit request: RequestWithSessionData[?], messages: Messages, viewConfig: ViewConfig)
 
 @key = @{
     "nonCalculatedTaxDue"

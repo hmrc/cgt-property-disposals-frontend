@@ -42,7 +42,7 @@
     taxYear: TaxYear,
     hideEstimatesQuestion: Boolean,
         wasUkResident: Boolean
-)(implicit request: RequestWithSessionData[_], messages: Messages)
+)(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @isAgent = @{ request.userType.contains(UserType.Agent) }
 @userKey = @{
