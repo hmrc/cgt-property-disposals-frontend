@@ -4548,6 +4548,9 @@ class YearToDateLiabilityControllerSpec
             "taxableGainOrLoss.pageTitle",
             { doc =>
               doc
+                .select("label[for='taxableGainOrLoss']")
+                .text()                            shouldBe messageFromMessageKey("taxableGainOrLoss.gain.label")
+              doc
                 .select("#taxableGainOrLoss-2")
                 .attr("checked")                   shouldBe ""
               doc.select("#netLoss").attr("value") shouldBe "1"
@@ -4566,10 +4569,15 @@ class YearToDateLiabilityControllerSpec
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
             "taxableGainOrLoss.pageTitle",
-            doc =>
+            { doc =>
+              doc
+                .select("label[for='taxableGainOrLoss-3']")
+                .text() shouldBe messageFromMessageKey("taxableGainOrLoss.noLossOrGain.label")
+
               doc
                 .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
+            }
           )
         }
 
@@ -4607,10 +4615,44 @@ class YearToDateLiabilityControllerSpec
             )._1,
             routes.YearToDateLiabilityController.checkYourAnswers(),
             "taxableGainOrLoss.pageTitle",
-            doc =>
+            { doc =>
+              doc
+                .select("label[for='taxableGainOrLoss-3']")
+                .text() shouldBe messageFromMessageKey(
+                "taxableGainOrLoss.personalRepInPeriodOfAdmin.noLossOrGain.label"
+              )
+
               doc
                 .select("#taxableGainOrLoss-3")
                 .hasAttr("checked")
+            }
+          )
+        }
+
+        "the user is a capacitor in period of admin for a multiple disposals journey" in {
+          test(
+            sessionWithMultipleDisposalsState(
+              Some(
+                sample[CompleteNonCalculatedYTDAnswers]
+                  .copy(taxableGainOrLoss = AmountInPence(0L))
+              ),
+              UserType.Individual,
+              wasUkResident = true,
+              individualUserType = Some(Capacitor)
+            )._1,
+            routes.YearToDateLiabilityController.checkYourAnswers(),
+            "taxableGainOrLoss.pageTitle",
+            { doc =>
+              doc
+                .select("label[for='taxableGainOrLoss-3']")
+                .text() shouldBe messageFromMessageKey(
+                "taxableGainOrLoss.capacitor.noLossOrGain.label"
+              )
+
+              doc
+                .select("#taxableGainOrLoss-3")
+                .hasAttr("checked")
+            }
           )
         }
 
