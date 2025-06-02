@@ -31,14 +31,18 @@ object AddressSource {
 
   implicit val format: Format[AddressSource] = new Format[AddressSource] {
     override def reads(json: JsValue): JsResult[AddressSource] = json match {
-      case JsString("BusinessPartnerRecord") => JsSuccess(BusinessPartnerRecord)
-      case JsString("ManuallyEntered")       => JsSuccess(ManuallyEntered)
-      case _                                 => JsError("Invalid address source")
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "ManuallyEntered"       => JsSuccess(ManuallyEntered)
+          case "BusinessPartnerRecord" => JsSuccess(BusinessPartnerRecord)
+          case other                   => JsError(s"Unknown AddressSource: $other")
+        }
+      case _                                    => JsError("Expected wrapper object for AddressSource")
     }
 
-    override def writes(o: AddressSource): JsValue = o match {
-      case BusinessPartnerRecord => JsString("BusinessPartnerRecord")
-      case ManuallyEntered       => JsString("ManuallyEntered")
+    override def writes(o: AddressSource): JsObject = o match {
+      case ManuallyEntered       => Json.obj("ManuallyEntered" -> Json.obj())
+      case BusinessPartnerRecord => Json.obj("BusinessPartnerRecord" -> Json.obj())
     }
   }
 }
