@@ -31,14 +31,18 @@ object NumberOfProperties {
 
   implicit val format: Format[NumberOfProperties] = new Format[NumberOfProperties] {
     override def reads(json: JsValue): JsResult[NumberOfProperties] = json match {
-      case JsString("One")         => JsSuccess(One)
-      case JsString("MoreThanOne") => JsSuccess(MoreThanOne)
-      case _                       => JsError("Invalid number of properties")
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "One"         => JsSuccess(One)
+          case "MoreThanOne" => JsSuccess(MoreThanOne)
+          case other         => JsError(s"Unknown NumberOfProperties: $other")
+        }
+      case _                                    => JsError("Expected wrapper object for NumberOfProperties")
     }
 
-    override def writes(o: NumberOfProperties): JsValue = o match {
-      case One         => JsString("One")
-      case MoreThanOne => JsString("MoreThanOne")
+    override def writes(o: NumberOfProperties): JsObject = o match {
+      case One         => Json.obj("One" -> Json.obj())
+      case MoreThanOne => Json.obj("MoreThanOne" -> Json.obj())
     }
   }
 

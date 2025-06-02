@@ -36,14 +36,18 @@ object NeedMoreDetailsDetails {
 
     implicit val format: Format[AffinityGroup] = new Format[AffinityGroup] {
       override def reads(json: JsValue): JsResult[AffinityGroup] = json match {
-        case JsString("Individual")   => JsSuccess(Individual)
-        case JsString("Organisation") => JsSuccess(Organisation)
-        case _                        => JsError("Invalid affinity group")
+        case JsObject(fields) if fields.size == 1 =>
+          fields.head._1 match {
+            case "Individual"   => JsSuccess(Individual)
+            case "Organisation" => JsSuccess(Organisation)
+            case other          => JsError(s"Invalid affinity group: $other")
+          }
+        case _                                    => JsError("Expected wrapper object for AffinityGroup")
       }
 
-      override def writes(o: AffinityGroup): JsValue = o match {
-        case Individual   => JsString("Individual")
-        case Organisation => JsString("Organisation")
+      override def writes(o: AffinityGroup): JsObject = o match {
+        case Individual   => Json.obj("Individual" -> Json.obj())
+        case Organisation => Json.obj("Organisation" -> Json.obj())
       }
     }
   }

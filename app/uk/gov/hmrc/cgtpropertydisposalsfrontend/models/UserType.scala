@@ -32,14 +32,23 @@ object UserType {
 
   implicit val format: Format[UserType] = new Format[UserType] {
     override def reads(json: JsValue): JsResult[UserType] = json match {
-      case JsString("Individual")               => JsSuccess(Individual)
-      case JsString("Organisation")             => JsSuccess(Organisation)
-      case JsString("NonGovernmentGatewayUser") => JsSuccess(NonGovernmentGatewayUser)
-      case JsString("Agent")                    => JsSuccess(Agent)
-      case _                                    => JsError("Invalid user type")
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "Individual"               => JsSuccess(Individual)
+          case "Organisation"             => JsSuccess(Organisation)
+          case "NonGovernmentGatewayUser" => JsSuccess(NonGovernmentGatewayUser)
+          case "Agent"                    => JsSuccess(Agent)
+          case other                      => JsError(s"Unknown UserType: $other")
+        }
+      case _                                    => JsError("Expected wrapper object for UserType")
     }
 
-    override def writes(o: UserType): JsValue = JsString(o.toString)
+    override def writes(o: UserType): JsObject = o match {
+      case Individual               => Json.obj("Individual" -> Json.obj())
+      case Organisation             => Json.obj("Organisation" -> Json.obj())
+      case NonGovernmentGatewayUser => Json.obj("NonGovernmentGatewayUser" -> Json.obj())
+      case Agent                    => Json.obj("Agent" -> Json.obj())
+    }
   }
 
 }

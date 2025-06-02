@@ -31,14 +31,18 @@ object ContactNameSource {
 
   implicit val format: Format[ContactNameSource] = new Format[ContactNameSource] {
     override def reads(json: JsValue): JsResult[ContactNameSource] = json match {
-      case JsString("DerivedFromBusinessPartnerRecord") => JsSuccess(DerivedFromBusinessPartnerRecord)
-      case JsString("ManuallyEntered")                  => JsSuccess(ManuallyEntered)
-      case _                                            => JsError("Invalid contact name source")
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "ManuallyEntered"                  => JsSuccess(ManuallyEntered)
+          case "DerivedFromBusinessPartnerRecord" => JsSuccess(DerivedFromBusinessPartnerRecord)
+          case other                              => JsError(s"Unknown contact name source: $other")
+        }
+      case _                                    => JsError("Expected wrapper object for ContactNameSource")
     }
 
-    override def writes(o: ContactNameSource): JsValue = o match {
-      case DerivedFromBusinessPartnerRecord => JsString("DerivedFromBusinessPartnerRecord")
-      case ManuallyEntered                  => JsString("ManuallyEntered")
+    override def writes(o: ContactNameSource): JsObject = o match {
+      case ManuallyEntered                  => Json.obj("ManuallyEntered" -> Json.obj())
+      case DerivedFromBusinessPartnerRecord => Json.obj("DerivedFromBusinessPartnerRecord" -> Json.obj())
     }
   }
 

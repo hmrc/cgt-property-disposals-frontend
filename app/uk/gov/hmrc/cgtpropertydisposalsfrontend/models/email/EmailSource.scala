@@ -33,16 +33,20 @@ object EmailSource {
 
   implicit val format: Format[EmailSource] = new Format[EmailSource] {
     override def reads(json: JsValue): JsResult[EmailSource] = json match {
-      case JsString("GovernmentGateway")     => JsSuccess(GovernmentGateway)
-      case JsString("BusinessPartnerRecord") => JsSuccess(BusinessPartnerRecord)
-      case JsString("ManuallyEntered")       => JsSuccess(ManuallyEntered)
-      case _                                 => JsError("Invalid email source")
+      case JsObject(fields) if fields.size == 1 =>
+        fields.head._1 match {
+          case "ManuallyEntered"       => JsSuccess(ManuallyEntered)
+          case "GovernmentGateway"     => JsSuccess(GovernmentGateway)
+          case "BusinessPartnerRecord" => JsSuccess(BusinessPartnerRecord)
+          case other                   => JsError(s"Unknown AddressSource: $other")
+        }
+      case _                                    => JsError("Expected wrapper object for AddressSource")
     }
 
-    override def writes(o: EmailSource): JsValue = o match {
-      case GovernmentGateway     => JsString("GovernmentGateway")
-      case BusinessPartnerRecord => JsString("BusinessPartnerRecord")
-      case ManuallyEntered       => JsString("ManuallyEntered")
+    override def writes(o: EmailSource): JsObject = o match {
+      case ManuallyEntered       => Json.obj("ManuallyEntered" -> Json.obj())
+      case GovernmentGateway     => Json.obj("GovernmentGateway" -> Json.obj())
+      case BusinessPartnerRecord => Json.obj("BusinessPartnerRecord" -> Json.obj())
     }
   }
 
