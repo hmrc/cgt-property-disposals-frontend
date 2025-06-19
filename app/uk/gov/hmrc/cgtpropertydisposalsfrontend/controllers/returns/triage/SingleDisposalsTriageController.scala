@@ -522,7 +522,7 @@ class SingleDisposalsTriageController @Inject() (
                     )
 
                     val result = existingDisposalDate match {
-                      case Some(existingDate) if existingDate.value === date =>
+                      case Some(existingDate) if existingDate.value === date && existingDate.taxYear.contains(date) =>
                         EitherT.pure[Future, Error](Some(existingDate.taxYear))
 
                       case _ =>
@@ -1152,9 +1152,10 @@ class SingleDisposalsTriageController @Inject() (
                   { date =>
                     val existingDisposalDate = triageAnswers.fold(_.disposalDate, c => Some(c.disposalDate))
                     val result               = existingDisposalDate match {
-                      case Some(existingDate) if existingDate.value === date.value =>
+                      case Some(existingDate)
+                          if existingDate.value === date.value && existingDate.taxYear.contains(date.value) =>
                         EitherT.pure[Future, Error](Some(existingDate.taxYear))
-                      case _                                                       =>
+                      case _ =>
                         for {
                           taxYear                         <- taxYearService.taxYear(date.value)
                           updatedDisposalDate              = updateDisposalDate(date.value, taxYear, triageAnswers)
