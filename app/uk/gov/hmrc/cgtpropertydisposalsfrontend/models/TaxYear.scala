@@ -60,6 +60,9 @@ object TaxYear {
         if (futureTaxYearsEnabled) TimeUtils.today().plusYears(1L) else TimeUtils.today()
       today < taxTear.endDateExclusive && today >= taxTear.startDateInclusive
     }
+
+    def contains(date: LocalDate): Boolean =
+      date >= taxTear.startDateInclusive && date < taxTear.endDateExclusive
   }
 
 }

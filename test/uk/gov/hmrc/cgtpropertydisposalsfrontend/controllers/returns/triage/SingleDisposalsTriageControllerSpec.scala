@@ -2221,6 +2221,38 @@ class SingleDisposalsTriageControllerSpec
 
           }
 
+          "the user has incomplete draft with incorrect disposal tax year" in {
+            val disposalDate    = LocalDate.of(2025, 4, 7)
+            val taxYear         = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(2024, 4, 6),
+              endDateExclusive = LocalDate.of(2025, 4, 6)
+            )
+            val expectedTaxYear = taxYear.copy(
+              startDateInclusive = LocalDate.of(2025, 4, 6),
+              endDateExclusive = LocalDate.of(2026, 4, 6)
+            )
+
+            val prevAnswers = requiredPreviousAnswers.copy(
+              disposalDate = Some(DisposalDate(disposalDate, taxYear))
+            )
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              prevAnswers,
+              formData(disposalDate),
+              prevAnswers.copy(
+                assetType = Some(AssetType.Residential),
+                disposalDate = Some(DisposalDate(disposalDate, expectedTaxYear))
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(disposalDate)(Right(Some(expectedTaxYear))),
+              Some(sample[CompleteRepresenteeAnswers].copy(dateOfDeath = Some(DateOfDeath(LocalDate.of(1800, 1, 1)))))
+            )
+          }
+
           "a tax year can be found and the journey was complete" in {
             val completeJourney =
               sample[CompleteSingleDisposalTriageAnswers]
@@ -4575,6 +4607,54 @@ class SingleDisposalsTriageControllerSpec
                 routes.SingleDisposalsTriageController.checkYourAnswers()
               ),
               () => mockGetTaxYear(date)(Right(Some(taxYear)))
+            )
+
+          }
+
+          "invalid tax year was found with disposal date and the journey was complete" in {
+
+            val disposalDate    = LocalDate.of(2025, 4, 7)
+            val taxYear         = sample[TaxYear].copy(
+              startDateInclusive = LocalDate.of(2024, 4, 6),
+              endDateExclusive = LocalDate.of(2025, 4, 6)
+            )
+            val expectedTaxYear = taxYear.copy(
+              startDateInclusive = LocalDate.of(2025, 4, 6),
+              endDateExclusive = LocalDate.of(2026, 4, 6)
+            )
+
+            val completeJourney = sample[CompleteSingleDisposalTriageAnswers].copy(
+              individualUserType = Some(Self),
+              disposalDate = DisposalDate(disposalDate, taxYear),
+              completionDate = CompletionDate(disposalDate),
+              assetType = IndirectDisposal,
+              disposalMethod = DisposalMethod.Sold,
+              alreadySentSelfAssessment = None
+            )
+
+            val date = disposalDate.minusDays(1L)
+
+            testSuccessfulUpdateStartingNewDraft(
+              performAction,
+              completeJourney,
+              formData(date),
+              IncompleteSingleDisposalTriageAnswers(
+                completeJourney.individualUserType,
+                hasConfirmedSingleDisposal = true,
+                Some(completeJourney.disposalMethod),
+                Some(completeJourney.countryOfResidence.isUk),
+                if (completeJourney.countryOfResidence.isUk) None else Some(completeJourney.countryOfResidence),
+                Some(completeJourney.assetType),
+                Some(DisposalDate(date, expectedTaxYear)),
+                completeJourney.alreadySentSelfAssessment,
+                Some(CompletionDate(date)),
+                None
+              ),
+              checkIsRedirect(
+                _,
+                routes.SingleDisposalsTriageController.checkYourAnswers()
+              ),
+              () => mockGetTaxYear(date)(Right(Some(expectedTaxYear)))
             )
 
           }
