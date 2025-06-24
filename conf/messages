@@ -3484,13 +3484,13 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.error.invalid=Select
 
 taxableGainOrLoss.cyaChange=if an overall gain or loss was made on the property sale or disposal
 
-taxableGainOrLoss.gain.label=Yes, I made an overall gain
-taxableGainOrLoss.agent.gain.label=Yes, my client made an overall gain
-taxableGainOrLoss.trust.gain.label=Yes, the trust made an overall gain
-taxableGainOrLoss.capacitor.gain.label=Yes, the person made an overall gain
-taxableGainOrLoss.personalRep.gain.label=Yes, the person made an overall gain
-taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Yes, the estate made an overall gain
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=Yes, the estate made an overall gain
+taxableGainOrLoss.gain.label=I made an overall gain
+taxableGainOrLoss.agent.gain.label=My client made an overall gain
+taxableGainOrLoss.trust.gain.label=The trust made an overall gain
+taxableGainOrLoss.capacitor.gain.label=The person made an overall gain
+taxableGainOrLoss.personalRep.gain.label=The person made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=The estate made an overall gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=The estate made an overall gain
 
 taxableGain.label=Amount of overall gain
 
@@ -3504,13 +3504,13 @@ taxableGainOrLoss.calculated.gain.prompt=Enter a net gain of <strong class="bold
 taxableGainOrLoss.calculated.loss.prompt=Enter a net loss of <strong class="bold">{0}</strong> if you agree with these workings.
 taxableGainOrLoss.calculated.noGainOrLoss.prompt=Select <strong class="bold">‘No net gain or loss’</strong> if you agree with these workings.
 
-taxableGainOrLoss.loss.label=No, I made an overall loss
-taxableGainOrLoss.agent.loss.label=No, my client made an overall loss
-taxableGainOrLoss.trust.loss.label=No, the trust made an overall loss
-taxableGainOrLoss.capacitor.loss.label=No, the person made an overall loss
-taxableGainOrLoss.personalRep.loss.label=No, the person made an overall loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.loss.label=No, the estate made an overall loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.loss.label=No, the estate made an overall loss
+taxableGainOrLoss.loss.label=I made an overall loss
+taxableGainOrLoss.agent.loss.label=My client made an overall loss
+taxableGainOrLoss.trust.loss.label=The trust made an overall loss
+taxableGainOrLoss.capacitor.loss.label=The person made an overall loss
+taxableGainOrLoss.personalRep.loss.label=The person made an overall loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.loss.label=The estate made an overall loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.loss.label=The estate made an overall loss
 
 netLoss.label=Amount of overall loss
 
@@ -3520,7 +3520,13 @@ netLoss.error.tooSmall=Overall loss must be an amount of money between 0 and 50,
 netLoss.error.tooLarge=Overall loss must be an amount of money between 0 and 50,000,000,000
 netLoss.error.tooManyDecimals=Overall loss must be an amount of money with pence as 2 decimal places or less, like 4,820.54 or 539
 
-taxableGainOrLoss.noLossOrGain.label=No overall gain or loss
+taxableGainOrLoss.noLossOrGain.label=I did not make an overall gain or loss
+taxableGainOrLoss.agent.noLossOrGain.label=My client did not make an overall gain or loss
+taxableGainOrLoss.trust.noLossOrGain.label=The trust did not make an overall gain or loss
+taxableGainOrLoss.capacitor.noLossOrGain.label=The person did not make an overall gain or loss
+taxableGainOrLoss.personalRep.noLossOrGain.label=The person did not make an overall gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.noLossOrGain.label=The estate did not make an overall gain or loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.noLossOrGain.label=The estate did not make an overall gain or loss
 
 taxableGainOrLoss.furtherReturn.title=Enter your net gain or loss
 taxableGainOrLoss.agent.furtherReturn.title=Enter your client’s net gain or loss
@@ -3577,21 +3583,21 @@ taxableGainOrLoss.personalRep.furtherReturn.link=How to work out the person’s 
 taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.link=How to work out the person’s overall Capital Gains Tax liability on UK property-related disposals
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.link=How to work out your client’s overall Capital Gains Tax liability on UK property-related disposals
 
-taxableGainOrLoss.furtherReturn.gain.label=Yes, I made a net gain
-taxableGainOrLoss.agent.furtherReturn.gain.label=Yes, they made a net gain
-taxableGainOrLoss.trust.furtherReturn.gain.label=Yes, it made a net gain
-taxableGainOrLoss.capacitor.furtherReturn.gain.label=Yes, they made a net gain
-taxableGainOrLoss.personalRep.furtherReturn.gain.label=Yes, they made a net gain
-taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.gain.label=Yes, it made a net gain
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.gain.label=Yes, they made a net gain
+taxableGainOrLoss.furtherReturn.gain.label=I made a net gain
+taxableGainOrLoss.agent.furtherReturn.gain.label=They made a net gain
+taxableGainOrLoss.trust.furtherReturn.gain.label=They made a net gain
+taxableGainOrLoss.capacitor.furtherReturn.gain.label=They made a net gain
+taxableGainOrLoss.personalRep.furtherReturn.gain.label=They made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.gain.label=They made a net gain
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.gain.label=They made a net gain
 
-taxableGainOrLoss.furtherReturn.loss.label=No, I made a net loss
-taxableGainOrLoss.agent.furtherReturn.loss.label=No, they made a net loss
-taxableGainOrLoss.trust.furtherReturn.loss.label=No, it made a net loss
-taxableGainOrLoss.capacitor.furtherReturn.loss.label=No, they made a net loss
-taxableGainOrLoss.personalRep.furtherReturn.loss.label=No, they made a net loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.loss.label=No, it made a net loss
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.loss.label=No, they made a net loss
+taxableGainOrLoss.furtherReturn.loss.label=I made a net loss
+taxableGainOrLoss.agent.furtherReturn.loss.label=They made a net loss
+taxableGainOrLoss.trust.furtherReturn.loss.label=They made a net loss
+taxableGainOrLoss.capacitor.furtherReturn.loss.label=They made a net loss
+taxableGainOrLoss.personalRep.furtherReturn.loss.label=They made a net loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.loss.label=They made a net loss
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.loss.label=They made a net loss
 
 taxableGain.furtherReturn.label=Amount of net gain
 netLoss.furtherReturn.label=Amount of net loss
@@ -4973,12 +4979,12 @@ gainOrLossAfterReliefs.calculated.noGainOrLoss.notSelf.prompt=Select <strong cla
 
 gainOrLossAfterReliefs.calculated.promptEnding=If you do not agree with these workings you can enter a different amount.
 
-gainOrLossAfterReliefs.gain.outerLabel=Yes, I made a gain
-gainOrLossAfterReliefs.loss.outerLabel=No, I made a loss
+gainOrLossAfterReliefs.gain.outerLabel=I made a gain
+gainOrLossAfterReliefs.loss.outerLabel=I made a loss
 gainOrLossAfterReliefs.noLossOrGain.outerLabel=I made no gain or loss after reliefs
 
-gainOrLossAfterReliefs.gain.notSelf.outerLabel=Yes, they made a gain
-gainOrLossAfterReliefs.loss.notSelf.outerLabel=No, they made a loss
+gainOrLossAfterReliefs.gain.notSelf.outerLabel=They made a gain
+gainOrLossAfterReliefs.loss.notSelf.outerLabel=They made a loss
 gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel=They made no gain or loss after reliefs
 
 gainOrLossAfterReliefs.gain.innerLabel=Amount of gain

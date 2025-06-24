@@ -3486,13 +3486,13 @@ taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.multiple.error.invalid=Dewisw
 
 taxableGainOrLoss.cyaChange=os gwnaed ennill neu golled gyffredinol wrth werthu neu waredu’r eiddo
 
-taxableGainOrLoss.gain.label=Iawn, gwnes i ennill cyffredinol
-taxableGainOrLoss.agent.gain.label=Iawn, gwnaeth fy nghleient ennill cyffredinol
-taxableGainOrLoss.trust.gain.label=Iawn, gwnaeth yr ymddiriedolaeth ennill cyffredinol
-taxableGainOrLoss.capacitor.gain.label=Iawn, gwnaeth y person ennill cyffredinol
-taxableGainOrLoss.personalRep.gain.label=Iawn, gwnaeth y person ennill cyffredinol
-taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Iawn, gwnaeth yr ystâd ennill cyffredinol
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=Iawn, gwnaeth yr ystâd ennill cyffredinol
+taxableGainOrLoss.gain.label=Gwnes i enillion cyffredinol
+taxableGainOrLoss.agent.gain.label=Gwnaeth fy nghleient enillion cyffredinol
+taxableGainOrLoss.trust.gain.label=Gwnaeth yr ymddiriedolaeth enillion cyffredinol
+taxableGainOrLoss.capacitor.gain.label=Gwnaeth y person enillion cyffredinol
+taxableGainOrLoss.personalRep.gain.label=Gwnaeth y person enillion cyffredinol
+taxableGainOrLoss.personalRepInPeriodOfAdmin.gain.label=Gwnaeth yr ystâd enillion cyffredinol
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.gain.label=Gwnaeth yr ystâd enillion cyffredinol
 
 taxableGain.label=Swm yr ennill cyffredinol
 
@@ -3506,13 +3506,13 @@ taxableGainOrLoss.calculated.gain.prompt=Nodwch ennill net o <strong class="bold
 taxableGainOrLoss.calculated.loss.prompt=Nodwch golled net o <strong class="bold">{0}</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 taxableGainOrLoss.calculated.noGainOrLoss.prompt=Dewiswch <strong class="bold">‘Dim ennill na cholled net’</strong> os ydych yn cytuno â’r cyfrifiadau hyn.
 
-taxableGainOrLoss.loss.label=Na, gwnes i golled gyffredinol
-taxableGainOrLoss.agent.loss.label=Na, gwnaeth fy nghleient golled gyffredinol
-taxableGainOrLoss.trust.loss.label=Na, gwnaeth yr ymddiriedolaeth golled gyffredinol
-taxableGainOrLoss.capacitor.loss.label=Na, gwnaeth y person golled gyffredinol
-taxableGainOrLoss.personalRep.loss.label=Na, gwnaeth y person golled gyffredinol
-taxableGainOrLoss.personalRepInPeriodOfAdmin.loss.label=Na, gwnaeth yr ystâd golled gyffredinol
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.loss.label=Na, gwnaeth yr ystâd golled gyffredinol
+taxableGainOrLoss.loss.label=Gwnes i golled gyffredinol
+taxableGainOrLoss.agent.loss.label=Gwnaeth fy nghleient golled gyffredinol
+taxableGainOrLoss.trust.loss.label=Gwnaeth yr ymddiriedolaeth golled gyffredinol
+taxableGainOrLoss.capacitor.loss.label=Gwnaeth y person golled gyffredinol
+taxableGainOrLoss.personalRep.loss.label=Gwnaeth y person golled gyffredinol
+taxableGainOrLoss.personalRepInPeriodOfAdmin.loss.label=Gwnaeth yr ystâd golled gyffredinol
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.loss.label=Gwnaeth yr ystâd golled gyffredinol
 
 netLoss.label=Swm y golled gyffredinol
 
@@ -3522,7 +3522,14 @@ netLoss.error.tooSmall=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian
 netLoss.error.tooLarge=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian rhwng 0 a 50,000,000,000
 netLoss.error.tooManyDecimals=Mae’n rhaid i’r golled gyffredinol fod yn swm o arian gydag uchafswm o 2 le degol ar gyfer ceiniogau, megis 4,820.54 neu 539
 
-taxableGainOrLoss.noLossOrGain.label=Dim ennill na cholled gyffredinol
+taxableGainOrLoss.noLossOrGain.label=Ni wnes i enillion neu golled gyffredinol
+taxableGainOrLoss.agent.noLossOrGain.label=Ni wnaeth fy nghleient enillion neu golled gyffredinol
+taxableGainOrLoss.trust.noLossOrGain.label=Ni wnaeth yr ymddiriedolaeth enillion neu golled gyffredinol
+taxableGainOrLoss.capacitor.noLossOrGain.label=Ni wnaeth y person enillion neu golled gyffredinol
+taxableGainOrLoss.personalRep.noLossOrGain.label=Ni wnaeth y person enillion neu golled gyffredinol
+taxableGainOrLoss.personalRepInPeriodOfAdmin.noLossOrGain.label=Ni wnaeth yr ystâd enillion neu golled gyffredinol
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.noLossOrGain.label=Ni wnaeth yr ystâd enillion neu golled gyffredinol
+
 
 taxableGainOrLoss.furtherReturn.title=Nodwch eich ennill neu golled net
 taxableGainOrLoss.agent.furtherReturn.title=Nodwch ennill neu golled net eich cleient
@@ -3579,21 +3586,21 @@ taxableGainOrLoss.personalRep.furtherReturn.link=Sut i gyfrifo rhwymedigaeth Tre
 taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.link=Sut i gyfrifo rhwymedigaeth Treth Enillion Cyfalaf gyffredinol y person ar warediadau sy’n gysylltiedig ag eiddo yn y DU
 taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.link=Sut i gyfrifo rhwymedigaeth Treth Enillion Cyfalaf gyffredinol eich cleient ar warediadau sy’n gysylltiedig ag eiddo yn y DU
 
-taxableGainOrLoss.furtherReturn.gain.label=Iawn, gwnes i ennill net
-taxableGainOrLoss.agent.furtherReturn.gain.label=Iawn, gwnaeth ennill net
-taxableGainOrLoss.trust.furtherReturn.gain.label=Iawn, gwnaeth ennill net
-taxableGainOrLoss.capacitor.furtherReturn.gain.label=Iawn, gwnaeth ennill net
-taxableGainOrLoss.personalRep.furtherReturn.gain.label=Iawn, gwnaeth ennill net
-taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.gain.label=Iawn, gwnaeth ennill net
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.gain.label=Iawn, gwnaeth ennill net
+taxableGainOrLoss.furtherReturn.gain.label=Gwnes i enillion net
+taxableGainOrLoss.agent.furtherReturn.gain.label=Roedd yna enillion net
+taxableGainOrLoss.trust.furtherReturn.gain.label=Roedd yna enillion net
+taxableGainOrLoss.capacitor.furtherReturn.gain.label=Roedd yna enillion net
+taxableGainOrLoss.personalRep.furtherReturn.gain.label=Roedd yna enillion net
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.gain.label=Roedd yna enillion net
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.gain.label=Roedd yna enillion net
 
-taxableGainOrLoss.furtherReturn.loss.label=Na, gwnes i golled net
-taxableGainOrLoss.agent.furtherReturn.loss.label=Na, gwnaeth golled net
-taxableGainOrLoss.trust.furtherReturn.loss.label=Na, gwnaeth golled net
-taxableGainOrLoss.capacitor.furtherReturn.loss.label=Na, gwnaeth golled net
-taxableGainOrLoss.personalRep.furtherReturn.loss.label=Na, gwnaeth golled net
-taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.loss.label=Na, gwnaeth golled net
-taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.loss.label=Na, gwnaeth golled net
+taxableGainOrLoss.furtherReturn.loss.label=Gwnes i golled net
+taxableGainOrLoss.agent.furtherReturn.loss.label=Roedd yna golled net
+taxableGainOrLoss.trust.furtherReturn.loss.label=Roedd yna golled net
+taxableGainOrLoss.capacitor.furtherReturn.loss.label=Roedd yna golled net
+taxableGainOrLoss.personalRep.furtherReturn.loss.label=Roedd yna golled net
+taxableGainOrLoss.personalRepInPeriodOfAdmin.furtherReturn.loss.label=Roedd yna golled net
+taxableGainOrLoss.personalRepInPeriodOfAdmin.agent.furtherReturn.loss.label=Roedd yna golled net
 
 taxableGain.furtherReturn.label=Swm yr ennill net
 netLoss.furtherReturn.label=Swm y golled net
@@ -4975,12 +4982,12 @@ gainOrLossAfterReliefs.calculated.noGainOrLoss.notSelf.prompt=Dewiswch <strong c
 
 gainOrLossAfterReliefs.calculated.promptEnding=Os nad ydych yn cytuno â’r cyfrifiadau hyn gallwch nodi swm gwahanol.
 
-gainOrLossAfterReliefs.gain.outerLabel=Do, fe wnes i enillion
-gainOrLossAfterReliefs.loss.outerLabel=Naddo, fe wnes i golled
+gainOrLossAfterReliefs.gain.outerLabel=Gwnes i enillion
+gainOrLossAfterReliefs.loss.outerLabel=Gwnes i golled
 gainOrLossAfterReliefs.noLossOrGain.outerLabel=Ni wnes i unrhyw enillion na cholled ar ôl rhyddhad
 
-gainOrLossAfterReliefs.gain.notSelf.outerLabel=Do, gwnaeth enillion
-gainOrLossAfterReliefs.loss.notSelf.outerLabel=Naddo, gwnaeth golled
+gainOrLossAfterReliefs.gain.notSelf.outerLabel=Roedd yna enillion
+gainOrLossAfterReliefs.loss.notSelf.outerLabel=Roedd yna golled
 gainOrLossAfterReliefs.noLossOrGain.notSelf.outerLabel=Ni wnaeth unrhyw enillion na cholled ar ôl rhyddhad
 
 gainOrLossAfterReliefs.gain.innerLabel=Swm yr enillion
