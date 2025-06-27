@@ -829,6 +829,9 @@ class GainOrLossAfterReliefsControllerSpec
                 { doc =>
                   doc.text() shouldNot include(messageFromMessageKey("calculator.privateResidenceRelief"))
                   doc.text() shouldNot include(messageFromMessageKey("calculator.lettingRelief"))
+                  doc
+                    .select("label[for='gainOrLossAfterReliefs-3']")
+                    .text() shouldBe messageFromMessageKey("gainOrLossAfterReliefs.noLossOrGain.outerLabel")
 
                   doc
                     .select("#main-content form")

@@ -155,7 +155,7 @@
             conditionalHtml = Some(lossContent)
           ),
           RadioItem(
-            content = Text(messages(s"$key.noLossOrGain.label")),
+            content = Text(messages(s"$key$userKey.noLossOrGain.label")),
             value = Some("2"),
             checked = form.data.get(key).contains("2")
           )
