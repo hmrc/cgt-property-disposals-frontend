@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.{Arbitrary, Gen}
-import io.github.martinhh.derived.scalacheck.{*, given}
+import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given

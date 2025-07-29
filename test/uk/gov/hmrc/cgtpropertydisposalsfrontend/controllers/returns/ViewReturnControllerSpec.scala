@@ -43,7 +43,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.format
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.PaymentMethod.DirectDebit
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
@@ -113,7 +112,7 @@ class ViewReturnControllerSpec
           _: Option[LocalDate],
           _: Call,
           _: Call
-        )(
+        )(using
           _: HeaderCarrier,
           _: Request[?]
         )

@@ -1145,14 +1145,14 @@ object PropertyDetailsController {
   private val hasValidPostcodeForm =
     Form(
       mapping(
-        "hasValidPostcode" -> of(BooleanFormatter.formatter)
+        "hasValidPostcode" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
   private val hasUPRNForm =
     Form(
       mapping(
-        "doesPropertyHaveUPRN" -> of(BooleanFormatter.formatter)
+        "doesPropertyHaveUPRN" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
@@ -1185,7 +1185,7 @@ object PropertyDetailsController {
     val key = "multipleDisposalsDisposalDate"
     Form(
       mapping(
-        "" -> of(
+        "" -> of(using
           TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             Some(minimumDateInclusive),
@@ -1211,7 +1211,7 @@ object PropertyDetailsController {
   val disposalPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "multipleDisposalsDisposalPrice" -> of(
+        "multipleDisposalsDisposalPrice" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
@@ -1221,7 +1221,7 @@ object PropertyDetailsController {
   val acquisitionPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "multipleDisposalsAcquisitionPrice" -> of(
+        "multipleDisposalsAcquisitionPrice" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )

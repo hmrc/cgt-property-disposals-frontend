@@ -49,7 +49,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils, PaymentsJourney}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen.given
@@ -58,7 +57,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndL
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
@@ -167,7 +165,7 @@ class CheckAllAnswersAndSubmitControllerSpec
     lang: Lang
   )(response: Either[Error, SubmitReturnResponse]) =
     (mockReturnsService
-      .submitReturn(_: SubmitReturnRequest, _: Lang)(_: HeaderCarrier))
+      .submitReturn(_: SubmitReturnRequest, _: Lang)(using _: HeaderCarrier))
       .expects(submitReturnRequest, lang, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -188,7 +186,7 @@ class CheckAllAnswersAndSubmitControllerSpec
           _: Option[LocalDate],
           _: Call,
           _: Call
-        )(
+        )(using
           _: HeaderCarrier,
           _: Request[?]
         )
@@ -205,7 +203,7 @@ class CheckAllAnswersAndSubmitControllerSpec
       .registerWithoutIdAndSubscribe(
         _: CompleteRepresenteeAnswers,
         _: Lang
-      )(
+      )(using
         _: HeaderCarrier
       ))
       .expects(completeRepresenteeAnswers, lang, *)

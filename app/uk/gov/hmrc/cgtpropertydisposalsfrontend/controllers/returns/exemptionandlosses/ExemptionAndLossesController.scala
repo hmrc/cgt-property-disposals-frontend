@@ -663,7 +663,7 @@ object ExemptionAndLossesController {
   ) =
     Form(
       mapping(
-        "annualExemptAmount" -> of(
+        "annualExemptAmount" -> of(using
           MoneyUtils.amountInPoundsFormatter(
             _ < 0,
             _ > maximumAnnualExemptAmount.inPounds()

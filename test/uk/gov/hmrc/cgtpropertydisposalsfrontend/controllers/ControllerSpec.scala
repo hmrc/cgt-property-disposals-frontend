@@ -131,7 +131,7 @@ trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll wi
   }
 
   def messageFromMessageKey(messageKey: String, args: Any*)(implicit messagesApi: MessagesApi): String = {
-    val m = messagesApi(messageKey, args*)(lang)
+    val m = messagesApi(messageKey, args*)(using lang)
     if (m === messageKey) sys.error(s"Message key `$messageKey` is missing a message")
     m
   }

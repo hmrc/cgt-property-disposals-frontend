@@ -1919,7 +1919,7 @@ object SingleDisposalsTriageController {
 
   val whoAreYouReportingForForm: Form[IndividualUserType] = Form(
     mapping(
-      "individualUserType" -> of(
+      "individualUserType" -> of(using
         FormUtils.radioFormFormatter(
           List(Self, Capacitor, PersonalRepresentative)
         )
@@ -1929,7 +1929,7 @@ object SingleDisposalsTriageController {
 
   val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
     mapping(
-      "numberOfProperties" -> of(
+      "numberOfProperties" -> of(using
         FormUtils
           .radioFormFormatter(List(One, MoreThanOne))
       )
@@ -1938,7 +1938,7 @@ object SingleDisposalsTriageController {
 
   private val disposalMethodForm = Form(
     mapping(
-      "disposalMethod" -> of(
+      "disposalMethod" -> of(using
         FormUtils
           .radioFormFormatter(List(Sold, Gifted, Other))
       )
@@ -1947,13 +1947,13 @@ object SingleDisposalsTriageController {
 
   val wasAUkResidentForm: Form[Boolean] = Form(
     mapping(
-      "wereYouAUKResident" -> of(BooleanFormatter.formatter)
+      "wereYouAUKResident" -> of(using BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 
   private val wasResidentialPropertyForm = Form(
     mapping(
-      "didYouDisposeOfResidentialProperty" -> of(BooleanFormatter.formatter)
+      "didYouDisposeOfResidentialProperty" -> of(using BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 
@@ -1963,7 +1963,7 @@ object SingleDisposalsTriageController {
   ): Form[LocalDate] =
     Form(
       mapping(
-        "" -> of(
+        "" -> of(using
           TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             None,
@@ -1991,7 +1991,7 @@ object SingleDisposalsTriageController {
   ): Form[CompletionDate] =
     Form(
       mapping(
-        "" -> of(
+        "" -> of(using
           TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             Some(disposalDate.value),
@@ -2006,13 +2006,13 @@ object SingleDisposalsTriageController {
 
   val countryOfResidenceForm: Form[Country] = Form(
     mapping(
-      "countryCode" -> of(Country.formatter)
+      "countryCode" -> of(using Country.formatter)
     )(identity)(Some(_))
   )
 
   val assetTypeForNonUkResidentsForm: Form[AssetType] = Form(
     mapping(
-      "assetTypeForNonUkResidents" -> of(
+      "assetTypeForNonUkResidents" -> of(using
         FormUtils.radioFormFormatter(
           List(Residential, NonResidential, MixedUse, IndirectDisposal)
         )

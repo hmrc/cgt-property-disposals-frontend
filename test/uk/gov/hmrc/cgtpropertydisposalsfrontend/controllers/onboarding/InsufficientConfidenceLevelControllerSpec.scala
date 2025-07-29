@@ -112,7 +112,7 @@ class InsufficientConfidenceLevelControllerSpec
           _: GGCredId,
           _: Option[UnsuccessfulNameMatchAttempts[IndividualSautrNameMatchDetails]],
           _: Lang
-        )(
+        )(using
           _: HeaderCarrier,
           _: Request[?]
         )

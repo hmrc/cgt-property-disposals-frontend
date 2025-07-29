@@ -29,7 +29,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.Registratio
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.EmailJourneyType.Onboarding.EnteringRegistrationEmail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailSource}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.ContactName
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.RegistrationDetails

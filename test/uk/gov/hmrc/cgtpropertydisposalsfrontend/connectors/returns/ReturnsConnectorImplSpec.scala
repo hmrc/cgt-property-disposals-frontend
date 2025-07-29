@@ -276,8 +276,8 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to calculate tax due" must {
-      val response                  = sample(calculatedTaxDueGen)
-      val calculateCgtTaxDueRequest = sample(calculateCgtTaxDueRequestGen)
+      val response                  = sample(using calculatedTaxDueGen)
+      val calculateCgtTaxDueRequest = sample(using calculateCgtTaxDueRequestGen)
 
       "call the right endpoint with calculate tax due body" in {
         stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
@@ -304,8 +304,8 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to calculate taxable gain or loss" must {
-      val response                            = sample(taxableGainOrLossCalculationGen)
-      val taxableGainOrLossCalculationRequest = sample(taxableGainOrLossCalculationRequestGen)
+      val response                            = sample(using taxableGainOrLossCalculationGen)
+      val taxableGainOrLossCalculationRequest = sample(using taxableGainOrLossCalculationRequestGen)
 
       "call the right endpoint with calculate taxable gain or loss body" in {
         stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
@@ -341,8 +341,8 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to calculate year to date liability" must {
-      val response                              = sample(yearToDateLiabilityCalculationGen)
-      val yearToDateLiabilityCalculationRequest = sample(yearToDateLiabilityCalculationRequestGen)
+      val response                              = sample(using yearToDateLiabilityCalculationGen)
+      val yearToDateLiabilityCalculationRequest = sample(using yearToDateLiabilityCalculationRequestGen)
 
       "call the right endpoint with calculate year to date liability body" in {
         stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
@@ -378,7 +378,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to get taxYear" must {
-      val response = TaxYearResponse(Option(sample(taxYearGen)))
+      val response = TaxYearResponse(Option(sample(using taxYearGen)))
       val date     = LocalDate.now()
 
       "call the right endpoint with tax Year body" in {

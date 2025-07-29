@@ -179,7 +179,7 @@ class SingleDisposalsTriageControllerSpec
     date: LocalDate
   )(response: Either[Error, Option[TaxYear]]) =
     (mockTaxYearService
-      .taxYear(_: LocalDate)(_: HeaderCarrier))
+      .taxYear(_: LocalDate)(using _: HeaderCarrier))
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
 

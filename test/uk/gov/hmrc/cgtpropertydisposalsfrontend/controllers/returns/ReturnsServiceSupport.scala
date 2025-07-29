@@ -43,7 +43,7 @@ trait ReturnsServiceSupport { this: MockFactory =>
     (mockReturnsService
       .storeDraftReturn(
         _: FillingOutReturn
-      )(
+      )(using
         _: HeaderCarrier,
         _: Request[?]
       ))
@@ -60,7 +60,7 @@ trait ReturnsServiceSupport { this: MockFactory =>
       .displayReturn(
         _: CgtReference,
         _: String
-      )(
+      )(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, submissionId, *)

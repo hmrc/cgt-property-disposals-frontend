@@ -24,7 +24,6 @@ import play.api.test.FakeRequest
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.amend.routes.{AmendReturnController => amendRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.*

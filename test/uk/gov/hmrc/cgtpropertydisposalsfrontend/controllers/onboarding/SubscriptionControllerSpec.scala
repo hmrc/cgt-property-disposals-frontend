@@ -79,7 +79,7 @@ class SubscriptionControllerSpec
     expectedLang: Lang
   )(response: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
-      .subscribe(_: SubscriptionDetails, _: Lang)(_: HeaderCarrier))
+      .subscribe(_: SubscriptionDetails, _: Lang)(using _: HeaderCarrier))
       .expects(expectedSubscriptionDetails, expectedLang, *)
       .returning(EitherT(Future.successful(response)))
 

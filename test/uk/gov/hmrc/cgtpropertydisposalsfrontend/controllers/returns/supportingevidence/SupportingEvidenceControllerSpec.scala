@@ -84,7 +84,7 @@ class SupportingEvidenceControllerSpec
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .initiate(_: Call, _: UploadReference => Call)(_: HeaderCarrier))
+      .initiate(_: Call, _: UploadReference => Call)(using _: HeaderCarrier))
       .expects(
         where {
           (
@@ -106,7 +106,7 @@ class SupportingEvidenceControllerSpec
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
+      .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
       .expects(uploadReference, *)
       .returning(EitherT.fromEither[Future](result))
 

@@ -18,7 +18,6 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
 import org.scalacheck.Gen
 import org.scalacheck.Arbitrary
-import io.github.martinhh.derived.scalacheck.*
 import io.github.martinhh.derived.scalacheck.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.EmailGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given

@@ -434,14 +434,14 @@ object InsufficientConfidenceLevelController {
   private val haveANinoForm =
     Form(
       mapping(
-        "hasNino" -> of(BooleanFormatter.formatter)
+        "hasNino" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
   private val hasSaUtrForm =
     Form(
       mapping(
-        "hasSaUtr" -> of(BooleanFormatter.formatter)
+        "hasSaUtr" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 

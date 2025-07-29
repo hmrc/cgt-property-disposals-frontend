@@ -63,7 +63,7 @@ class NameMatchRetryStoreImpl @Inject() (
       ttl = expireAfter,
       timestampSupport = timeStampSupport,
       cacheIdType = CacheIdType.SimpleCacheId
-    )(ec)
+    )(using ec)
   }
 
   val sessionKey = "bpr-name-match-retries"

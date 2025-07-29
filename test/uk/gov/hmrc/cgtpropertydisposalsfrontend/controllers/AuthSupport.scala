@@ -43,13 +43,13 @@ trait AuthSupport {
     instanceOf[Configuration],
     instanceOf[ErrorHandler],
     mockSessionStore
-  )(instanceOf[ExecutionContext])
+  )(using instanceOf[ExecutionContext])
 
   def mockAuth[R](predicate: Predicate, retrieval: Retrieval[R])(
     result: Future[R]
   ): Unit =
     (mockAuthConnector
-      .authorise(_: Predicate, _: Retrieval[R])(
+      .authorise(_: Predicate, _: Retrieval[R])(using
         _: HeaderCarrier,
         _: ExecutionContext
       ))

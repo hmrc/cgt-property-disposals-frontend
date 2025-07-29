@@ -47,7 +47,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturn
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.*
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.*
@@ -103,7 +102,7 @@ class StartControllerSpec
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (mockBprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(using
         _: HeaderCarrier
       ))
       .expects(request, lang, *)
@@ -113,7 +112,7 @@ class StartControllerSpec
     response: Either[Error, Option[CgtReference]]
   ) =
     (mockSubscriptionService
-      .hasFailedCgtEnrolment()(_: HeaderCarrier))
+      .hasFailedCgtEnrolment()(using _: HeaderCarrier))
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
@@ -121,7 +120,7 @@ class StartControllerSpec
     cgtReference: CgtReference
   )(response: Either[Error, Option[SubscribedDetails]]) =
     (mockSubscriptionService
-      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .getSubscribedDetails(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
@@ -132,7 +131,7 @@ class StartControllerSpec
     response: Either[Error, List[DraftSingleDisposalReturn]]
   ) =
     (mockReturnsService
-      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(
+      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, sentReturns, *)
@@ -145,7 +144,7 @@ class StartControllerSpec
     response: Either[Error, (Boolean, List[ReturnSummary])]
   ) =
     (mockReturnsService
-      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(
+      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, sentReturns, *)
@@ -157,7 +156,7 @@ class StartControllerSpec
     transactionName: String
   ) =
     (mockAuditService
-      .sendEvent(_: String, _: A, _: String)(
+      .sendEvent(_: String, _: A, _: String)(using
         _: ExecutionContext,
         _: HeaderCarrier,
         _: Writes[A],
@@ -170,7 +169,7 @@ class StartControllerSpec
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
-      .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .listReturns(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 

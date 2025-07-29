@@ -35,7 +35,7 @@ trait BusinessPartnerRecordServiceSupport {
     lang: Lang
   ): Unit =
     (mockBusinessPartnerRecordService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(using
         _: HeaderCarrier
       ))
       .expects(businessPartnerRecordRequest, lang, *)
