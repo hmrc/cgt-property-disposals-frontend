@@ -55,7 +55,7 @@ object CompleteReturnGen extends LowerPriorityCompleteReturnGen {
 
 trait LowerPriorityCompleteReturnGen extends Common {
 
-  implicit val completeMultipleDisposalsReturnGen: Gen[CompleteMultipleDisposalsReturn] = for {
+  given completeMultipleDisposalsReturnGen: Gen[CompleteMultipleDisposalsReturn] = for {
     triageAnswers                 <- TriageQuestionsGen.completeMultipleDisposalsTriageAnswersGen
     examplePropertyDetailsAnswers <- ExamplePropertyDetailsAnswersGen.completeExamplePropertyDetailsAnswersGen
     exemptionAndLossesAnswers     <- exemptionAndLossesAnswers
@@ -75,7 +75,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
     hasAttachments
   )
 
-  implicit val completeSingleIndirectDisposalReturnGen: Gen[CompleteSingleIndirectDisposalReturn] =
+  given completeSingleIndirectDisposalReturnGen: Gen[CompleteSingleIndirectDisposalReturn] =
     for {
       triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       companyAddress             <- AddressGen.addressGen
@@ -100,7 +100,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
       hasAttachments
     )
 
-  implicit val completeMultipleIndirectDisposalReturnGen: Gen[CompleteMultipleIndirectDisposalReturn] = for {
+  given completeMultipleIndirectDisposalReturnGen: Gen[CompleteMultipleIndirectDisposalReturn] = for {
     triageAnswers                <- TriageQuestionsGen.completeMultipleDisposalsTriageAnswersGen
     exampleCompanyDetailsAnswers <- ExampleCompanyDetailsAnswersGen.completeExampleCompanyDetailsAnswersGen
     exemptionsAndLossesDetails   <- exemptionAndLossesAnswers
@@ -120,7 +120,7 @@ trait LowerPriorityCompleteReturnGen extends Common {
     hasAttachments
   )
 
-  implicit val completeSingleMixedUseDisposalReturnGen: Gen[CompleteSingleMixedUseDisposalReturn] =
+  given completeSingleMixedUseDisposalReturnGen: Gen[CompleteSingleMixedUseDisposalReturn] =
     for {
       triageAnswers              <- TriageQuestionsGen.completeSingleDisposalTriageAnswersGen
       propertyDetailsAnswers     <- SingleMixedUseDetailsAnswersGen.given_Gen_CompleteMixedUsePropertyDetailsAnswers
