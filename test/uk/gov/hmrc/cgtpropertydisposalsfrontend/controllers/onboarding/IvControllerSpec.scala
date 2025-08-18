@@ -60,7 +60,7 @@ class IvControllerSpec extends ControllerSpec with AuthSupport with SessionSuppo
     journeyId: UUID
   )(result: Either[Error, IvErrorStatus]) =
     (mockIvService
-      .getFailedJourneyStatus(_: UUID)(_: HeaderCarrier))
+      .getFailedJourneyStatus(_: UUID)(using _: HeaderCarrier))
       .expects(journeyId, *)
       .returning(EitherT.fromEither[Future](result))
 

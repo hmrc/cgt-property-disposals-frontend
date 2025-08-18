@@ -37,7 +37,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.ChargeType.{Penal
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AddressGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.CompleteReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
@@ -97,7 +96,7 @@ class HomePageControllerSpec
     response: Either[Error, List[DraftReturn]]
   ) =
     (mockReturnsService
-      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(
+      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, sentReturns, *)
@@ -110,7 +109,7 @@ class HomePageControllerSpec
     response: Either[Error, (Boolean, List[ReturnSummary])]
   ) =
     (mockReturnsService
-      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(
+      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, sentReturns, *)
@@ -120,7 +119,7 @@ class HomePageControllerSpec
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
-      .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .listReturns(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -128,7 +127,7 @@ class HomePageControllerSpec
     response: Either[Error, DisplayReturn]
   ) =
     (mockReturnsService
-      .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
+      .displayReturn(_: CgtReference, _: String)(using _: HeaderCarrier))
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -155,7 +154,7 @@ class HomePageControllerSpec
           _: Option[LocalDate],
           _: Call,
           _: Call
-        )(
+        )(using
           _: HeaderCarrier,
           _: Request[?]
         )

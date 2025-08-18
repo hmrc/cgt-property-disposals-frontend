@@ -47,7 +47,7 @@ trait FurtherReturnCalculationEligibilityUtilSupport { this: ControllerSpec =>
       mockFurtherReturnCalculationEligibilityUtil
         .isEligibleForFurtherReturnOrAmendCalculation(
           _: FillingOutReturn
-        )(
+        )(using
           _: HeaderCarrier,
           _: RequestWithSessionData[?]
         )

@@ -25,7 +25,9 @@ import play.api.i18n.Lang
 import play.api.libs.json.Json
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector.DeleteDraftReturnsRequest
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Country
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.draftReturnGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen.{taxableGainOrLossCalculationGen, taxableGainOrLossCalculationRequestGen, yearToDateLiabilityCalculationGen, yearToDateLiabilityCalculationRequestGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
@@ -35,6 +37,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.tax
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.calculatedTaxDueGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.CgtReference
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalMethod.Sold
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.Self
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsServiceImpl.{GetDraftReturnResponse, ListReturnsResponse}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.TaxYearServiceImpl.{AvailableTaxYearsResponse, TaxYearResponse, taxYearResponseFormat}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.ConnectorSupport
@@ -50,7 +54,6 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
   private val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_DATE
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
-
   "ReturnsConnectorImpl" when {
     "handling requests to store a draft return" must {
       "call the right endpoint with draft return body" in {
@@ -91,10 +94,53 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to get a draft return" must {
-      implicit val gen: Gen[GetDraftReturnResponse] = Gen.listOf(draftReturnGen).map(GetDraftReturnResponse(_))
+      val response = GetDraftReturnResponse(
+        draftReturns = List(
+          DraftSingleDisposalReturn(
+            id = UUID.randomUUID(),
+            triageAnswers = SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers(
+              individualUserType = Some(Self),
+              disposalMethod = Sold,
+              countryOfResidence = Country.uk,
+              assetType = AssetType.Residential,
+              disposalDate = DisposalDate(
+                value = LocalDate.now(),
+                taxYear = TaxYear(
+                  startDateInclusive = LocalDate.now(),
+                  endDateExclusive = LocalDate.now(),
+                  annualExemptAmountGeneral = AmountInPence(value = 1111111),
+                  annualExemptAmountNonVulnerableTrust = AmountInPence(value = 1111111),
+                  personalAllowance = AmountInPence(value = 1111111),
+                  maxPersonalAllowance = AmountInPence(value = 1111111),
+                  higherIncomePersonalAllowanceThreshold = AmountInPence(value = 1111111),
+                  incomeTaxHigherRateThreshold = AmountInPence(value = 1111111),
+                  cgtRateLowerBandResidential = 131.33,
+                  cgtRateLowerBandNonResidential = 3333.22,
+                  cgtRateHigherBandResidential = 23213.66,
+                  cgtRateHigherBandNonResidential = 64444.66,
+                  maxLettingsReliefAmount = AmountInPence(value = 1111111)
+                )
+              ),
+              alreadySentSelfAssessment = None,
+              completionDate = CompletionDate(value = LocalDate.now())
+            ),
+            propertyAddress = None,
+            disposalDetailsAnswers = None,
+            acquisitionDetailsAnswers = None,
+            reliefDetailsAnswers = None,
+            exemptionAndLossesAnswers = None,
+            yearToDateLiabilityAnswers = None,
+            initialGainOrLoss = None,
+            supportingEvidenceAnswers = None,
+            representeeAnswers = None,
+            gainOrLossAfterReliefs = None,
+            lastUpdatedDate = LocalDate.now()
+          )
+        )
+      )
 
       "call the right endpoint with draft return body" in {
-        val response = sample[GetDraftReturnResponse]
+
         stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
         await(con.getDraftReturns(CgtReference("CGT12345678")).value)
@@ -104,7 +150,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
       }
 
       "return Unit on success" in {
-        val response = sample[GetDraftReturnResponse]
+
         stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
 
         val result = await(con.getDraftReturns(CgtReference("CGT12345678")).value)
@@ -115,7 +161,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
       "return Left on error" in {
         val table = Table("status", 403, 404, 500)
         for (status <- table) {
-          val response = sample[GetDraftReturnResponse]
+
           stubFor(get(urlPathMatching(".*")).willReturn(jsonResponse(status, Json.toJson(response).toString())))
 
           val result = await(con.getDraftReturns(CgtReference("CGT12345678")).value)
@@ -276,8 +322,8 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to calculate tax due" must {
-      val response                  = sample(calculatedTaxDueGen)
-      val calculateCgtTaxDueRequest = sample(calculateCgtTaxDueRequestGen)
+      val response                  = sample(using calculatedTaxDueGen)
+      val calculateCgtTaxDueRequest = sample(using calculateCgtTaxDueRequestGen)
 
       "call the right endpoint with calculate tax due body" in {
         stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
@@ -304,8 +350,8 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to calculate taxable gain or loss" must {
-      val response                            = sample(taxableGainOrLossCalculationGen)
-      val taxableGainOrLossCalculationRequest = sample(taxableGainOrLossCalculationRequestGen)
+      val response                            = sample(using taxableGainOrLossCalculationGen)
+      val taxableGainOrLossCalculationRequest = sample(using taxableGainOrLossCalculationRequestGen)
 
       "call the right endpoint with calculate taxable gain or loss body" in {
         stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
@@ -341,8 +387,8 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to calculate year to date liability" must {
-      val response                              = sample(yearToDateLiabilityCalculationGen)
-      val yearToDateLiabilityCalculationRequest = sample(yearToDateLiabilityCalculationRequestGen)
+      val response                              = sample(using yearToDateLiabilityCalculationGen)
+      val yearToDateLiabilityCalculationRequest = sample(using yearToDateLiabilityCalculationRequestGen)
 
       "call the right endpoint with calculate year to date liability body" in {
         stubFor(post(urlPathMatching(".*")).willReturn(jsonResponse(200, Json.toJson(response).toString())))
@@ -378,7 +424,7 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
     }
 
     "handling requests to get taxYear" must {
-      val response = TaxYearResponse(Option(sample(taxYearGen)))
+      val response = TaxYearResponse(Option(sample(using taxYearGen)))
       val date     = LocalDate.now()
 
       "call the right endpoint with tax Year body" in {

@@ -5,7 +5,7 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin)
   .settings(
-    scalaVersion := "3.6.4",
+    scalaVersion := "3.7.1",
     majorVersion := 2,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test(),
     onLoadMessage := "",
@@ -25,8 +25,7 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
     ),
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
-      "-Wconf:msg=unused import&src=html/.*:s",
-      "-source:3.5"
+      "-Wconf:msg=unused import&src=html/.*:s"
     )
   )
   .settings(CodeCoverageSettings.settings *)

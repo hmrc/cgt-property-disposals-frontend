@@ -44,7 +44,7 @@ class IvServiceImplSpec extends AnyWordSpec with Matchers with MockFactory with 
     journeyId: UUID
   )(result: Either[Error, IvStatusResponse]) =
     (mockConnector
-      .getFailedJourneyStatus(_: UUID)(_: HeaderCarrier))
+      .getFailedJourneyStatus(_: UUID)(using _: HeaderCarrier))
       .expects(journeyId, *)
       .returning(EitherT.fromEither[Future](result))
 

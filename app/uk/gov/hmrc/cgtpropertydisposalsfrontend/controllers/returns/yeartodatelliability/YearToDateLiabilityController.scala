@@ -2947,7 +2947,7 @@ object YearToDateLiabilityController {
   private val estimatedIncomeForm =
     Form(
       mapping(
-        "estimatedIncome" -> of(
+        "estimatedIncome" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds)
         )
@@ -2957,7 +2957,7 @@ object YearToDateLiabilityController {
   private def personalAllowanceForm(taxYear: TaxYear) =
     Form(
       mapping(
-        "personalAllowance" -> of(
+        "personalAllowance" -> of(using
           MoneyUtils.amountInPoundsFormatter(
             _ < 0,
             _ > taxYear.maxPersonalAllowance.inPounds(),
@@ -2981,7 +2981,7 @@ object YearToDateLiabilityController {
   private val hasEstimatedDetailsForm =
     Form(
       mapping(
-        "hasEstimatedDetails" -> of(BooleanFormatter.formatter)
+        "hasEstimatedDetails" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
@@ -3022,7 +3022,7 @@ object YearToDateLiabilityController {
 
     Form(
       mapping(
-        "" -> of(formatter)
+        "" -> of(using formatter)
       )(identity)(Some(_))
     )
   }
@@ -3069,7 +3069,7 @@ object YearToDateLiabilityController {
 
     Form(
       mapping(
-        "" -> of(formatter)
+        "" -> of(using formatter)
       )(identity)(Some(_))
     )
   }
@@ -3077,7 +3077,7 @@ object YearToDateLiabilityController {
   private val nonCalculatedTaxDueForm =
     Form(
       mapping(
-        "nonCalculatedTaxDue" -> of(
+        "nonCalculatedTaxDue" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ < 0, _ > MoneyUtils.maxAmountOfPounds)
         )
@@ -3087,7 +3087,7 @@ object YearToDateLiabilityController {
   private def yearToDateLiabilityForm(taxYear: TaxYear) =
     Form(
       mapping(
-        "yearToDateLiability" -> of(
+        "yearToDateLiability" -> of(using
           MoneyUtils.amountInPoundsFormatter(
             _ < 0,
             _ > MoneyUtils.maxAmountOfPounds,
@@ -3103,7 +3103,7 @@ object YearToDateLiabilityController {
   private val repaymentForm =
     Form(
       mapping(
-        "repayment" -> of(BooleanFormatter.formatter)
+        "repayment" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 }

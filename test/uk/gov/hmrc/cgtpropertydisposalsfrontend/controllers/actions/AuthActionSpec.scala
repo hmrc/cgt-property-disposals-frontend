@@ -49,7 +49,7 @@ trait AuthActionSpec { this: MockFactory =>
     result: Future[R]
   ): Unit =
     (mockAuthConnector
-      .authorise(_: Predicate, _: Retrieval[R])(
+      .authorise(_: Predicate, _: Retrieval[R])(using
         _: HeaderCarrier,
         _: ExecutionContext
       ))

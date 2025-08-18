@@ -49,7 +49,7 @@ class EmailVerificationServiceImplSpec extends AnyWordSpec with Matchers with Mo
     result: Either[Error, HttpResponse]
   ) =
     (mockConnector
-      .verifyEmail(_: Email, _: ContactName, _: Call, _: AcceptLanguage)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: ContactName, _: Call, _: AcceptLanguage)(using _: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinueCall, expectedLanguage, *)
       .returning(EitherT.fromEither[Future](result))
 

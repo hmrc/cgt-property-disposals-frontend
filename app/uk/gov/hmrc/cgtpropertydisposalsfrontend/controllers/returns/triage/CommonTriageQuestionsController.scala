@@ -1287,7 +1287,7 @@ object CommonTriageQuestionsController {
 
     Form(
       mapping(
-        "individualUserType" -> of(
+        "individualUserType" -> of(using
           FormUtils.radioFormFormatter(
             options
           )
@@ -1298,7 +1298,7 @@ object CommonTriageQuestionsController {
 
   val numberOfPropertiesForm: Form[NumberOfProperties] = Form(
     mapping(
-      "numberOfProperties" -> of(
+      "numberOfProperties" -> of(using
         FormUtils
           .radioFormFormatter(List(One, MoreThanOne))
       )
@@ -1312,7 +1312,7 @@ object CommonTriageQuestionsController {
     val key = "sharesDisposalDate"
     Form(
       mapping(
-        "" -> of(
+        "" -> of(using
           TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             None,
@@ -1332,7 +1332,7 @@ object CommonTriageQuestionsController {
 
   private val alreadySentSelfAssessmentForm = Form(
     mapping(
-      "alreadySentSelfAssessment" -> of(BooleanFormatter.formatter)
+      "alreadySentSelfAssessment" -> of(using BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 

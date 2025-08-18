@@ -251,7 +251,7 @@ object InitialGainOrLossController {
 
     Form[BigDecimal](
       mapping(
-        "" -> of(formatter)
+        "" -> of(using formatter)
       )(identity)(Some(_))
     )
   }
