@@ -87,7 +87,7 @@
   (isShare, acquisitionMethod, representativeType) match {
     case (true, _, None) if acquisitionDate.value.isBefore(rebaseDate) =>
       (messages("acquisitionPrice.3.title", rebaseDate), messages("acquisitionPrice.3.helpText"))
-    case (true, Inherited | Gifted, None) =>
+    case (true, Inherited | Gifted, None) if !isAgent =>
       (messages("acquisitionPrice.2.title", TimeUtils.govDisplayFormat(acquisitionDate.value)), messages("acquisitionPrice.2.helpText"))
     case (true, Bought, Some(Capacitor | PersonalRepresentative)) =>
       (messages("acquisitionPrice.4.title"), messages("acquisitionPrice.4.helpText"))
