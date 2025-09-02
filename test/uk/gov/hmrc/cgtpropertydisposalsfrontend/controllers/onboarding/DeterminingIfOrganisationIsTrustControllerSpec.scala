@@ -115,7 +115,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
           _: GGCredId,
           _: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]],
           _: Lang
-        )(
+        )(using
           _: HeaderCarrier,
           _: Request[?]
         )

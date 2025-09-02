@@ -255,7 +255,7 @@ object AmendReturnController {
   private val confirmCancelForm =
     Form(
       mapping(
-        "confirmCancelAmendReturn" -> of(BooleanFormatter.formatter)
+        "confirmCancelAmendReturn" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 

@@ -71,7 +71,7 @@ trait AddressControllerSpec[A <: AddressJourneyType]
     result: Either[Error, AddressLookupResult]
   ): CallHandler3[Postcode, Option[String], HeaderCarrier, EitherT[Future, Error, AddressLookupResult]] =
     (mockService
-      .lookupAddress(_: Postcode, _: Option[String])(_: HeaderCarrier))
+      .lookupAddress(_: Postcode, _: Option[String])(using _: HeaderCarrier))
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 

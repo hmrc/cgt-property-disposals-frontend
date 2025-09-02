@@ -1471,7 +1471,7 @@ object AcquisitionDetailsController {
 
     Form(
       mapping(
-        "" -> of(formatter)
+        "" -> of(using formatter)
       )(identity)(Some(_))
     )
   }
@@ -1479,7 +1479,7 @@ object AcquisitionDetailsController {
   private def acquisitionDateForm(today: LocalDate) =
     Form(
       mapping(
-        "" -> of(
+        "" -> of(using
           TimeUtils.dateFormatter(
             Some(today),
             None,
@@ -1495,7 +1495,7 @@ object AcquisitionDetailsController {
   val acquisitionPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "acquisitionPrice" -> of(
+        "acquisitionPrice" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
@@ -1505,7 +1505,7 @@ object AcquisitionDetailsController {
   private val rebasedAcquisitionPriceForm =
     Form(
       mapping(
-        "rebaseAcquisitionPrice" -> of(
+        "rebaseAcquisitionPrice" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
@@ -1515,7 +1515,7 @@ object AcquisitionDetailsController {
   private def periodOfAdminMarketValueForm(dateOfDeath: DateOfDeath)(implicit m: Messages) =
     Form(
       mapping(
-        "periodOfAdminMarketValue" -> of(
+        "periodOfAdminMarketValue" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(
               _ <= 0,
@@ -1528,7 +1528,7 @@ object AcquisitionDetailsController {
 
   private val shouldUseRebaseForm = Form(
     mapping(
-      "shouldUseRebase" -> of(BooleanFormatter.formatter)
+      "shouldUseRebase" -> of(using BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 

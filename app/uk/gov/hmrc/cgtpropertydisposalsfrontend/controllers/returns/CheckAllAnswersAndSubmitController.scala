@@ -124,7 +124,7 @@ class CheckAllAnswersAndSubmitController @Inject() (
                       showSubmissionDetails = true,
                       fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
                       furtherOrAmendReturnCalculationEligibility
-                    )(request, explicitEnglishMessage)
+                    )(using request, explicitEnglishMessage)
                       .toString()
                       .getBytes
                   )

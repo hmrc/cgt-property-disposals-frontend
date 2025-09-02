@@ -48,7 +48,7 @@ class CgtCalculationServiceImplSpec
     request: CalculateCgtTaxDueRequest
   )(response: Either[Error, CalculatedTaxDue]) =
     (mockReturnsConnector
-      .calculateTaxDue(_: CalculateCgtTaxDueRequest)(_: HeaderCarrier))
+      .calculateTaxDue(_: CalculateCgtTaxDueRequest)(using _: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -56,7 +56,7 @@ class CgtCalculationServiceImplSpec
     request: TaxableGainOrLossCalculationRequest
   )(response: Either[Error, TaxableGainOrLossCalculation]) =
     (mockReturnsConnector
-      .calculateTaxableGainOrLoss(_: TaxableGainOrLossCalculationRequest)(_: HeaderCarrier))
+      .calculateTaxableGainOrLoss(_: TaxableGainOrLossCalculationRequest)(using _: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -64,7 +64,7 @@ class CgtCalculationServiceImplSpec
     request: YearToDateLiabilityCalculationRequest
   )(response: Either[Error, YearToDateLiabilityCalculation]) =
     (mockReturnsConnector
-      .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(_: HeaderCarrier))
+      .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(using _: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](response))
 

@@ -46,7 +46,7 @@ class SubscribedChangeContactNameControllerSpec
     subscribedUpdateDetails: SubscribedUpdateDetails
   )(result: Either[Error, Unit]) =
     (mockSubscriptionService
-      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(using _: HeaderCarrier))
       .expects(subscribedUpdateDetails, *)
       .returning(EitherT.fromEither[Future](result))
 

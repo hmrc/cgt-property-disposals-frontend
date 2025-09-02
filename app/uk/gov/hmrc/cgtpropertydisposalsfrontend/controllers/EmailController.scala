@@ -287,7 +287,7 @@ object EmailController {
     Form(
       mapping(
         "email"                   -> Email.mapping,
-        "resendVerificationEmail" -> of(BooleanFormatter.formatter)
+        "resendVerificationEmail" -> of(using BooleanFormatter.formatter)
       )(SubmitEmailDetails.apply)(o => Some(o.email, o.resendVerificationEmail))
     )
 

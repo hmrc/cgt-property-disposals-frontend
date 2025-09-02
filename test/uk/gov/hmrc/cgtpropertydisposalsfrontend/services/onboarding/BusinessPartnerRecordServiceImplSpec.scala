@@ -52,7 +52,7 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
     lang: Lang
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(using
         _: HeaderCarrier
       ))
       .expects(request, lang, *)

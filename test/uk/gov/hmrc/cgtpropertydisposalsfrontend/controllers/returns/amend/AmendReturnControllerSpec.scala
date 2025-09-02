@@ -78,7 +78,7 @@ class AmendReturnControllerSpec
 
   def mockAuditCancelAmendReturn(auditEvent: CancelAmendReturn): Unit =
     (mockAuditService
-      .sendEvent(_: String, _: CancelAmendReturn, _: String)(
+      .sendEvent(_: String, _: CancelAmendReturn, _: String)(using
         _: ExecutionContext,
         _: HeaderCarrier,
         _: Writes[CancelAmendReturn],

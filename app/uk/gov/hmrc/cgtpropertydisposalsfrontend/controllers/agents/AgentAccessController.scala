@@ -566,7 +566,7 @@ object AgentAccessController {
 
   private val countryForm = Form(
     mapping(
-      countryKey -> of(Country.formatter)
+      countryKey -> of(using Country.formatter)
     )(identity)(Some(_))
   )
 

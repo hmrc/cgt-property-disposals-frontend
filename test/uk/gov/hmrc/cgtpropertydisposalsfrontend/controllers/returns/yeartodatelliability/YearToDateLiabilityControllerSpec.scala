@@ -525,7 +525,7 @@ class YearToDateLiabilityControllerSpec
     request: CalculateCgtTaxDueRequest
   )(result: Either[Error, CalculatedTaxDue]) =
     (mockCgtCalculationService
-      .calculateTaxDue(_: CalculateCgtTaxDueRequest)(_: HeaderCarrier))
+      .calculateTaxDue(_: CalculateCgtTaxDueRequest)(using _: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -533,7 +533,7 @@ class YearToDateLiabilityControllerSpec
     request: TaxableGainOrLossCalculationRequest
   )(result: Either[Error, TaxableGainOrLossCalculation]) =
     (mockCgtCalculationService
-      .calculateTaxableGainOrLoss(_: TaxableGainOrLossCalculationRequest)(_: HeaderCarrier))
+      .calculateTaxableGainOrLoss(_: TaxableGainOrLossCalculationRequest)(using _: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -541,7 +541,7 @@ class YearToDateLiabilityControllerSpec
     request: YearToDateLiabilityCalculationRequest
   )(result: Either[Error, YearToDateLiabilityCalculation]) =
     (mockCgtCalculationService
-      .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(_: HeaderCarrier))
+      .calculateYearToDateLiability(_: YearToDateLiabilityCalculationRequest)(using _: HeaderCarrier))
       .expects(request, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -552,7 +552,7 @@ class YearToDateLiabilityControllerSpec
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .initiate(_: Call, _: UploadReference => Call)(_: HeaderCarrier))
+      .initiate(_: Call, _: UploadReference => Call)(using _: HeaderCarrier))
       .expects(
         where {
           (
@@ -575,7 +575,7 @@ class YearToDateLiabilityControllerSpec
     uploadReference: UploadReference
   )(result: Either[Error, UpscanUpload]) =
     (mockUpscanService
-      .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
+      .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
       .expects(uploadReference, *)
       .returning(EitherT.fromEither(result))
 

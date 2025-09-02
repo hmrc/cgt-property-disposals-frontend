@@ -561,7 +561,7 @@ object CompanyDetailsController {
   private val multipleIndirectDisposalPriceForm =
     Form(
       mapping(
-        "multipleIndirectDisposalsDisposalPrice" -> of(
+        "multipleIndirectDisposalsDisposalPrice" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
@@ -571,7 +571,7 @@ object CompanyDetailsController {
   private val multipleIndirectAcquisitionPriceForm =
     Form(
       mapping(
-        "multipleIndirectDisposalsAcquisitionPrice" -> of(
+        "multipleIndirectDisposalsAcquisitionPrice" -> of(using
           MoneyUtils
             .amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )

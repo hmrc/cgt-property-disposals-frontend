@@ -466,14 +466,14 @@ object DeterminingIfOrganisationIsTrustController {
   private val doYouWantToReportForATrustForm =
     Form(
       mapping(
-        "isReportingForATrust" -> of(BooleanFormatter.formatter)
+        "isReportingForATrust" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
   private val doYouHaveATrnForm =
     Form(
       mapping(
-        "hasTrn" -> of(BooleanFormatter.formatter)
+        "hasTrn" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 

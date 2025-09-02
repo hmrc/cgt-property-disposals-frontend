@@ -61,7 +61,7 @@ class PaymentsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory
         _: Option[LocalDate],
         _: Call,
         _: Call
-      )(_: HeaderCarrier))
+      )(using _: HeaderCarrier))
       .expects(cgtReference, chargeReference, amount, dueDate, returnUrl, backUrl, *)
       .returning(EitherT.fromEither[Future](response))
 

@@ -32,7 +32,7 @@ trait SessionSupport { this: MockFactory =>
     result: Either[Error, Option[SessionData]]
   ): CallHandler1[HeaderCarrier, Future[Either[Error, Option[SessionData]]]] =
     (mockSessionStore
-      .get()(_: HeaderCarrier))
+      .get()(using _: HeaderCarrier))
       .expects(*)
       .returning(Future.successful(result))
 
@@ -40,7 +40,7 @@ trait SessionSupport { this: MockFactory =>
     session: SessionData
   ): CallHandler1[HeaderCarrier, Future[Either[Error, Option[SessionData]]]] =
     (mockSessionStore
-      .get()(_: HeaderCarrier))
+      .get()(using _: HeaderCarrier))
       .expects(*)
       .returning(Future.successful(Right(Some(session))))
 
@@ -48,7 +48,7 @@ trait SessionSupport { this: MockFactory =>
     session: SessionData
   )(result: Either[Error, Unit]): CallHandler2[SessionData, HeaderCarrier, Future[Either[Error, Unit]]] =
     (mockSessionStore
-      .store(_: SessionData)(_: HeaderCarrier))
+      .store(_: SessionData)(using _: HeaderCarrier))
       .expects(session, *)
       .returning(Future.successful(result))
 

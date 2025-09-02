@@ -91,7 +91,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
 
             case other =>
               logger.warn(s"User has unsupported affinity group type $other")
-              Future.successful(Left(errorHandler.errorResult(None)(request)))
+              Future.successful(Left(errorHandler.errorResult(None)(using request)))
           }
         }
       }
@@ -162,12 +162,12 @@ class AuthenticatedActionWithRetrievedData @Inject() (
             Future.successful(Right(Some(CgtReference(cgtReference.value))))
           case None               =>
             logger.warn(s"CGT identifier value is missing from the enrolment")
-            Future.successful(Left(errorHandler.errorResult(None)(request)))
+            Future.successful(Left(errorHandler.errorResult(None)(using request)))
         }
       case None               =>
         subscriptionService
           .hasFailedCgtEnrolment()
-          .leftMap(_ => errorHandler.errorResult(None)(request))
+          .leftMap(_ => errorHandler.errorResult(None)(using request))
           .value
     }
 
@@ -200,7 +200,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
     credentials match {
       case None =>
         logger.warn("No credentials were retrieved")
-        Future.successful(Left(errorHandler.errorResult(None)(request)))
+        Future.successful(Left(errorHandler.errorResult(None)(using request)))
 
       case Some(Credentials(id, "GovernmentGateway")) =>
         f(GGCredId(id))
@@ -232,7 +232,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
             logger.warn(
               s"Agent has ${AgentsEnrolment.key} enrolment but does not have ${AgentsEnrolment.agentReferenceNumberIdentifier} identifier"
             )
-            Left(errorHandler.errorResult(Some(UserType.Agent))(request))
+            Left(errorHandler.errorResult(Some(UserType.Agent))(using request))
           case Some(x) => Right(Some(AgentReferenceNumber(x.value)))
         }
     }
@@ -261,7 +261,7 @@ class AuthenticatedActionWithRetrievedData @Inject() (
               s"Could not find SAUTR identifier for user with trust enrolment $trustEnrolment. " +
                 s"Found identifier keys [${trustEnrolment.identifiers.map(_.key).mkString(",")}]"
             )
-            Left(errorHandler.errorResult(Some(Organisation))(request))
+            Left(errorHandler.errorResult(Some(Organisation))(using request))
           case Some(id) =>
             Right(RetrievedUserType.Trust(SAUTR(id.value), email.filter(_.nonEmpty).map(Email(_)), ggCredId))
         }

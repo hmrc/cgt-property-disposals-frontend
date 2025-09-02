@@ -97,7 +97,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
           _: String,
           _: NameMatchAccountLocked,
           _: String
-        )(
+        )(using
           _: ExecutionContext,
           _: HeaderCarrier,
           _: Writes[NameMatchAccountLocked],
@@ -118,7 +118,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
           _: String,
           _: BusinessPartnerRecordNameMatchAttemptEvent,
           _: String
-        )(
+        )(using
           _: ExecutionContext,
           _: HeaderCarrier,
           _: Writes[BusinessPartnerRecordNameMatchAttemptEvent],
@@ -148,7 +148,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
   ) =
     (
       mockAuditService
-        .sendEvent(_: String, _: CgtAccountNameMatchAttemptEvent, _: String)(
+        .sendEvent(_: String, _: CgtAccountNameMatchAttemptEvent, _: String)(using
           _: ExecutionContext,
           _: HeaderCarrier,
           _: Writes[CgtAccountNameMatchAttemptEvent],
@@ -199,7 +199,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (bprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(using
         _: HeaderCarrier
       ))
       .expects(
@@ -224,7 +224,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
     result: Either[Error, BusinessPartnerRecordResponse]
   ) =
     (bprService
-      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(
+      .getBusinessPartnerRecord(_: BusinessPartnerRecordRequest, _: Lang)(using
         _: HeaderCarrier
       ))
       .expects(
@@ -244,7 +244,7 @@ class NameMatchRetryServiceImplSpec extends AnyWordSpec with Matchers with MockF
     expectedSubscribedDetails: Either[Error, Option[SubscribedDetails]]
   ): Unit =
     (mockSubscriptionService
-      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .getSubscribedDetails(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(
         EitherT.fromEither[Future](expectedSubscribedDetails)

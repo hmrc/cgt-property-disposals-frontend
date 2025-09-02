@@ -31,11 +31,12 @@
   messages: Messages,
   request: RequestHeader
 )
+@noname=@{"anonymous "}
 
 @layout(pageTitle) {
   <h1
     class="govuk-heading-xl"
-    data-user-type=@{s"${if(userType.isEmpty){ "anonymous " }}"}
+    data-user-type=@{s"${if(userType.isEmpty)noname }"}
   >
     @heading
   </h1>

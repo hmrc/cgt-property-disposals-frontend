@@ -1778,20 +1778,20 @@ object MultipleDisposalsTriageController {
 
     Form(
       mapping(
-        numberOfDisposalsKey -> of(numberOfPropertiesFormatter)
+        numberOfDisposalsKey -> of(using numberOfPropertiesFormatter)
       )(identity)(Some(_))
     )
   }
 
   val wasAUkResidentForm: Form[Boolean] = Form(
     mapping(
-      "multipleDisposalsWereYouAUKResident" -> of(BooleanFormatter.formatter)
+      "multipleDisposalsWereYouAUKResident" -> of(using BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 
   private val wereAllPropertiesResidentialForm = Form(
     mapping(
-      "multipleDisposalsWereAllPropertiesResidential" -> of(
+      "multipleDisposalsWereAllPropertiesResidential" -> of(using
         BooleanFormatter.formatter
       )
     )(identity)(Some(_))
@@ -1799,7 +1799,7 @@ object MultipleDisposalsTriageController {
 
   val countryOfResidenceForm: Form[Country] = Form(
     mapping(
-      "countryCode" -> of(Country.formatter)
+      "countryCode" -> of(using Country.formatter)
     )(identity)(Some(_))
   )
 
@@ -1849,7 +1849,7 @@ object MultipleDisposalsTriageController {
     Form(
       mapping(
         "multipleDisposalsAssetTypeForNonUkResidents" -> Forms
-          .list(of(checkBoxAssetTypeFormFormatter))
+          .list(of(using checkBoxAssetTypeFormFormatter))
           .verifying("error.required", _.nonEmpty)
       )(identity)(Some(_))
     )
@@ -1864,7 +1864,7 @@ object MultipleDisposalsTriageController {
   ): Form[CompletionDate] =
     Form(
       mapping(
-        "" -> of(
+        "" -> of(using
           TimeUtils.dateFormatter(
             Some(maximumDateInclusive),
             Some(minimumDateInclusive),

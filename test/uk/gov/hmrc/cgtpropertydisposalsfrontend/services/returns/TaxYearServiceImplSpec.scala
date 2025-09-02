@@ -42,13 +42,13 @@ class TaxYearServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDr
 
   private def mockGetTaxYear(date: LocalDate)(response: Either[Error, TaxYearResponse]) =
     (mockReturnsConnector
-      .taxYear(_: LocalDate)(_: HeaderCarrier))
+      .taxYear(_: LocalDate)(using _: HeaderCarrier))
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
 
   private def mockAvailableTaxYears()(response: Either[Error, AvailableTaxYearsResponse]) =
     (mockReturnsConnector
-      .availableTaxYears()(_: HeaderCarrier))
+      .availableTaxYears()(using _: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](response))
 
