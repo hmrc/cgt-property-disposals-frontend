@@ -46,7 +46,7 @@ class UKAddressLookupServiceImplSpec extends AnyWordSpec with Matchers with Mock
     result: Either[Error, AddressLookupResponse]
   ) =
     (mockConnector
-      .lookupAddress(_: Postcode, _: Option[String])(_: HeaderCarrier))
+      .lookupAddress(_: Postcode, _: Option[String])(using _: HeaderCarrier))
       .expects(expectedPostcode, filter, *)
       .returning(EitherT.fromEither[Future](result))
 

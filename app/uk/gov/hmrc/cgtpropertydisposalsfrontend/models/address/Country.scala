@@ -42,7 +42,7 @@ object Country {
   val countryCodes: List[CountryCode] = {
     val source = Source.fromInputStream(
       getClass.getResourceAsStream("/resources/countries.txt")
-    )(Codec.UTF8)
+    )(using Codec.UTF8)
     try source.getLines().toList
     finally source.close()
   }

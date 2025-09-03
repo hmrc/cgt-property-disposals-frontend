@@ -21,10 +21,10 @@
 @this()
 
 @(activeLink: Option[AccountMenuItem])(implicit messages: Messages)
-
+@link = @{"hmrc-account-menu__link--active"}
 <!-- ACCOUNT MENU -->
 <nav id="secondary-nav" class="hmrc-account-menu" aria-label="Account" aria-current="page" data-module="hmrc-account-menu">
-    <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="hmrc-account-menu__link hmrc-account-menu__link--home@{if(activeLink.exists(_.is[AccountMenuItem.Home])){ " hmrc-account-menu__link--active"}}">
+    <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="hmrc-account-menu__link hmrc-account-menu__link--home@{if(activeLink.exists(_.is[AccountMenuItem.Home])){ link}}">
       <span class="hmrc-account-icon hmrc-account-icon--home">
         @messages("account.menu.home") </span>
     </a>
@@ -34,7 +34,7 @@
     <ul class="hmrc-account-menu__main js-hidden">
 
         <li>
-            <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="hmrc-account-menu__link@{if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){ " hmrc-account-menu__link--active" }}">
+            <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="hmrc-account-menu__link@{if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){ link }}">
                 @messages("account.menu.manageYourDetails") </a>
         </li>
     </ul>

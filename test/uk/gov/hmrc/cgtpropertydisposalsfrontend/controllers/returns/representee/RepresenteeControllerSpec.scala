@@ -186,7 +186,7 @@ class RepresenteeControllerSpec
           _: GGCredId,
           _: Option[UnsuccessfulNameMatchAttempts[IndividualRepresenteeNameMatchDetails]],
           _: Lang
-        )(
+        )(using
           _: HeaderCarrier,
           _: Request[?]
         )
@@ -3587,7 +3587,7 @@ object RepresenteeControllerSpec extends Matchers {
 
     answers.dateOfDeath.foreach { date =>
       doc.select("#dateOfDeath-answer").text() shouldBe TimeUtils
-        .govShortDisplayFormat(date.value)(
+        .govShortDisplayFormat(date.value)(using
           MessagesImpl(lang, messagesApi)
         )
     }

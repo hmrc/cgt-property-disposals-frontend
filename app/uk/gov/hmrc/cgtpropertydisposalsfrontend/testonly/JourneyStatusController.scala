@@ -242,13 +242,13 @@ object JourneyStatusController {
   private val returnStateForm =
     Form(
       mapping(
-        "individual-user-type"             -> of(individualUserTypeFormatter),
-        "number-of-properties"             -> of(numberOfPropertiesFormatter),
-        "disposal-method"                  -> of(disposalMethodFormatter),
-        "was-a-uk-resident"                -> of(optionalBooleanFormatter),
-        "disposed-of-residential-property" -> of(optionalBooleanFormatter),
-        "disposal-date"                    -> of(optionalDateFormatter),
-        "completion-date"                  -> of(optionalDateFormatter)
+        "individual-user-type"             -> of(using individualUserTypeFormatter),
+        "number-of-properties"             -> of(using numberOfPropertiesFormatter),
+        "disposal-method"                  -> of(using disposalMethodFormatter),
+        "was-a-uk-resident"                -> of(using optionalBooleanFormatter),
+        "disposed-of-residential-property" -> of(using optionalBooleanFormatter),
+        "disposal-date"                    -> of(using optionalDateFormatter),
+        "completion-date"                  -> of(using optionalDateFormatter)
       ) {
         case (
               individualUserType,

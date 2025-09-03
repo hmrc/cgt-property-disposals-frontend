@@ -433,7 +433,7 @@ object MixedUsePropertyDetailsController {
   val disposalPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "singleMixedUseDisposalsDisposalPrice" -> of(
+        "singleMixedUseDisposalsDisposalPrice" -> of(using
           MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
       )(identity)(Some(_))
@@ -442,7 +442,7 @@ object MixedUsePropertyDetailsController {
   val acquisitionPriceForm: Form[BigDecimal] =
     Form(
       mapping(
-        "singleMixedUseDisposalsAcquisitionPrice" -> of(
+        "singleMixedUseDisposalsAcquisitionPrice" -> of(using
           MoneyUtils.amountInPoundsFormatter(_ <= 0, _ > MoneyUtils.maxAmountOfPounds)
         )
       )(identity)(Some(_))

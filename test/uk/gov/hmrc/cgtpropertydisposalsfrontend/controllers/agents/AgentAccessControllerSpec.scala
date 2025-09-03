@@ -141,7 +141,7 @@ class AgentAccessControllerSpec
     cgtReference: CgtReference
   )(result: Either[Error, Option[SubscribedDetails]]) =
     (mockSubscriptionService
-      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .getSubscribedDetails(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](result))
 
@@ -173,7 +173,7 @@ class AgentAccessControllerSpec
     response: Either[Error, List[DraftSingleDisposalReturn]]
   ) =
     (mockReturnsService
-      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(
+      .getDraftReturns(_: CgtReference, _: List[ReturnSummary])(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, sentReturns, *)
@@ -183,7 +183,7 @@ class AgentAccessControllerSpec
     response: Either[Error, List[ReturnSummary]]
   ) =
     (mockReturnsService
-      .listReturns(_: CgtReference)(_: HeaderCarrier))
+      .listReturns(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -194,7 +194,7 @@ class AgentAccessControllerSpec
     response: Either[Error, (Boolean, List[ReturnSummary])]
   ) =
     (mockReturnsService
-      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(
+      .updateCorrectTaxYearToSentReturns(_: CgtReference, _: List[ReturnSummary])(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, sentReturns, *)

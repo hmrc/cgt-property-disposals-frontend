@@ -722,7 +722,7 @@ object ReliefDetailsController {
 
     Form(
       mapping(
-        "" -> of(formatter)
+        "" -> of(using formatter)
       )(identity)(Some(_))
     )
   }

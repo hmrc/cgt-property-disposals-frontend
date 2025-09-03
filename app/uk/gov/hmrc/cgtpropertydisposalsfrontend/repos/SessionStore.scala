@@ -56,7 +56,7 @@ class SessionStoreImpl @Inject() (
       ttl = expireAfter,
       timestampSupport = timeStampSupport,
       cacheIdType = CacheIdType.SimpleCacheId
-    )(ec)
+    )(using ec)
   }
 
   val sessionKey = "cgtpd-session"

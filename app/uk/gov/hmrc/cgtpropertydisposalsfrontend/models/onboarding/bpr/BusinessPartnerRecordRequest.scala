@@ -52,9 +52,9 @@ object BusinessPartnerRecordRequest {
 
     override def writes(bpr: BusinessPartnerRecordRequest): JsObject = bpr match {
       case i: IndividualBusinessPartnerRecordRequest =>
-        Json.obj("IndividualBusinessPartnerRecordRequest" -> Json.toJson(i)(individualFormat))
+        Json.obj("IndividualBusinessPartnerRecordRequest" -> Json.toJson(i)(using individualFormat))
       case t: TrustBusinessPartnerRecordRequest      =>
-        Json.obj("TrustBusinessPartnerRecordRequest" -> Json.toJson(t)(trustFormat))
+        Json.obj("TrustBusinessPartnerRecordRequest" -> Json.toJson(t)(using trustFormat))
     }
   }
 }

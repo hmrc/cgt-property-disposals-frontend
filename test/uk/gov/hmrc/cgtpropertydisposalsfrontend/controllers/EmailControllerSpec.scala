@@ -75,7 +75,7 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
     expectedLanguage: AcceptLanguage
   )(result: Either[Error, EmailVerificationResponse]) =
     (mockService
-      .verifyEmail(_: Email, _: ContactName, _: Call, _: AcceptLanguage)(_: HeaderCarrier))
+      .verifyEmail(_: Email, _: ContactName, _: Call, _: AcceptLanguage)(using _: HeaderCarrier))
       .expects(expectedEmail, expectedName, expectedContinue, expectedLanguage, *)
       .returning(EitherT.fromEither[Future](result))
 

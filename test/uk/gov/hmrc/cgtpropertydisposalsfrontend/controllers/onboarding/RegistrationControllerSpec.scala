@@ -81,7 +81,7 @@ class RegistrationControllerSpec
     registrationDetails: RegistrationDetails
   )(result: Either[Error, RegisteredWithoutId]) =
     (mockSubscriptionService
-      .registerWithoutId(_: RegistrationDetails)(_: HeaderCarrier))
+      .registerWithoutId(_: RegistrationDetails)(using _: HeaderCarrier))
       .expects(registrationDetails, *)
       .returning(EitherT(Future.successful(result)))
 
@@ -90,7 +90,7 @@ class RegistrationControllerSpec
     lang: Lang
   )(result: Either[Error, SubscriptionResponse]) =
     (mockSubscriptionService
-      .subscribe(_: SubscriptionDetails, _: Lang)(_: HeaderCarrier))
+      .subscribe(_: SubscriptionDetails, _: Lang)(using _: HeaderCarrier))
       .expects(subscriptionDetails, lang, *)
       .returning(EitherT(Future.successful(result)))
 

@@ -80,7 +80,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
     response: Either[Error, Unit]
   ) =
     (mockConnector
-      .storeDraftReturn(_: DraftReturn, _: CgtReference)(_: HeaderCarrier))
+      .storeDraftReturn(_: DraftReturn, _: CgtReference)(using _: HeaderCarrier))
       .expects(draftReturn, cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -88,7 +88,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
     cgtReference: CgtReference
   )(response: Either[Error, GetDraftReturnResponse]) =
     (mockConnector
-      .getDraftReturns(_: CgtReference)(_: HeaderCarrier))
+      .getDraftReturns(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -97,7 +97,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
     lang: Lang
   )(response: Either[Error, SubmitReturnResponse]) =
     (mockConnector
-      .submitReturn(_: SubmitReturnRequest, _: Lang)(_: HeaderCarrier))
+      .submitReturn(_: SubmitReturnRequest, _: Lang)(using _: HeaderCarrier))
       .expects(submitReturnRequest, lang, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -109,7 +109,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
     response: Either[Error, ListReturnsResponse]
   ) =
     (mockConnector
-      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(
+      .listReturns(_: CgtReference, _: LocalDate, _: LocalDate)(using
         _: HeaderCarrier
       ))
       .expects(cgtReference, fromDate, toDate, *)
@@ -119,7 +119,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
     response: Either[Error, DisplayReturn]
   ) =
     (mockConnector
-      .displayReturn(_: CgtReference, _: String)(_: HeaderCarrier))
+      .displayReturn(_: CgtReference, _: String)(using _: HeaderCarrier))
       .expects(cgtReference, submissionId, *)
       .returning(EitherT.fromEither[Future](response))
 
@@ -127,7 +127,7 @@ class ReturnsServiceImplSpec extends AnyWordSpec with Matchers with MockFactory 
     draftReturnIds: List[UUID]
   )(response: Either[Error, Unit]) =
     (mockConnector
-      .deleteDraftReturns(_: List[UUID])(_: HeaderCarrier))
+      .deleteDraftReturns(_: List[UUID])(using _: HeaderCarrier))
       .expects(draftReturnIds, *)
       .returning(EitherT.fromEither[Future](response))
 

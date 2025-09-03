@@ -950,7 +950,7 @@ object RepresenteeController {
     val key = "dateOfDeath"
     Form(
       mapping(
-        "" -> of(
+        "" -> of(using
           TimeUtils.dateFormatter(
             Some(allowedDateOfDeath),
             None,
@@ -1040,7 +1040,7 @@ object RepresenteeController {
 
     Form(
       mapping(
-        "" -> of(formatter)
+        "" -> of(using formatter)
       )(identity)(Some(_))
     )
   }
@@ -1048,13 +1048,13 @@ object RepresenteeController {
   private val confirmPersonForm =
     Form(
       mapping(
-        "confirmed" -> of(BooleanFormatter.formatter)
+        "confirmed" -> of(using BooleanFormatter.formatter)
       )(identity)(Some(_))
     )
 
   private val isFirstReturnForm = Form(
     mapping(
-      "representeeIsFirstReturn" -> of(BooleanFormatter.formatter)
+      "representeeIsFirstReturn" -> of(using BooleanFormatter.formatter)
     )(identity)(Some(_))
   )
 }

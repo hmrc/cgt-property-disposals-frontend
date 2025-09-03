@@ -66,7 +66,7 @@ class SubscriptionReadyAction @Inject() (
     } yield for {
       maybeSessionData <- response.left.map { e =>
                             logger.warn("Could not get session data", e)
-                            errorHandler.errorResult(None)(request)
+                            errorHandler.errorResult(None)(using request)
                           }
       sessionData      <- maybeSessionData.toRight(redirect)
       ready            <- sessionData.journeyStatus.toRight(redirect)

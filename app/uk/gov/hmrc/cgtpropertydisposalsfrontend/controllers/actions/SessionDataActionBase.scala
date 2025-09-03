@@ -54,7 +54,7 @@ trait SessionDataActionBase[R[_] <: Request[?], P[_] <: Request[?]] extends Acti
         _.bimap(
           { e =>
             logger.warn("Could not get session data", e)
-            errorHandler.errorResult(None)(request)
+            errorHandler.errorResult(None)(using request)
           },
           sessionDataAction(_, request)
         )

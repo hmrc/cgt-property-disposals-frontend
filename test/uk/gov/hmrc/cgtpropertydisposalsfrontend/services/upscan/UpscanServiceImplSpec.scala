@@ -55,7 +55,7 @@ class UpscanServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDri
         "Response is OK" in {
           val response = Right(HttpResponse(OK, Json.toJson(upload), Map[String, Seq[String]]().empty))
           (mockConnector
-            .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
+            .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
             .expects(reference, *)
             .returning(EitherT.fromEither[Future](response))
           await(service.getUpscanUpload(reference).value).isRight shouldBe true
@@ -64,7 +64,7 @@ class UpscanServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDri
         "Malformed response" in {
           val response = Right(HttpResponse(OK, JsString("Nope"), Map[String, Seq[String]]().empty))
           (mockConnector
-            .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
+            .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
             .expects(reference, *)
             .returning(EitherT.fromEither[Future](response))
           await(service.getUpscanUpload(reference).value).isLeft shouldBe true
@@ -73,7 +73,7 @@ class UpscanServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDri
         "Internal server error" in {
           val response = Right(HttpResponse(INTERNAL_SERVER_ERROR, emptyJsonBody))
           (mockConnector
-            .getUpscanUpload(_: UploadReference)(_: HeaderCarrier))
+            .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
             .expects(reference, *)
             .returning(EitherT.fromEither[Future](response))
           await(service.getUpscanUpload(reference).value).isLeft shouldBe true
@@ -92,11 +92,11 @@ class UpscanServiceImplSpec extends AnyWordSpec with Matchers with ScalaCheckDri
             )
           )
           (mockConnector
-            .initiate(_: Call, _: Call, _: UploadReference)(_: HeaderCarrier))
+            .initiate(_: Call, _: Call, _: UploadReference)(using _: HeaderCarrier))
             .expects(mockFailure, mockSuccess, *, *)
             .returning(EitherT.fromEither[Future](response))
           (mockConnector
-            .saveUpscanUpload(_: UpscanUpload)(_: HeaderCarrier))
+            .saveUpscanUpload(_: UpscanUpload)(using _: HeaderCarrier))
             .expects(*, *)
             .returning(EitherT.fromEither[Future](Right(HttpResponse(OK, emptyJsonBody))))
           await(

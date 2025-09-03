@@ -60,7 +60,7 @@ class AgentVerifierMatchRetryStoreImpl @Inject() (
       ttl = expireAfter,
       timestampSupport = new CurrentTimestampSupport,
       cacheIdType = CacheIdType.SimpleCacheId
-    )(ec)
+    )(using ec)
   }
 
   val sessionKey = "agent-verifier-match-retries"

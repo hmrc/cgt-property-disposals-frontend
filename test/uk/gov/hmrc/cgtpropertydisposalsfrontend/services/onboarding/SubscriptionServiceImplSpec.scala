@@ -56,13 +56,13 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
     expectedLang: Lang
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .subscribe(_: SubscriptionDetails, _: Lang)(_: HeaderCarrier))
+      .subscribe(_: SubscriptionDetails, _: Lang)(using _: HeaderCarrier))
       .expects(expectedSubscriptionDetails, expectedLang, *)
       .returning(EitherT(Future.successful(response)))
 
   private def mockHasSubscription()(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getSubscriptionStatus()(_: HeaderCarrier))
+      .getSubscriptionStatus()(using _: HeaderCarrier))
       .expects(*)
       .returning(EitherT(Future.successful(response)))
 
@@ -70,7 +70,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
     expectedRegistrationDetails: RegistrationDetails
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .registerWithoutId(_: RegistrationDetails)(_: HeaderCarrier))
+      .registerWithoutId(_: RegistrationDetails)(using _: HeaderCarrier))
       .expects(expectedRegistrationDetails, *)
       .returning(EitherT(Future.successful(response)))
 
@@ -78,7 +78,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
     cgtReference: CgtReference
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .getSubscribedDetails(_: CgtReference)(_: HeaderCarrier))
+      .getSubscribedDetails(_: CgtReference)(using _: HeaderCarrier))
       .expects(cgtReference, *)
       .returning(EitherT(Future.successful(response)))
 
@@ -86,7 +86,7 @@ class SubscriptionServiceImplSpec extends AnyWordSpec with Matchers with MockFac
     subscribedAndVerifierDetails: SubscribedUpdateDetails
   )(response: Either[Error, HttpResponse]) =
     (mockConnector
-      .updateSubscribedDetails(_: SubscribedUpdateDetails)(_: HeaderCarrier))
+      .updateSubscribedDetails(_: SubscribedUpdateDetails)(using _: HeaderCarrier))
       .expects(subscribedAndVerifierDetails, *)
       .returning(EitherT(Future.successful(response)))
 

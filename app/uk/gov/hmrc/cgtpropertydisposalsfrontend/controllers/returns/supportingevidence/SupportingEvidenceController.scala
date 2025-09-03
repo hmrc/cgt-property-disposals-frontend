@@ -655,7 +655,7 @@ object SupportingEvidenceController {
   private val doYouWantToUploadForm =
     Form(
       mapping(
-        "supporting-evidence.do-you-want-to-upload" -> of(
+        "supporting-evidence.do-you-want-to-upload" -> of(using
           BooleanFormatter.formatter
         )
       )(identity)(Some(_))

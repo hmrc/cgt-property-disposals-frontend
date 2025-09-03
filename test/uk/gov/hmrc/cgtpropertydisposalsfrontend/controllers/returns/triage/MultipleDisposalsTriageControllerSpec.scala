@@ -132,13 +132,13 @@ class MultipleDisposalsTriageControllerSpec
     date: LocalDate
   )(response: Either[Error, Option[TaxYear]]) =
     (mockTaxYearService
-      .taxYear(_: LocalDate)(_: HeaderCarrier))
+      .taxYear(_: LocalDate)(using _: HeaderCarrier))
       .expects(date, *)
       .returning(EitherT.fromEither[Future](response))
 
   private def mockAvailableTaxYears()(response: Either[Error, List[Int]]) =
     (mockTaxYearService
-      .availableTaxYears()(_: HeaderCarrier))
+      .availableTaxYears()(using _: HeaderCarrier))
       .expects(*)
       .returning(EitherT.fromEither[Future](response))
 
