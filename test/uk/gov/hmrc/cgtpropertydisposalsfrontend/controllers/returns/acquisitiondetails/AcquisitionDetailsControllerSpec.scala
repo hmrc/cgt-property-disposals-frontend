@@ -28,41 +28,44 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.RebasingCutoffDates.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.AmountOfMoneyErrorScenarios.amountOfMoneyErrorScenarios
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.DateErrorScenarios.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.AcquisitionDetailsControllerSpec.validateAcquisitionDetailsCheckYourAnswersPage
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.UserType.Agent
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.formatAmountOfMoneyWithPoundSign
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.RepresenteeAnswersGen.given
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.{CompleteAcquisitionDetailsAnswers, IncompleteAcquisitionDetailsAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionMethod.Inherited
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{IndirectDisposal, NonResidential, Residential}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ShareOfProperty.Half
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.IncompleteSingleDisposalTriageAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, models}
@@ -295,6 +298,44 @@ class AcquisitionDetailsControllerSpec
     )
 
     (sessionData, journey, draftReturn)
+  }
+
+  def sessionWithStateForAgent(
+    answers: AcquisitionDetailsAnswers,
+    assetType: Option[AssetType],
+    wasUkResident: Option[Boolean],
+    userType: UserType,
+    representativeType: Option[RepresentativeType]
+  ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn, UserType) = {
+
+    val draftReturn = sample[DraftSingleDisposalReturn].copy(
+      triageAnswers = sample[IncompleteSingleDisposalTriageAnswers].copy(
+        Some(IndividualUserType.Self),
+        assetType = assetType,
+        wasAUKResident = wasUkResident
+      ),
+      acquisitionDetailsAnswers = Some(answers),
+      disposalDetailsAnswers = Some(
+        sample[DisposalDetailsAnswers.IncompleteDisposalDetailsAnswers]
+          .copy(shareOfProperty = Some(Half), disposalPrice = None, disposalFees = None)
+      )
+    )
+
+    val journey = sample[FillingOutReturn].copy(
+      draftReturn = draftReturn,
+      agentReferenceNumber = setAgentReferenceNumber(Agent),
+      subscribedDetails = sample[SubscribedDetails].copy(
+        name = setNameForUserType(Agent)
+      )
+    )
+
+    val sessionData = SessionData.empty.copy(
+      userType = Some(Agent),
+      journeyStatus = Some(journey)
+    )
+    val userType    = UserType.Agent
+
+    (sessionData, journey, draftReturn, userType)
   }
 
   def sessionWithSingleIndirectDisposalState(
@@ -5107,6 +5148,130 @@ class AcquisitionDetailsControllerSpec
               controllers.returns.routes.TaskListController.taskList()
             )
         }
+      }
+
+    }
+
+    "handling requests to display the improvement costs page for agent" must {
+
+      val key = "improvementCosts"
+
+      def performAction(): Future[Result] =
+        controller.improvementCosts()(FakeRequest())
+
+      "display the page" when {
+
+        "the agent's client meets the rebasing criteria and their acquisition details journey is incomplete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithStateForAgent(
+              sample[IncompleteAcquisitionDetailsAnswers].copy(
+                acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
+                rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+                shouldUseRebase = Some(false)
+              ),
+              Some(AssetType.Residential),
+              wasUkResident = Some(false),
+              userType = Agent,
+              representativeType = None
+            )._1
+          )
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.5.title"),
+            doc =>
+              doc
+                .select("#content > article > form, #main-content form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .improvementCostsSubmit()
+                .url
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the acquisition price page for agent" must {
+
+      val key = "acquisitionPrice"
+
+      def performAction(): Future[Result] =
+        controller.acquisitionPrice()(FakeRequest())
+
+      "display the page" when {
+
+        "the agent's client meets the rebasing criteria and their acquisition details journey is incomplete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithStateForAgent(
+              sample[IncompleteAcquisitionDetailsAnswers].copy(
+                acquisitionMethod = Some(Inherited),
+                acquisitionDate = Some(AcquisitionDate(allResidents)),
+                rebasedAcquisitionPrice = None,
+                shouldUseRebase = Some(false)
+              ),
+              Some(AssetType.Residential),
+              wasUkResident = None,
+              userType = UserType.Agent,
+              representativeType = Some(PersonalRepresentative)
+            )._1
+          )
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.8.title", TimeUtils.govDisplayFormat(allResidents)),
+            doc =>
+              doc
+                .select("#content > article > form, #main-content form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionPrice()
+                .url
+          )
+        }
+
+      }
+
+    }
+
+    "handling requests to display the acquisition cost(fee) page for agent" must {
+
+      val key = "acquisitionFees"
+
+      def performAction(): Future[Result] =
+        controller.acquisitionFees()(FakeRequest())
+
+      "display the page" when {
+
+        "the agent's client meets the rebasing criteria and their acquisition details journey is incomplete" in {
+          mockAuthWithNoRetrievals()
+          mockGetSession(
+            sessionWithStateForAgent(
+              sample[IncompleteAcquisitionDetailsAnswers].copy(
+                acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
+                rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+                shouldUseRebase = Some(true)
+              ),
+              Some(AssetType.Residential),
+              wasUkResident = Some(false),
+              userType = Agent,
+              representativeType = None
+            )._1
+          )
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey(s"$key.6.title"),
+            doc =>
+              doc
+                .select("#content > article > form, #main-content form")
+                .attr("action") shouldBe routes.AcquisitionDetailsController
+                .acquisitionFees()
+                .url
+          )
+        }
+
       }
 
     }

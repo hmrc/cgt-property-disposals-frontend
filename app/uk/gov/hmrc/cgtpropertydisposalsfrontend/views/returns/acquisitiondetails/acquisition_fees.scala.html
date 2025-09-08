@@ -85,7 +85,7 @@
 
 @titleAndHelpText = @{
   (isShare, representativeType, shouldUseRebase) match {
-    case (true, None, Some(true)) =>
+    case (true, None, Some(true)) if !isAgent =>
       (messages("acquisitionFees.2.title"), messages("acquisitionFees.2.helpText"))
     case (true, Some(Capacitor | PersonalRepresentative), _) =>
       (messages("acquisitionFees.3.title"), messages("acquisitionFees.3.helpText"))
