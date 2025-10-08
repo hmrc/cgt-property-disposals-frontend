@@ -1484,7 +1484,7 @@ companyDetails.cyaChange.company-address=the company name and address
 
 non-uk-resident.change-address-to-uk-address.title=You cannot use this service
 non-uk-resident.change-address-to-uk-address.p1=You cannot use this service to report Capitals Gains Tax on UK property sales or disposals. This is because your address is in the UK.
-non-uk-resident.change-address-to-uk-address.p2=You’ll need to <a href="{0}">contact HMRC</a> to find out how to report the tax.
+non-uk-resident.change-address-to-uk-address.p2=You’ll need to <a class="govuk-link" href="{0}">contact HMRC</a> to find out how to report the tax.
 
 company-details.multiple-indirect-disposals.guidance.title=You’ll need to enter details for one of the disposals
 company-details.multiple-indirect-disposals.guidance.p1=You should enter the details of the disposal that gave the largest gain or the smallest loss.
