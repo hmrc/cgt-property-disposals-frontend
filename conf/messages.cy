@@ -1485,7 +1485,7 @@ companyDetails.cyaChange.company-address=enw a chyfeiriad y cwmni
 
 non-uk-resident.change-address-to-uk-address.title=Ni allwch ddefnyddio’r gwasanaeth hwn
 non-uk-resident.change-address-to-uk-address.p1=Ni allwch ddefnyddio’r gwasanaeth hwn i roi gwybod am Dreth Enillion Cyfalaf ar werthu neu waredu eiddo yn y DU. Mae hyn oherwydd nad yw’ch cyfeiriad yn y DU.
-non-uk-resident.change-address-to-uk-address.p2=Bydd angen i chi <a href
+non-uk-resident.change-address-to-uk-address.p2=Bydd angen i chi <a class="govuk-link" href="{0}">gysylltu â CThEF</a> i gael gwybod sut i roi gwybod am y dreth.
 
 company-details.multiple-indirect-disposals.guidance.title=Bydd angen i chi nodi manylion ar gyfer un o’r gwarediadau
 company-details.multiple-indirect-disposals.guidance.p1=Dylech nodi manylion y gwarediad a roddodd yr enillion mwyaf neu’r golled leiaf.
