@@ -25,7 +25,8 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
     ),
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s",
-      "-Wconf:msg=unused import&src=html/.*:s"
+      "-Wconf:msg=unused import&src=html/.*:s",
+      "-Wconf:msg=Flag.*repeatedly:s"
     )
   )
   .settings(CodeCoverageSettings.settings *)
