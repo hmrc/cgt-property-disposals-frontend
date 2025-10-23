@@ -316,8 +316,8 @@ nonUkAddress-line1.error.pattern=Address line 1 must only include letters, numbe
 nonUkAddress-line2.error.pattern=Address line 2 must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
-countryCode.error.required=Select a country from the options presented as you type
-countryCode.error.notFound=Select a country from the options presented as you type
+countryCode.error.required=Select a country
+countryCode.error.notFound=Select a country
 
 countryOfResidence.cyaChange=country of residence
 
@@ -1475,8 +1475,8 @@ nonUkAddress-line1.companyDetails.error.pattern=Company name must only include l
 nonUkAddress-line2.companyDetails.error.pattern=Street address must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 nonUkAddress-line3.companyDetails.error.pattern=Address line 3 must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 nonUkAddress-line4.companyDetails.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
-countryCode.companyDetails.error.required=Select a country from the options presented as you type
-countryCode.companyDetails.error.notFound=Select a country from the options presented as you type
+countryCode.companyDetails.error.required=Select a country
+countryCode.companyDetails.error.notFound=Select a country
 
 companyDetails.cya.title=Check your answers
 companyDetails.cyaLabel.company-address=Company name and address

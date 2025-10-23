@@ -316,8 +316,8 @@ nonUkAddress-line1.error.pattern=Mae’n rhaid i linell 1 y cyfeiriad gynnwys ll
 nonUkAddress-line2.error.pattern=Mae’n rhaid i linell 2 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 nonUkAddress-line3.error.pattern=Mae’n rhaid i linell 3 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 nonUkAddress-line4.error.pattern=Mae’n rhaid i linell 4 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
-countryCode.error.required=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
-countryCode.error.notFound=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
+countryCode.error.required=Dewiswch wlad
+countryCode.error.notFound=Dewiswch wlad
 
 countryOfResidence.cyaChange=gwlad breswyl
 
@@ -1476,8 +1476,8 @@ nonUkAddress-line1.companyDetails.error.pattern=Mae’n rhaid i enw’r cwmni gy
 nonUkAddress-line2.companyDetails.error.pattern=Mae’n rhaid i gyfeiriad y stryd gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 nonUkAddress-line3.companyDetails.error.pattern=Mae’n rhaid i linell 3 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 nonUkAddress-line4.companyDetails.error.pattern=Mae’n rhaid i linell 4 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
-countryCode.companyDetails.error.required=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
-countryCode.companyDetails.error.notFound=Dewiswch wlad o’r dewisiadau a gyflwynir wrth i chi deipio
+countryCode.companyDetails.error.required=Dewiswch wlad
+countryCode.companyDetails.error.notFound=Dewiswch wlad
 
 companyDetails.cya.title=Gwiriwch eich atebion
 companyDetails.cyaLabel.company-address=Enw a chyfeiriad y cwmni
