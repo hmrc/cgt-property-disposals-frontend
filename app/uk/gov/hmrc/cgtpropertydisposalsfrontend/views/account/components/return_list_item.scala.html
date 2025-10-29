@@ -40,7 +40,7 @@
         @sentReturn.propertyAddress.getAddressLines.headOption.getOrElse("")
         <span class="govuk-caption-m govuk-!-font-size-16">@sentReturn.propertyAddress.getAddressLines.drop(1).mkString(", ")</span>
       </h3>
-      <h4 id="taxOwed-@sentReturn.submissionId" class="govuk-heading-l">
+      <h4 id="taxOwed-@sentReturn.submissionId" class="govuk-heading-m">
         <span class="govuk-caption-m govuk-!-font-size-16">@messages("returns.list.taxOwed")</span>
         @MoneyUtils.formatAmountOfMoneyWithPoundSign(sentReturn.mainReturnChargeAmount.withFloorZero.inPounds())
       </h4>
