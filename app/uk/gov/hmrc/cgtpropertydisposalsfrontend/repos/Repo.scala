@@ -22,6 +22,7 @@ import uk.gov.hmrc.mongo.cache.{DataKey, MongoCacheRepository}
 import uk.gov.hmrc.mdc.Mdc.preservingMdc
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success, Try}
 
 trait Repo {
   val cacheRepository: MongoCacheRepository[String]
@@ -37,12 +38,18 @@ trait Repo {
 
   protected def clearCache(id: String)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
     preservingMdc {
-      cacheRepository
-        .delete(id)(DataKey(sessionKey))
-        .map(_ => Right(()))
-        .recover { case _: Exception =>
-          Left(Error("unknown error during clearing session data in mongo"))
-        }
+      Try {
+        cacheRepository.delete(id)(DataKey(sessionKey))
+      } match {
+        case Success(futureResult) =>
+          futureResult
+            .map(_ => Right(()))
+            .recover { case _: Exception =>
+              Left(Error("unknown error during clearing session data in mongo"))
+            }
+        case Failure(_)            =>
+          Future.successful(Left(Error("unknown error during clearing session data in mongo")))
+      }
     }
 
   protected def store[A : Writes](id: String, a: A)(implicit ec: ExecutionContext): Future[Either[Error, Unit]] =
