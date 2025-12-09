@@ -463,12 +463,12 @@ isReportingForATrust.error.required=Select yes if you want to report the tax for
 isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate
 
 haveATrn.title=Does the trust or estate have a Trust Registration Number?
-haveATrn.helpText=It is sent to the person who registers the trust with the Trust Registration Service and is 15 characters. For example, ‘XC TVN 999 000 0000’.
+haveATrn.helpText=Your URN is 15 alphanumeric characters, for example ABTRUST12345678. It is usually sent to the person who registers the trust with the Trust Registration Service.
 hasTrn.error.required=Select yes if you have a Trust Registration number
 hasTrn.error.boolean=Select yes if you have a Trust Registration number
 
 enterTrn.title=Enter details about the trust or estate
-trn.label=Trust Registration Number
+trn.label=Unique Reference Number (URN)
 trn.error.required=Enter your Trust Registration Number
 trn.error.pattern=Trust Registration Number must only include letters, numbers and spaces
 trn.error.tooLong=Trust Registration Number must be 15 characters

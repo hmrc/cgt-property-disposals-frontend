@@ -463,12 +463,12 @@ isReportingForATrust.error.required=Dewiswch ‘Iawn’ os ydych am roi gwybod a
 isReportingForATrust.error.boolean=Dewiswch ‘Iawn’ os ydych am roi gwybod am y dreth ar gyfer ymddiriedolaeth neu ystâd
 
 haveATrn.title=A oes gan yr ymddiriedolaeth neu ystâd Rif Cofrestru Ymddiriedolaeth?
-haveATrn.helpText=Mae’n cael ei anfon at y person sy’n cofrestru’r ymddiriedolaeth gyda’r Gwasanaeth Cofrestru Ymddiriedolaeth ac mae’n 15 o gymeriadau. Er enghraifft, ‘XC TVN 999 000 0000’.
+haveATrn.helpText=Mae eich URN yn 15 o gymeriadau alffaniwmerig, er enghraifft, ABTRUST12345678. Fel arfer caiff ei anfon at y person sy’n cofrestru’r ymddiriedolaeth gyda’r Gwasanaeth Cofrestru Ymddiriedolaeth.
 hasTrn.error.required=Dewiswch ‘Iawn’ os oes gennych Rif Cofrestru Ymddiriedolaeth
 hasTrn.error.boolean=Dewiswch ‘Iawn’ os oes gennych Rif Cofrestru Ymddiriedolaeth
 
 enterTrn.title=Nodwch fanylion ynghylch yr ymddiriedolaeth neu ystâd
-trn.label=Rhif Cofrestru Ymddiriedolaeth
+trn.label=Cyfeirnod Unigryw (URN)
 trn.error.required=Nodwch eich Rhif Cofrestru Ymddiriedolaeth
 trn.error.pattern=Gall Rhif Cofrestru Ymddiriedolaeth dim ond cynnwys llythrennau, rhifau a bwlch
 trn.error.tooLong=Rhaid i’r Rhif Cofrestru Ymddiriedolaeth fod yn 15 o gymeriadau
