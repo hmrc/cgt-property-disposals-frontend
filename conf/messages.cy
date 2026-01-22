@@ -463,24 +463,24 @@ isReportingForATrust.error.required=Dewiswch ‘Iawn’ os ydych am roi gwybod a
 isReportingForATrust.error.boolean=Dewiswch ‘Iawn’ os ydych am roi gwybod am y dreth ar gyfer ymddiriedolaeth neu ystâd
 
 haveATrn.title=A oes gan yr ymddiriedolaeth neu ystâd Rif Cofrestru Ymddiriedolaeth?
-haveATrn.helpText=Mae’n cael ei anfon at y person sy’n cofrestru’r ymddiriedolaeth gyda’r Gwasanaeth Cofrestru Ymddiriedolaeth ac mae’n 15 o gymeriadau. Er enghraifft, ‘XC TVN 999 000 0000’.
+haveATrn.helpText=Mae eich URN yn 15 o gymeriadau alffaniwmerig, er enghraifft, ABTRUST12345678. Fel arfer caiff ei anfon at y person sy’n cofrestru’r ymddiriedolaeth gyda’r Gwasanaeth Cofrestru Ymddiriedolaeth.
 hasTrn.error.required=Dewiswch ‘Iawn’ os oes gennych Rif Cofrestru Ymddiriedolaeth
 hasTrn.error.boolean=Dewiswch ‘Iawn’ os oes gennych Rif Cofrestru Ymddiriedolaeth
 
 enterTrn.title=Nodwch fanylion ynghylch yr ymddiriedolaeth neu ystâd
-trn.label=Rhif Cofrestru Ymddiriedolaeth
-trn.error.required=Nodwch eich Rhif Cofrestru Ymddiriedolaeth
-trn.error.pattern=Gall Rhif Cofrestru Ymddiriedolaeth dim ond cynnwys llythrennau, rhifau a bwlch
-trn.error.tooLong=Rhaid i’r Rhif Cofrestru Ymddiriedolaeth fod yn 15 o gymeriadau
-trn.error.tooShort=Rhaid i’r Rhif Cofrestru Ymddiriedolaeth fod yn 15 o gymeriadau
-enterTrn.error.notFound=Nid oeddem yn gallu dod o hyd i’ch manylion drwy ddefnyddio’r enw a Rhif Cofrestru Ymddiriedolaeth a nodwyd gennych
+trn.label=Cyfeirnod Unigryw (URN)
+trn.error.required=Nodwch eich Cyfeirnod Unigryw (URN)
+trn.error.pattern=Gall Cyfeirnod Unigryw (URN) dim ond cynnwys llythrennau, rhifau a bwlch
+trn.error.tooLong=Rhaid i’r Cyfeirnod Unigryw (URN) fod yn 15 o gymeriadau
+trn.error.tooShort=Rhaid i’r Cyfeirnod Unigryw (URN) fod yn 15 o gymeriadau
+enterTrn.error.notFound=Nid oeddem yn gallu dod o hyd i’ch manylion drwy ddefnyddio’r enw a Cyfeirnod Unigryw (URN) a nodwyd gennych
 enterTrn.tooManyAttempts.title=Bydd angen i chi aros a rhoi cynnig arall arni
-enterTrn.tooManyAttempts.p1=Rydych wedi ceisio nodi eich Rhif Cofrestru Ymddiriedolaeth ac enw’r ymddiriedolaeth gormod o weithiau.
+enterTrn.tooManyAttempts.p1=Rydych wedi ceisio nodi eich Cyfeirnod Unigryw (URN) ac enw’r ymddiriedolaeth gormod o weithiau.
 enterTrn.tooManyAttempts.p2=Bydd angen i chi aros am 2 awr a rhoi cynnig arall arni.
-enterTrn.whatATrnIs=Beth yw Rhif Cofrestru Ymddiriedolaeth?
+enterTrn.whatATrnIs=Beth yw Cyfeirnod Unigryw (URN)?
 enterTrn.whatATrnIs.p1=Mae CThEF yn anfon y rhif hwn i’r person sy’n <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">cofrestru’r ymddiriedolaeth (yn agor tab newydd)</a>.
 enterTrn.ifYouCannotFind=Os na allwch ddod o hyd iddo
-enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Rhif Cofrestru Ymddiriedolaeth, gallwch <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">gysylltu â CThEF (yn agor tab newydd)</a>.
+enterTrn.ifYouCannotFind.p1=Os gwnaethoch gofrestru’r ymddiriedolaeth a ni allwch ddod o hyd i’w Cyfeirnod Unigryw (URN), gallwch <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">gysylltu â CThEF (yn agor tab newydd)</a>.
 
 enterTrustName.label=Enw’r ymddiriedolaeth
 trustName.error.required=Nodwch enw’ch ymddiriedolaeth
