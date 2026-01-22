@@ -92,8 +92,13 @@ class SingleDisposalsTriageControllerSpec
       bind[TaxYearService].toInstance(mockTaxYearService)
     )
 
-  private val today = LocalDate.now(Clock.systemUTC())
-
+  private val today           = LocalDate.now(Clock.systemUTC())
+  private val startDate       = TaxYear.thisTaxYearStartDate()
+  private val endDate         = startDate.plusYears(1)
+  private val taxYear         = sample[TaxYear].copy(
+    startDateInclusive = startDate,
+    endDateExclusive = endDate
+  )
   private lazy val controller = instanceOf[SingleDisposalsTriageController]
 
   implicit lazy val messagesApi: MessagesApi = controller.messagesApi
@@ -1997,11 +2002,6 @@ class SingleDisposalsTriageControllerSpec
           viewConfig.maxYearForDisposalsAndCompletion
         )
         .plusDays(1L)
-
-      val taxYear = sample[TaxYear].copy(
-        startDateInclusive = LocalDate.of(today.getYear, 4, 6),
-        endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
-      )
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
@@ -4409,11 +4409,6 @@ class SingleDisposalsTriageControllerSpec
         )
 
       val tomorrow = today.plusDays(1L)
-
-      val taxYear = sample[TaxYear].copy(
-        startDateInclusive = LocalDate.of(today.getYear, 4, 6),
-        endDateExclusive = LocalDate.of(today.getYear + 1, 4, 6)
-      )
 
       val requiredPreviousAnswers =
         IncompleteSingleDisposalTriageAnswers.empty.copy(
