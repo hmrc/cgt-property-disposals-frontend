@@ -52,7 +52,7 @@ landingPage.beforeYouStart.list1.bullet9=property type, if you’re a non-reside
 landingPage.ifAgent.h2=If you’re an agent
 landingPage.ifAgent.p1=Find out how to <a class="govuk-link" href="{0}">report your client’s Capital Gains Tax on UK property disposals</a>.
 landingPage.ifTrust.h2=If you’re representing a trust
-landingPage.ifTrust.p1=The trust must be <a class="govuk-link" href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Trust Registration Number.
+landingPage.ifTrust.p1=The trust must be <a class="govuk-link" href="{0}">registered</a>. You’ll need the trust’s Self Assessment Unique Taxpayer Reference or Unique Reference Number (URN).
 landingPage.capacitorOrPersonalRepresentative.h2=If you’re a capacitor or personal representative
 landingPage.capacitorOrPersonalRepresentative.p1=A capacitor is someone who helps someone else deal with their tax. A <a class="govuk-link" href="{0}">personal representative</a> is someone responsible for settling the affairs of someone who has died.
 landingPage.capacitorOrPersonalRepresentative.p2=To use this service for another person you’ll need to:
@@ -462,25 +462,25 @@ isReportingForATrust.title=Do you want to report a capital gain for a trust or e
 isReportingForATrust.error.required=Select yes if you want to report the tax for a trust or estate
 isReportingForATrust.error.boolean=Select yes if you want to report the tax for a trust or estate
 
-haveATrn.title=Does the trust or estate have a Trust Registration Number?
-haveATrn.helpText=It is sent to the person who registers the trust with the Trust Registration Service and is 15 characters. For example, ‘XC TVN 999 000 0000’.
-hasTrn.error.required=Select yes if you have a Trust Registration number
-hasTrn.error.boolean=Select yes if you have a Trust Registration number
+haveATrn.title=Does the trust or estate have a Unique Reference Number (URN)?
+haveATrn.helpText=Your URN is 15 alphanumeric characters, for example ABTRUST12345678. It is usually sent to the person who registers the trust with the Trust Registration Service.
+hasTrn.error.required=Select yes if you have a Unique Reference Number (URN)
+hasTrn.error.boolean=Select yes if you have a Unique Reference Number (URN)
 
 enterTrn.title=Enter details about the trust or estate
-trn.label=Trust Registration Number
-trn.error.required=Enter your Trust Registration Number
-trn.error.pattern=Trust Registration Number must only include letters, numbers and spaces
-trn.error.tooLong=Trust Registration Number must be 15 characters
-trn.error.tooShort=Trust Registration Number must be 15 characters
-enterTrn.error.notFound=We could not find your details using the name and Trust Registration Number you entered
+trn.label=Unique Reference Number (URN)
+trn.error.required=Enter your Unique Reference Number (URN)
+trn.error.pattern=Unique Reference Number (URN) must only include letters, numbers and spaces
+trn.error.tooLong=Unique Reference Number (URN) must be 15 characters
+trn.error.tooShort=Unique Reference Number (URN) must be 15 characters
+enterTrn.error.notFound=We could not find your details using the name and Unique Reference Number (URN) you entered
 enterTrn.tooManyAttempts.title=You’ll need to wait and try again
-enterTrn.tooManyAttempts.p1=You’ve tried to enter your Trust Registration Number and trust name too many times.
+enterTrn.tooManyAttempts.p1=You’ve tried to enter your Unique Reference Number (URN) and trust name too many times.
 enterTrn.tooManyAttempts.p2=You’ll need to wait 2 hours and try again.
-enterTrn.whatATrnIs=What a Trust Registration Number is
+enterTrn.whatATrnIs=What a Unique Reference Number (URN) is
 enterTrn.whatATrnIs.p1=HMRC sends this number to the person who <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">registers the trust (opens in a new tab)</a>.
 enterTrn.ifYouCannotFind=If you cannot find it
-enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Trust Registration Number number, you can <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">contact HMRC (opens in a new tab)</a>.
+enterTrn.ifYouCannotFind.p1=If you registered the trust and cannot find its Unique Reference Number (URN) number, you can <a class="govuk-link" href="{0}" target="_blank" rel="noopener noreferrer">contact HMRC (opens in a new tab)</a>.
 
 enterTrustName.label=Name of trust
 trustName.error.required=Enter the name of your trust
