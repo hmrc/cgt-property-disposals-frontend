@@ -28,7 +28,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{TelephoneNumber, UserTyp
 
 final case class SubscribedDetails(
   name: Either[TrustName, IndividualName],
-  emailAddress: Email,
+  emailAddress: Option[Email],
   address: Address,
   contactName: ContactName,
   cgtReference: CgtReference,

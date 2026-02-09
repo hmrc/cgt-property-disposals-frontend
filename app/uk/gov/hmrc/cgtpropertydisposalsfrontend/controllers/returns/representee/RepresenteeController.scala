@@ -695,7 +695,7 @@ class RepresenteeController @Inject() (
             val defaultContactDetails = RepresenteeContactDetails(
               subscribedDetails.contactName,
               subscribedDetails.address,
-              subscribedDetails.emailAddress
+              subscribedDetails.emailAddress.get
             )
             val newAnswers            = incompleteWithoutContactDetails.copy(
               contactDetails = Some(defaultContactDetails),

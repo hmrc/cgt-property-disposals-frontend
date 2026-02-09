@@ -105,7 +105,7 @@ trait EmailController[T <: EmailJourneyType] {
           request.sessionData.flatMap(s => s.journeyStatus.map(s -> _)) match {
             case Some((_, subscribed: Subscribed)) =>
               EmailController.submitEmailForm.fill(
-                SubmitEmailDetails(subscribed.subscribedDetails.emailAddress, resendVerificationEmail = false)
+                SubmitEmailDetails(subscribed.subscribedDetails.emailAddress.get, resendVerificationEmail = false)
               )
             case _                                 => EmailController.submitEmailForm
           }
@@ -231,7 +231,7 @@ trait EmailController[T <: EmailJourneyType] {
                                   updateSession(sessionStore, request.toSession) { s =>
                                     s.copy(
                                       journeyStatus = Some(updatedJourney),
-                                      emailToBeVerified = Some(emailToBeVerified.copy(verified = true))
+                                      Some(emailToBeVerified.copy(verified = true))
                                     )
                                   }
                                 )

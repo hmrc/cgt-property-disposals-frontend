@@ -324,7 +324,7 @@ class RegistrationController @Inject() (
                                               Subscribed(
                                                 SubscribedDetails(
                                                   Right(registrationDetails.name),
-                                                  registrationDetails.emailAddress,
+                                                  Some(registrationDetails.emailAddress),
                                                   registrationDetails.address,
                                                   ContactName(
                                                     s"${registrationDetails.name.firstName} ${registrationDetails.name.lastName}"

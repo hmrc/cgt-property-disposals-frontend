@@ -81,7 +81,7 @@ class SubscriptionController @Inject() (
                                             Subscribed(
                                               SubscribedDetails(
                                                 details.name,
-                                                details.emailAddress,
+                                                Some(details.emailAddress),
                                                 details.address,
                                                 details.contactName,
                                                 CgtReference(cgtReferenceNumber),

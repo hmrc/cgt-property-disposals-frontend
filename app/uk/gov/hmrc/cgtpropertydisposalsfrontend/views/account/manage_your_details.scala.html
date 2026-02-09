@@ -23,6 +23,7 @@
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.NonUkAddress
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
+@import org.apache.pekko.util.Helpers.Requiring
 
 @this(
 layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
@@ -94,7 +95,7 @@ accountMenu: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.acco
 
     @cyaRow(
       messages("subscription.cyaLabel.email"),
-      Html(details.emailAddress.value),
+      Html(details.emailAddress.map(_.value)),
       Some(cyaChange(messages("subscription.cyaChange.email"), routes.SubscribedChangeEmailController.enterEmail().url)),
       id = "email",
       widthClass = Some("govuk-!-width-one-third")

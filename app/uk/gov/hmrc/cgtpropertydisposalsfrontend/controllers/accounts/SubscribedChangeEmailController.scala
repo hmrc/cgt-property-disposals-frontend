@@ -39,6 +39,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.{controllers, views}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
+import org.apache.pekko.util.Helpers.Requiring
 
 import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
@@ -87,7 +88,7 @@ class SubscribedChangeEmailController @Inject() (
   ): EitherT[Future, Error, JourneyStatus] = {
     val journey                 = changingAccountEmail.journey
     val journeyWithUpdatedEmail =
-      journey.subscribedDetails.copy(emailAddress = email)
+      journey.subscribedDetails.copy(emailAddress = Some(email))
     if (journey.subscribedDetails === journeyWithUpdatedEmail) {
       EitherT.pure[Future, Error](journey)
     } else {
@@ -110,7 +111,7 @@ class SubscribedChangeEmailController @Inject() (
     auditService.sendEvent(
       "changeEmailAddressVerified",
       SubscribedChangeEmailAddressVerifiedEvent(
-        journey.subscribedDetails.emailAddress.value,
+        journey.subscribedDetails.emailAddress.value.toString,
         email.value,
         journey.subscribedDetails.cgtReference.value,
         journey.agentReferenceNumber.isDefined,
@@ -128,7 +129,7 @@ class SubscribedChangeEmailController @Inject() (
     auditService.sendEvent(
       "changeEmailAddressAttempted",
       SubscribedChangeEmailAddressAttemptedEvent(
-        journey.subscribedDetails.emailAddress.value,
+        journey.subscribedDetails.emailAddress.value.toString,
         email.value,
         journey.subscribedDetails.cgtReference.value,
         journey.agentReferenceNumber.isDefined,
