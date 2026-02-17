@@ -150,7 +150,7 @@ class StartControllerSpec
       .expects(cgtReference, sentReturns, *)
       .returning(EitherT.fromEither[Future](response))
 
-  private def mockSendAuditEvent[A : Writes](
+  private def mockSendAuditEvent[A](
     event: A,
     auditType: String,
     transactionName: String
