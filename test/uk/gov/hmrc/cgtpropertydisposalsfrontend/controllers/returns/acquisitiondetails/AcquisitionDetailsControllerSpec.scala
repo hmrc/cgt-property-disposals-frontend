@@ -303,9 +303,7 @@ class AcquisitionDetailsControllerSpec
   def sessionWithStateForAgent(
     answers: AcquisitionDetailsAnswers,
     assetType: Option[AssetType],
-    wasUkResident: Option[Boolean],
-    userType: UserType,
-    representativeType: Option[RepresentativeType]
+    wasUkResident: Option[Boolean]
   ): (SessionData, FillingOutReturn, DraftSingleDisposalReturn, UserType) = {
 
     val draftReturn = sample[DraftSingleDisposalReturn].copy(
@@ -333,9 +331,7 @@ class AcquisitionDetailsControllerSpec
       userType = Some(Agent),
       journeyStatus = Some(journey)
     )
-    val userType    = UserType.Agent
-
-    (sessionData, journey, draftReturn, userType)
+    (sessionData, journey, draftReturn, UserType.Agent)
   }
 
   def sessionWithSingleIndirectDisposalState(
@@ -1236,14 +1232,16 @@ class AcquisitionDetailsControllerSpec
             expectedErrorKey
           )(s"$key$userKey.title")(
             performAction,
-            sessionWithState(
-              sample[CompleteAcquisitionDetailsAnswers],
-              assetType,
-              sample[Boolean],
-              userType,
-              individualUserType,
-              disposalDate
-            )._1
+            Some(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers],
+                assetType,
+                sample[Boolean],
+                userType,
+                individualUserType,
+                disposalDate
+              )._1
+            )
           )
 
         "the user enters date that is invalid" in {
@@ -2091,7 +2089,7 @@ class AcquisitionDetailsControllerSpec
                 )(scenario.expectedErrorMessageKey)(
                   s"$contextKey.title",
                   TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
-                )(performAction, scenarioSession)
+                )(performAction, Some(scenarioSession))
               }
             }
           }
@@ -2132,7 +2130,7 @@ class AcquisitionDetailsControllerSpec
             )(
               s"$contextKey.title",
               TimeUtils.govDisplayFormat(answers.acquisitionDate.value)
-            )(performAction, scenarioSession)
+            )(performAction, Some(scenarioSession))
           }
 
         "the user enters zero for amount" in {
@@ -4454,19 +4452,21 @@ class AcquisitionDetailsControllerSpec
             expectedErrorKey
           )("shouldUseRebase.title", date)(
             performAction,
-            sessionWithState(
-              sample[CompleteAcquisitionDetailsAnswers]
-                .copy(acquisitionDate =
-                  AcquisitionDate(
-                    nonUkResidentsNonResidentialProperty.minusDays(1)
-                  )
-                ),
-              NonResidential,
-              wasUkResident = false,
-              userType,
-              individualUserType,
-              disposalDate
-            )._1
+            Some(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers]
+                  .copy(acquisitionDate =
+                    AcquisitionDate(
+                      nonUkResidentsNonResidentialProperty.minusDays(1)
+                    )
+                  ),
+                NonResidential,
+                wasUkResident = false,
+                userType,
+                individualUserType,
+                disposalDate
+              )._1
+            )
           )
 
         "no option has been selected" in {
@@ -4494,15 +4494,17 @@ class AcquisitionDetailsControllerSpec
             expectedErrorKey
           )("shouldUseRebase.title", date)(
             performAction,
-            sessionWithState(
-              sample[CompleteAcquisitionDetailsAnswers]
-                .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty)),
-              Residential,
-              wasUkResident = false,
-              userType,
-              individualUserType,
-              disposalDate
-            )._1
+            Some(
+              sessionWithState(
+                sample[CompleteAcquisitionDetailsAnswers]
+                  .copy(acquisitionDate = AcquisitionDate(nonUkResidentsResidentialProperty)),
+                Residential,
+                wasUkResident = false,
+                userType,
+                individualUserType,
+                disposalDate
+              )._1
+            )
           )
 
         "no option has been selected" in {
@@ -5171,9 +5173,7 @@ class AcquisitionDetailsControllerSpec
                 shouldUseRebase = Some(false)
               ),
               Some(AssetType.Residential),
-              wasUkResident = Some(false),
-              userType = Agent,
-              representativeType = None
+              wasUkResident = Some(false)
             )._1
           )
 
@@ -5213,9 +5213,7 @@ class AcquisitionDetailsControllerSpec
                 shouldUseRebase = Some(false)
               ),
               Some(AssetType.Residential),
-              wasUkResident = None,
-              userType = UserType.Agent,
-              representativeType = Some(PersonalRepresentative)
+              wasUkResident = None
             )._1
           )
 
@@ -5254,9 +5252,7 @@ class AcquisitionDetailsControllerSpec
                 shouldUseRebase = Some(true)
               ),
               Some(AssetType.Residential),
-              wasUkResident = Some(false),
-              userType = Agent,
-              representativeType = None
+              wasUkResident = Some(false)
             )._1
           )
 
@@ -5451,21 +5447,24 @@ class AcquisitionDetailsControllerSpec
     errorArgs: String*
   )(pageTitleKey: String, titleArgs: String*)(
     performAction: Seq[(String, String)] => Future[Result],
-    currentSession: SessionData = sessionWithState(
-      sample[CompleteAcquisitionDetailsAnswers].copy(
-        rebasedAcquisitionPrice = Some(sample[AmountInPence]),
-        shouldUseRebase = false
-      ),
-      assetType,
-      wasUkResident,
-      userType,
-      individualUserType
-    )._1
+    currentSession: Option[SessionData] = None
   ): Unit = {
+    val session = currentSession.getOrElse(
+      sessionWithState(
+        sample[CompleteAcquisitionDetailsAnswers].copy(
+          rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+          shouldUseRebase = false
+        ),
+        assetType,
+        wasUkResident,
+        userType,
+        individualUserType
+      )._1
+    )
 
     inSequence {
       mockAuthWithNoRetrievals()
-      mockGetSession(currentSession)
+      mockGetSession(session)
     }
 
     checkPageIsDisplayed(
