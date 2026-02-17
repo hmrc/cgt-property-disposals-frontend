@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
 import cats.syntax.either._
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -49,7 +49,7 @@ import scala.concurrent.Future
 
 trait ChangeRepresenteeEmailControllerSpec
     extends EmailControllerSpec[ChangingRepresenteeEmail]
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with ReturnsServiceSupport {
 

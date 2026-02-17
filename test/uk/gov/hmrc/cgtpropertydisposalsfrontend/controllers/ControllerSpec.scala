@@ -21,6 +21,7 @@ import com.typesafe.config.ConfigFactory
 import org.apache.pekko.stream.Materializer
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.scalactic.anyvals.{PosInt, PosZInt}
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.should.Matchers
@@ -34,10 +35,12 @@ import play.api.mvc.{Call, Result}
 import play.api.test.Helpers.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.metrics.{Metrics, TestMetrics}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 
 import java.net.URLEncoder
 import scala.concurrent.Future
 import scala.reflect.ClassTag
+import scala.util.Try
 
 @Singleton
 class TestMessagesApi(
@@ -83,9 +86,22 @@ class TestDefaultMessagesApiProvider @Inject() (
     )
 }
 
-trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with MockFactory {
+trait ControllerSpec extends AnyWordSpec with Matchers with BeforeAndAfterAll with MockFactory with SampledScalaCheck {
+
+  private def toInt(key: String, default: Int): Int =
+    sys.props.get(key).flatMap(value => Try(value.toInt).toOption).filter(_ > 0).getOrElse(default)
 
   implicit val lang: Lang = Lang("en")
+
+  private val sampleMinSuccessful: Int = toInt("controllerSpec.minSuccessful", default = 6)
+  private val sampleSizeRange: Int     = toInt("controllerSpec.sizeRange", default = 5)
+
+  implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
+    PropertyCheckConfiguration(
+      minSuccessful = PosInt.ensuringValid(sampleMinSuccessful),
+      sizeRange = PosInt.ensuringValid(sampleSizeRange),
+      maxDiscardedFactor = 2.0
+    )
 
   protected def overrideBindings: List[GuiceableModule] = List.empty[GuiceableModule]
 

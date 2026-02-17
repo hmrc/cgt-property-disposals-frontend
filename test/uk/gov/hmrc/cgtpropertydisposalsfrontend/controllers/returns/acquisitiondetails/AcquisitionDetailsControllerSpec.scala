@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisition
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -53,7 +53,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.*
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -78,7 +77,7 @@ class AcquisitionDetailsControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
@@ -400,21 +399,14 @@ class AcquisitionDetailsControllerSpec
       gainOrLossAfterReliefs = None
     )
 
-  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
-    case UserType.Agent | UserType.Organisation | UserType.Individual => true
-    case _                                                            => false
-  }
+  val acceptedUserTypeGen: Gen[UserType] =
+    Gen.oneOf(UserType.Agent, UserType.Organisation, UserType.Individual)
 
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
-    individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative => true
-      case _                                         => false
-    }
+    Gen.oneOf(Self, Capacitor, PersonalRepresentative)
 
-  val acceptedAssetTypeGenerator: Gen[AssetType] = assetTypeGen.filter {
-    case IndirectDisposal | Residential | NonResidential => true
-    case _                                               => false
-  }
+  val acceptedAssetTypeGenerator: Gen[AssetType] =
+    Gen.oneOf(IndirectDisposal, Residential, NonResidential)
 
   "AcquisitionDetailsController" when {
 
@@ -5167,7 +5159,7 @@ class AcquisitionDetailsControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithStateForAgent(
-              sample[IncompleteAcquisitionDetailsAnswers].copy(
+              IncompleteAcquisitionDetailsAnswers.empty.copy(
                 acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
                 rebasedAcquisitionPrice = Some(sample[AmountInPence]),
                 shouldUseRebase = Some(false)
@@ -5206,7 +5198,7 @@ class AcquisitionDetailsControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithStateForAgent(
-              sample[IncompleteAcquisitionDetailsAnswers].copy(
+              IncompleteAcquisitionDetailsAnswers.empty.copy(
                 acquisitionMethod = Some(Inherited),
                 acquisitionDate = Some(AcquisitionDate(allResidents)),
                 rebasedAcquisitionPrice = None,
@@ -5246,9 +5238,10 @@ class AcquisitionDetailsControllerSpec
           mockAuthWithNoRetrievals()
           mockGetSession(
             sessionWithStateForAgent(
-              sample[IncompleteAcquisitionDetailsAnswers].copy(
+              IncompleteAcquisitionDetailsAnswers.empty.copy(
                 acquisitionDate = Some(AcquisitionDate(allResidents.minusDays(1L))),
                 rebasedAcquisitionPrice = Some(sample[AmountInPence]),
+                improvementCosts = Some(sample[AmountInPence]),
                 shouldUseRebase = Some(true)
               ),
               Some(AssetType.Residential),

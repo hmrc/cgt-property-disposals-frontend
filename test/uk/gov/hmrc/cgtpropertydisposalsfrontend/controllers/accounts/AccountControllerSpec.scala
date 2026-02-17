@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -37,7 +37,7 @@ class AccountControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour {
 
   override val overrideBindings: List[GuiceableModule] =

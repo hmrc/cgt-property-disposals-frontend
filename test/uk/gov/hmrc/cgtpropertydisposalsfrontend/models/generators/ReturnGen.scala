@@ -46,7 +46,7 @@ object ReturnGen extends GenUtils {
       mainReturnChargeAmount    <- MoneyGen.amountInPenceGen
       mainReturnChargeReference <- Gen.option(Generators.stringGen)
       propertyAddress           <- AddressGen.addressGen
-      charges                   <- Gen.listOf(MoneyGen.chargeGen)
+      charges                   <- Generators.listOfMax(3, MoneyGen.chargeGen)
       isRecentlyAmended         <- Generators.booleanGen
       expired                   <- Generators.booleanGen
     } yield ReturnSummary(
@@ -70,10 +70,10 @@ object ReturnGen extends GenUtils {
 
   implicit val previousReturnDataGen: Gen[PreviousReturnData] =
     for {
-      summaries                                     <- Gen.listOf(returnSummaryGen)
+      summaries                                     <- Generators.listOfMax(3, returnSummaryGen)
       previousYearToDate                            <- Gen.option(MoneyGen.amountInPenceGen)
       previousReturnsImplyEligibilityForCalculation <- Gen.option(Generators.booleanGen)
-      calculationData                               <- Gen.option(Gen.listOf(furtherReturnCalculationData))
+      calculationData                               <- Gen.option(Generators.listOfMax(2, furtherReturnCalculationData))
     } yield PreviousReturnData(
       summaries,
       previousYearToDate,

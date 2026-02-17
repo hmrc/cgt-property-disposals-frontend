@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -36,7 +36,7 @@ import scala.concurrent.Future
 trait ContactNameControllerSpec[J <: JourneyStatus]
     extends ContactNameFormValidationTests
     with RedirectToStartBehaviour {
-  this: ControllerSpec & AuthSupport & SessionSupport & ScalaCheckDrivenPropertyChecks =>
+  this: ControllerSpec & AuthSupport & SessionSupport & SampledScalaCheck =>
 
   val controller: ContactNameController[J]
 

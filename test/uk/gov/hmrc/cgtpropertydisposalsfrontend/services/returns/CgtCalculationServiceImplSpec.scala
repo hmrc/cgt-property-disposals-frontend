@@ -21,7 +21,7 @@ import cats.instances.future._
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.connectors.returns.ReturnsConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
@@ -35,11 +35,7 @@ import uk.gov.hmrc.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class CgtCalculationServiceImplSpec
-    extends AnyWordSpec
-    with Matchers
-    with ScalaCheckDrivenPropertyChecks
-    with MockFactory {
+class CgtCalculationServiceImplSpec extends AnyWordSpec with Matchers with SampledScalaCheck with MockFactory {
   private val mockReturnsConnector = mock[ReturnsConnector]
 
   val service = new CgtCalculationServiceImpl(mockReturnsConnector)

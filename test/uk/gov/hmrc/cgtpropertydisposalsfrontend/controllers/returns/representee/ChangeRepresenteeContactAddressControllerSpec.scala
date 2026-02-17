@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.representee
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -42,7 +42,7 @@ import scala.concurrent.Future
 
 trait ChangeRepresenteeContactAddressControllerSpec
     extends AddressControllerSpec[ChangingRepresenteeContactAddressJourney]
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with ReturnsServiceSupport {
 

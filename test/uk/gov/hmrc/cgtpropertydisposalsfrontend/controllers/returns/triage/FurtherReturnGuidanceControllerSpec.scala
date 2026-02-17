@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.triage
 
 import org.scalacheck.Gen
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -34,8 +34,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusG
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.NameGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -53,7 +51,7 @@ class FurtherReturnGuidanceControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour {
 
   protected override val overrideBindings: List[GuiceableModule] =
@@ -206,15 +204,10 @@ class FurtherReturnGuidanceControllerSpec
   }
 
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
-    individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case null                                                                              => false
-    }
+    Gen.oneOf(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
 
-  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
-    case UserType.Agent | UserType.Organisation | UserType.Individual => true
-    case _                                                            => false
-  }
+  val acceptedUserTypeGen: Gen[UserType] =
+    Gen.oneOf(UserType.Agent, UserType.Organisation, UserType.Individual)
 
   "FurtherReturnGuidanceController" when {
 

@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -77,7 +77,7 @@ class MultipleDisposalsTriageControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with ReturnsServiceSupport
     with StartingToAmendToFillingOutReturnSpecBehaviour {
@@ -4234,7 +4234,7 @@ class MultipleDisposalsTriageControllerSpec
         Some(TaxYearExchanged(cutoffTaxYear - 1)),
         taxYear,
         Some(false),
-        sample[CompletionDate]
+        CompletionDate(taxYear.startDateInclusive.plusDays(1L))
       )
 
       val allQuestionsAnsweredNonUk = IncompleteMultipleDisposalsTriageAnswers(

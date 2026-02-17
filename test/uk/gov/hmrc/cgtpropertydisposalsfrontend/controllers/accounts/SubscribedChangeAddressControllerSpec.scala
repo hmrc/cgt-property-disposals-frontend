@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
@@ -42,7 +42,7 @@ import scala.concurrent.Future
 
 class SubscribedChangeAddressControllerSpec
     extends AddressControllerSpec[SubscribedAddressJourney]
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour {
 
   implicit val hc: HeaderCarrier = HeaderCarrier()

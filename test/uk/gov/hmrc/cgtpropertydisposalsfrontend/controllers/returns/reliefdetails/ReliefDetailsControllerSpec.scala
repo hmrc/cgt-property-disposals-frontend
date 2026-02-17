@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.reliefdetai
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -50,7 +50,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.give
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
@@ -74,7 +73,7 @@ class ReliefDetailsControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
@@ -191,22 +190,14 @@ class ReliefDetailsControllerSpec
       isAmend
     )
 
-  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
-    case UserType.Agent | UserType.Organisation | UserType.Individual => true
-    case _                                                            => false
-  }
+  val acceptedUserTypeGen: Gen[UserType] =
+    Gen.oneOf(UserType.Agent, UserType.Organisation, UserType.Individual)
 
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
-    individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case null                                                                              => false
-    }
+    Gen.oneOf(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
 
   val acceptedIndividualUserTypeForLettingsRelief: Gen[IndividualUserType] =
-    individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative => true
-      case _                                         => false
-    }
+    Gen.oneOf(Self, Capacitor, PersonalRepresentative)
 
   def isPeriodOfAdmin(individualUserType: IndividualUserType): Boolean =
     if (individualUserType === PersonalRepresentativeInPeriodOfAdmin) true else false

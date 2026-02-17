@@ -20,7 +20,7 @@ import cats.Eq
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.{Lang, MessagesApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -70,7 +70,7 @@ class CompanyDetailsControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
@@ -212,10 +212,7 @@ class CompanyDetailsControllerSpec
   }
 
   val allIndividualUserTypeGen: Gen[IndividualUserType] =
-    individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case null                                                                              => false
-    }
+    Gen.oneOf(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
 
   def userMessageKey(individualUserType: IndividualUserType): String =
     individualUserType match {

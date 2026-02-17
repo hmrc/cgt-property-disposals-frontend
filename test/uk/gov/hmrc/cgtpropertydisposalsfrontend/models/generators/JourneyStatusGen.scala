@@ -80,8 +80,8 @@ trait JourneyStatusLowerPriorityGen extends GenUtils {
     subscribedDetails    <- SubscribedDetailsGen.subscribedDetailsGen
     ggCredId             <- IdGen.ggCredIdGen
     agentReferenceNumber <- Gen.option(IdGen.arnGen)
-    draftReturns         <- Gen.listOf(DraftReturnGen.draftReturnGen)
-    sentReturns          <- Gen.listOf(ReturnGen.returnSummaryGen)
+    draftReturns         <- Generators.listOfMax(3, DraftReturnGen.draftReturnGen)
+    sentReturns          <- Generators.listOfMax(3, ReturnGen.returnSummaryGen)
   } yield Subscribed(subscribedDetails, ggCredId, agentReferenceNumber, draftReturns, sentReturns)
 
   implicit val individualMissingEmailGen: Gen[IndividualMissingEmail] = for {

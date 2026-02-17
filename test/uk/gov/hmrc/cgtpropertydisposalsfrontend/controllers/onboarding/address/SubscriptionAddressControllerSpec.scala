@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.address
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.mvc.Result
 import play.api.test.CSRFTokenHelper._
@@ -38,7 +38,7 @@ import scala.concurrent.Future
 
 class SubscriptionAddressControllerSpec
     extends AddressControllerSpec[SubscriptionReadyAddressJourney]
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour {
 
   private val subscriptionDetails =

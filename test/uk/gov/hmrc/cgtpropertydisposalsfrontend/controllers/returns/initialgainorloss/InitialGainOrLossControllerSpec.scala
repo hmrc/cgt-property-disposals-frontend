@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.initialgain
 
 import org.scalacheck.Gen
 import org.scalatest.Assertion
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -56,7 +56,7 @@ class InitialGainOrLossControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 

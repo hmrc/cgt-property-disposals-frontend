@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.AcquisitionDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.{arb, sample}
@@ -29,7 +29,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AssetType.{Indire
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.{PersonalRepresentativeInPeriodOfAdmin, Self}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.CompleteSingleDisposalTriageAnswers
 
-class AcquisitionDetailsAnswersSpec extends AnyWordSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class AcquisitionDetailsAnswersSpec extends AnyWordSpec with Matchers with SampledScalaCheck {
 
   "IncompleteAcquisitionDetailsAnswers" must {
 

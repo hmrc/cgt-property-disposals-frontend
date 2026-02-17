@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 
 import cats.data.EitherT
 import cats.instances.future._
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
@@ -40,7 +40,7 @@ class SubscribedChangeContactNameControllerSpec
     with AuthSupport
     with SessionSupport
     with ContactNameControllerSpec[Subscribed]
-    with ScalaCheckDrivenPropertyChecks {
+    with SampledScalaCheck {
 
   private def mockSubscriptionUpdate(
     subscribedUpdateDetails: SubscribedUpdateDetails

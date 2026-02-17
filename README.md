@@ -92,6 +92,17 @@ sm2 --start CGTPD_ALL
 sm2 --stop CGTPD_FRONTEND
 ```   
 
+Controller property-based specs (`ControllerSpec`) default to:
+
+- `minSuccessful = 6`
+- `sizeRange = 5`
+
+For stricter local runs, override with JVM system properties, for example:
+
+```
+sbt -DcontrollerSpec.minSuccessful=10 -DcontrollerSpec.sizeRange=6 test
+```
+
 For details on accessing the service on both local and higher up environments, please refer to 
 [CGT Development](https://confluence.tools.tax.service.gov.uk/display/DDCWLS/CGT%3A+Development) confluence page.
 

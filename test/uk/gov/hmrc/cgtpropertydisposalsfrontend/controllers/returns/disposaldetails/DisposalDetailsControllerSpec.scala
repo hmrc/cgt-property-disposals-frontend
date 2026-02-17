@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.disposaldet
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -70,7 +70,7 @@ class DisposalDetailsControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour {
 
@@ -274,16 +274,11 @@ class DisposalDetailsControllerSpec
       isAmend
     )
 
-  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
-    case UserType.Agent | UserType.Organisation | UserType.Individual => true
-    case _                                                            => false
-  }
+  val acceptedUserTypeGen: Gen[UserType] =
+    Gen.oneOf(UserType.Agent, UserType.Organisation, UserType.Individual)
 
   val acceptedIndividualUserType: Gen[IndividualUserType] =
-    individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case null                                                                              => false
-    }
+    Gen.oneOf(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
 
   "DisposalDetailsController" when {
 

@@ -20,7 +20,7 @@ import cats.data.EitherT
 import cats.instances.future._
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -71,7 +71,7 @@ class RepresenteeControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with ReturnsServiceSupport
     with BusinessPartnerRecordServiceSupport

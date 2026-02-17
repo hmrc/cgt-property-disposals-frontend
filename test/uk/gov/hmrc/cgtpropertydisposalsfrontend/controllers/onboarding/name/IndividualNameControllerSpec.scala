@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -35,7 +35,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.Subscription
 import scala.concurrent.Future
 
 trait IndividualNameControllerSpec[J <: JourneyStatus] extends NameFormValidationTests with RedirectToStartBehaviour {
-  this: ControllerSpec & AuthSupport & SessionSupport & ScalaCheckDrivenPropertyChecks =>
+  this: ControllerSpec & AuthSupport & SessionSupport & SampledScalaCheck =>
 
   val controller: IndividualNameController[J]
 
