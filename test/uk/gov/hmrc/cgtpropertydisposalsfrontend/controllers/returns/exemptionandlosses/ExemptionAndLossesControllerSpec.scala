@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.exemptionan
 import org.jsoup.nodes.Document
 import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
@@ -51,7 +51,6 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.give
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.*
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -73,7 +72,7 @@ class ExemptionAndLossesControllerSpec
     with AuthSupport
     with SessionSupport
     with ReturnsServiceSupport
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with StartingToAmendToFillingOutReturnSpecBehaviour
     with FurtherReturnCalculationEligibilityUtilSupport {
@@ -354,16 +353,11 @@ class ExemptionAndLossesControllerSpec
     (sessionData, journey, draftReturn)
   }
 
-  val acceptedUserTypeGen: Gen[UserType] = userTypeGen.filter {
-    case UserType.Agent | UserType.Organisation | UserType.Individual => true
-    case _                                                            => false
-  }
+  val acceptedUserTypeGen: Gen[UserType] =
+    Gen.oneOf(UserType.Agent, UserType.Organisation, UserType.Individual)
 
   val acceptedIndividualUserTypeGen: Gen[IndividualUserType] =
-    individualUserTypeGen.filter {
-      case Self | Capacitor | PersonalRepresentative | PersonalRepresentativeInPeriodOfAdmin => true
-      case null                                                                              => false
-    }
+    Gen.oneOf(Self, Capacitor, PersonalRepresentative, PersonalRepresentativeInPeriodOfAdmin)
 
   "ExemptionAndLossesController" when {
 

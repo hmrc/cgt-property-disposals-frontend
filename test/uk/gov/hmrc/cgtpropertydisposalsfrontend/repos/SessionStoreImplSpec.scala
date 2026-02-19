@@ -21,7 +21,7 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.Configuration
 import play.api.test.Helpers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models._
@@ -40,7 +40,7 @@ class SessionStoreImplSpec
     with MongoSupportSpec
     with Eventually
     with GuiceOneAppPerSuite
-    with ScalaCheckDrivenPropertyChecks {
+    with SampledScalaCheck {
   private val timestampSupport: TimestampSupport = app.injector.instanceOf[TimestampSupport]
   val sessionStore                               = new SessionStoreImpl(mongoComponent, config, timestampSupport)
 

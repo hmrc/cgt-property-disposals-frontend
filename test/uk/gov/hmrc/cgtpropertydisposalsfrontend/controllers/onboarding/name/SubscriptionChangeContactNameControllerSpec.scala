@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.name
 
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.test.CSRFTokenHelper._
 import play.api.test.FakeRequest
@@ -33,7 +33,7 @@ class SubscriptionChangeContactNameControllerSpec
     with AuthSupport
     with SessionSupport
     with ContactNameControllerSpec[SubscriptionReady]
-    with ScalaCheckDrivenPropertyChecks {
+    with SampledScalaCheck {
 
   override val controller: SubscriptionChangeContactNameController =
     instanceOf[SubscriptionChangeContactNameController]

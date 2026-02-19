@@ -60,7 +60,7 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
       individualUserType        <- Gen.option(individualUserTypeGen)
       numberOfProperties        <- Gen.size
       countryOfResidence        <- AddressGen.countryGen
-      assetTypes                <- Gen.listOf(assetTypeGen)
+      assetTypes                <- Generators.listOfMax(3, assetTypeGen)
       taxYearExchanged          <- Gen.option(taxYearExchangedGen)
       taxYear                   <- TaxYearGen.taxYearGen
       alreadySentSelfAssessment <- Gen.option(Generators.booleanGen)
@@ -83,7 +83,7 @@ trait HigherPriorityTriageQuestionsGen extends LowerPriorityTriageQuestionsGen {
       wasAUKResident               <- Gen.option(Generators.booleanGen)
       countryOfResidence           <- Gen.option(AddressGen.countryGen)
       wereAllPropertiesResidential <- Gen.option(Generators.booleanGen)
-      assetTypes                   <- Gen.option(Gen.listOf(assetTypeGen))
+      assetTypes                   <- Gen.option(Generators.listOfMax(3, assetTypeGen))
       taxYearExchanged             <- Gen.option(taxYearExchangedGen)
       taxYear                      <- Gen.option(TaxYearGen.taxYearGen)
       alreadySentSelfAssessment    <- Gen.option(Generators.booleanGen)

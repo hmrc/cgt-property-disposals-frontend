@@ -18,7 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.should.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
@@ -57,7 +57,7 @@ import scala.jdk.CollectionConverters._
 
 class SingleDisposalPropertyDetailsControllerSpec
     extends AddressControllerSpec[FillingOutReturnAddressJourney]
-    with ScalaCheckDrivenPropertyChecks
+    with SampledScalaCheck
     with RedirectToStartBehaviour
     with ReturnsServiceSupport
     with StartingToAmendToFillingOutReturnSpecBehaviour {

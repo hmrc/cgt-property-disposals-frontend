@@ -30,7 +30,13 @@ object Generators {
   implicit val longGen: Gen[Long] =
     Gen.choose(-5e13.toLong, 5e13.toLong)
 
-  implicit def listGen[A](g: Gen[A]): Gen[List[A]] = Gen.listOf(g)
+  private val defaultMaxListSize: Int = 3
+
+  def listOfMax[A](maxSize: Int, g: Gen[A]): Gen[List[A]] =
+    Gen.choose(0, maxSize).flatMap(n => Gen.listOfN(n, g))
+
+  implicit def listGen[A](g: Gen[A]): Gen[List[A]] =
+    listOfMax(defaultMaxListSize, g)
 
   def sample[A](implicit gen: Gen[A]): A =
     gen.sample.getOrElse(sys.error(s"Could not generate instance with $gen"))

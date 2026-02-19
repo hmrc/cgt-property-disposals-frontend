@@ -35,7 +35,7 @@ object SessionDataGen extends GenUtils {
   private val addressLookupResultGen: Gen[AddressLookupResult] = for {
     postcode  <- AddressGen.postcodeGen
     filter    <- Gen.option(Generators.stringGen)
-    addresses <- Gen.listOf(AddressGen.addressGen)
+    addresses <- Generators.listOfMax(3, AddressGen.addressGen)
   } yield AddressLookupResult(postcode, filter, addresses)
 
   private val needMoreDetailsDetailsGen: Gen[NeedMoreDetailsDetails] = for {

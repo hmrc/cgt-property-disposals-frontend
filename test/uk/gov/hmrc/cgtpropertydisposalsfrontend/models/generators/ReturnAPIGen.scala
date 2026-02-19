@@ -46,7 +46,7 @@ object ReturnAPIGen extends Common {
     gen[SubmitReturnResponse]
 
   given listReturnsResponseGen: Gen[ListReturnsResponse] = for {
-    returns <- Gen.listOf(ReturnGen.returnSummaryGen)
+    returns <- Generators.listOfMax(3, ReturnGen.returnSummaryGen)
   } yield ListReturnsResponse(returns)
 
   given calculateCgtTaxDueRequestGen: Gen[CalculateCgtTaxDueRequest] =
