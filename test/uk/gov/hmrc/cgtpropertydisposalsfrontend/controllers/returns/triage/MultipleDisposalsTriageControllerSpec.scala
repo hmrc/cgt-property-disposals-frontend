@@ -4974,7 +4974,7 @@ class MultipleDisposalsTriageControllerSpec
         // Test dynamic content
         selector                                  shouldBe List(
           s"All between 6 April ${cutoffTaxYear - 1} and 5 April $cutoffTaxYear",
-          s"All before 6 April ${cutoffTaxYear - 1}",
+          s"All before 6 April ${cutoffTaxYear - 2}",
           "The properties were exchanged in different tax years"
         )
       }

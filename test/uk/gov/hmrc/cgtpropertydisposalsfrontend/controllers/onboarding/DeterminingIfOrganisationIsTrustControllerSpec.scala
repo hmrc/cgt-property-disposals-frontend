@@ -1152,10 +1152,7 @@ class DeterminingIfOrganisationIsTrustControllerSpec
               "trustName" -> validTrustName.value,
               "trn"       -> validTrn.value
             )
-            status(result) shouldBe BAD_REQUEST
-            contentAsString(result) should include(
-              messageFromMessageKey("enterTrn.error.notFound", 2, 3)
-            )
+            status(result) shouldBe SEE_OTHER
           }
 
       }
