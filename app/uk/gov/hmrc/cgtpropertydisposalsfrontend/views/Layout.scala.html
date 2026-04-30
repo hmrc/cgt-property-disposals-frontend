@@ -27,13 +27,13 @@
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.UserResearchBanner
 @import views.html.helper.CSPNonce
+@import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 
 @this(
         hmrcStandardPage: HmrcStandardPage,
         twoThirdsOneThirdMainContent: TwoThirdsOneThirdMainContent,
         hmrcTimeoutDialogHelper: HmrcTimeoutDialogHelper,
         hmrcReportTechnicalIssueHelper: HmrcReportTechnicalIssueHelper,
-        hmrcLanguageSelectHelper: HmrcLanguageSelectHelper,
         autocompleteCss: HmrcAccessibleAutocompleteCss,
         autocompleteJavascript: HmrcAccessibleAutocompleteJavascript,
         viewConfig: ViewConfig,
@@ -66,9 +66,6 @@
 @beforeContent = {
   <div class="govuk-!-display-none-print">
     @accountMenu.fold(Html(""))(s => s)
-    @if(isWelshTranslationAvailable) {
-      @hmrcLanguageSelectHelper()
-    }
     @{
       backLinkUrl map { url =>
         viewHelpers.govukBackLink(BackLink(href = url, attributes = Map("id" -> "back"), content = Text(messages("generic.back"))))
@@ -105,11 +102,15 @@
   }
 }
 
+@serviceURLs = @{
+    ServiceURLs(
+        signOutUrl = if (withSignOutLink) Some(signOutUrl) else None,
+    )
+}
+
 @hmrcStandardPage(
   HmrcStandardPageParams(
-    serviceURLs = ServiceURLs(
-      signOutUrl = if (withSignOutLink) Some(signOutUrl) else None,
-    ),
+    serviceURLs = serviceURLs,
     templateOverrides = TemplateOverrides(
       additionalHeadBlock = Some(additionalHeadBlock),
       mainContentLayout = layoutOption,

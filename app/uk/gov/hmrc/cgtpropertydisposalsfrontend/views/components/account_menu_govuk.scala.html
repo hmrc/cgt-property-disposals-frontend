@@ -1,5 +1,5 @@
 @*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2026 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,25 @@
 @import play.api.i18n.Messages
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.account.AccountMenuItem
+@import uk.gov.hmrc.govukfrontend.views.html.components._
+@import uk.gov.hmrc.govukfrontend.views.viewmodels.servicenavigation.{ServiceNavigation, ServiceNavigationItem}
 
-@this()
+@this(govukServiceNavigation: GovukServiceNavigation)
 
 @(activeLink: Option[AccountMenuItem])(implicit messages: Messages)
-@link = @{"hmrc-account-menu__link--active"}
-<!-- ACCOUNT MENU -->
-<nav id="secondary-nav" class="hmrc-account-menu" aria-label="Account" aria-current="page" data-module="hmrc-account-menu">
-    <a href="@{accounts.homepage.routes.HomePageController.homepage().url}" class="hmrc-account-menu__link hmrc-account-menu__link--home@{if(activeLink.exists(_.is[AccountMenuItem.Home])){ link}}">
-      <span class="hmrc-account-icon hmrc-account-icon--home">
-        @messages("account.menu.home") </span>
-    </a>
 
-    <a href="#" class="hmrc-account-menu__link hmrc-account-menu__link--menu js-hidden js-visible" tabindex="-1" aria-hidden="true" aria-expanded="false">
-        @messages("account.menu") </a>
-    <ul class="hmrc-account-menu__main js-hidden">
-
-        <li>
-            <a href="@{accounts.routes.AccountController.manageYourDetails().url}" class="hmrc-account-menu__link@{if(activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])){ link }}">
-                @messages("account.menu.manageYourDetails") </a>
-        </li>
-    </ul>
-</nav>
+@govukServiceNavigation(ServiceNavigation(
+     ariaLabel = Some(messages("account.menu")),
+     navigation = Seq(
+         ServiceNavigationItem(
+             content = Text(messages("account.menu.home")),
+             href = accounts.homepage.routes.HomePageController.homepage().url,
+             active = activeLink.exists(_.is[AccountMenuItem.Home])
+         ),
+         ServiceNavigationItem(
+             content = Text(messages("account.menu.manageYourDetails")),
+             href = accounts.routes.AccountController.manageYourDetails().url,
+             active = activeLink.exists(_.is[AccountMenuItem.ManageYourDetails])
+         )
+     )
+))
