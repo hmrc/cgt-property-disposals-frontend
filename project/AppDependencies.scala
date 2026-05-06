@@ -2,7 +2,7 @@ import sbt.*
 
 object AppDependencies {
   val playVersion      = "play-30"
-  val bootstrapVersion = "10.6.0"
+  val bootstrapVersion = "10.7.0"
   val mongoVersion     = "2.12.0"
 
   val compile: Seq[ModuleID] = Seq(
@@ -16,9 +16,9 @@ object AppDependencies {
   )
 
   def test(scope: String = "test"): Seq[ModuleID] = Seq(
-    "org.jsoup"           % "jsoup"                         % "1.21.2"         % scope,
-    "org.scalamock"      %% "scalamock"                     % "7.5.0"          % scope,
-    "org.scalatest"      %% "scalatest"                     % "3.2.19"         % scope,
+    "org.jsoup"           % "jsoup"                         % "1.22.2"         % scope,
+    "org.scalamock"      %% "scalamock"                     % "7.5.5"          % scope,
+    "org.scalatest"      %% "scalatest"                     % "3.2.20"         % scope,
     "org.scalacheck"     %% "scalacheck"                    % "1.19.0"         % scope,
     "io.github.martinhh" %% "scalacheck-derived"            % "0.10.0"          % scope,
     "org.scalatestplus"   % "scalacheck-1-18_3"             % "3.2.19.0"       % scope,

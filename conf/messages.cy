@@ -4898,6 +4898,9 @@ representeeNameMatchError.title=Nid yw’r manylion a nodwyd gennych yn cyd-fynd
 representeeNameMatchError.p1=Nid yw’r cyfeirnod a’r enw a nodwyd gennych ar gyfer y person yn cyd-fynd â’r manylion sydd gennym.
 representeeNameMatchError.p2=Gwiriwch fod gennych y manylion cywir ar gyfer y person a rhoi cynnig arall arni.
 
+representeeOrganisationNameMatchError.p1= Nid oeddem yn gallu dod o hyd i’ch manylion drwy ddefnyddio’r enw a Rhif Cofrestru Ymddiriedolaeth a nodwyd gennych
+representeeOrganisationNameMatchError.p2= Os gwnaethoch ddefnyddio’r manylion anghywir <a class="govuk-link" href="{0}">gallwch roi cynnig arall arni gan ddefnyddio manylion gwahanol</a>.
+
 representeeTooManyNameMatchFailures.title=Bydd angen i chi aros a rhoi cynnig arall arni
 representeeTooManyNameMatchFailures.p1=Rydych wedi nodi’r manylion anghywir gormod o weithiau.
 representeeTooManyNameMatchFailures.p2=Nid yw’r cyfeirnod a nodwyd gennych yn cyd-fynd ag enw’r person.

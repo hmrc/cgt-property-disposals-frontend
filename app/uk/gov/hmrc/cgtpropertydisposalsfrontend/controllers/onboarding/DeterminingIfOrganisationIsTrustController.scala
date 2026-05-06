@@ -64,6 +64,7 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
   registerYourTrustPage: views.html.onboarding.register_your_trust,
   enterTrnAndNamePage: views.html.onboarding.subscription.enter_trn_and_trust_name,
   tooManyAttemptsPage: views.html.onboarding.subscription.too_many_trn_name_match_attempts,
+  doNotMatchState: views.html.onboarding.subscription.trust_or_state_do_not_match,
   cc: MessagesControllerComponents
 )(implicit viewConfig: ViewConfig, ec: ExecutionContext)
     extends FrontendController(cc)
@@ -359,65 +360,84 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
       }
     }
 
+  def doNotMatch(): Action[AnyContent] =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withValidUser(request) { _ =>
+        Ok(doNotMatchState())
+      }
+    }
+
   private def attemptNameMatchAndUpdateSession(
     trustNameMatchDetails: TrustNameMatchDetails,
     ggCredId: GGCredId,
     ggEmail: Option[Email],
-    previousUnsuccessfulAttempt: Option[UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]]
+    previousUnsuccessfulAttempt: Option[
+      UnsuccessfulNameMatchAttempts[TrustNameMatchDetails]
+    ]
   )(implicit
     hc: HeaderCarrier,
     request: RequestWithSessionData[?]
-  ): EitherT[Future, NameMatchServiceError[
-    TrustNameMatchDetails
-  ], (BusinessPartnerRecord, BusinessPartnerRecordResponse)] =
+  ): EitherT[
+    Future,
+    NameMatchServiceError[TrustNameMatchDetails],
+    (BusinessPartnerRecord, BusinessPartnerRecordResponse)
+  ] =
     for {
-      bprWithBprResponse <- bprNameMatchService
-                              .attemptBusinessPartnerRecordNameMatch(
-                                trustNameMatchDetails,
-                                ggCredId,
-                                previousUnsuccessfulAttempt,
-                                request.messages.lang
-                              )
-                              .subflatMap { case (bpr, bprResponse) =>
-                                if (bpr.name.isRight) {
-                                  Left(
-                                    NameMatchServiceError
-                                      .BackendError(
-                                        Error(
-                                          "Found BPR for individual but expected one for a trust"
-                                        )
-                                      )
-                                  )
-                                } else {
-                                  Right(bpr -> bprResponse)
-                                }
-                              }
-      _                  <- EitherT(
-                              updateSession(sessionStore, request.toSession)(
-                                _.copy(journeyStatus =
-                                  Some(
-                                    bprWithBprResponse._2.cgtReference.fold[JourneyStatus](
-                                      SubscriptionStatus.SubscriptionMissingData(
-                                        bprWithBprResponse._1,
-                                        None,
-                                        None,
-                                        ggCredId,
-                                        ggEmail
-                                      )
-                                    )(cgtRef =>
-                                      bprWithBprResponse._2.newEnrolmentSubscribedDetails.fold[JourneyStatus](
-                                        AlreadySubscribedWithDifferentGGAccount(
-                                          ggCredId,
-                                          Some(cgtRef)
-                                        )
-                                      )(subscribedDetails => NewEnrolmentCreatedForMissingEnrolment(subscribedDetails, ggCredId))
-                                    )
-                                  )
-                                )
-                              )
-                            ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
-                              NameMatchServiceError.BackendError.apply
-                            )
+      bprWithBprResponse <-
+        bprNameMatchService
+          .attemptBusinessPartnerRecordNameMatch(
+            trustNameMatchDetails,
+            ggCredId,
+            previousUnsuccessfulAttempt,
+            request.messages.lang
+          )
+          .subflatMap { case (bpr, bprResponse) =>
+            if (bpr.name.isRight) {
+              Left(
+                NameMatchServiceError.BackendError(
+                  Error(
+                    "Found BPR for individual but expected one for a trust"
+                  )
+                )
+              )
+            } else {
+              Right(bpr -> bprResponse)
+            }
+          }
+
+      _ <-
+        EitherT(
+          updateSession(sessionStore, request.toSession)(
+            _.copy(
+              journeyStatus = Some(
+                bprWithBprResponse._2.cgtReference.fold[JourneyStatus](
+                  SubscriptionStatus.SubscriptionMissingData(
+                    bprWithBprResponse._1,
+                    None,
+                    None,
+                    ggCredId,
+                    ggEmail
+                  )
+                ) { cgtRef =>
+                  bprWithBprResponse._2.newEnrolmentSubscribedDetails
+                    .fold[JourneyStatus](
+                      AlreadySubscribedWithDifferentGGAccount(
+                        ggCredId,
+                        Some(cgtRef)
+                      )
+                    ) { subscribedDetails =>
+                      NewEnrolmentCreatedForMissingEnrolment(
+                        subscribedDetails,
+                        ggCredId
+                      )
+                    }
+                }
+              )
+            )
+          )
+        ).leftMap[NameMatchServiceError[TrustNameMatchDetails]](
+          NameMatchServiceError.BackendError.apply
+        )
     } yield bprWithBprResponse
 
   private def handleNameMatchServiceError(
@@ -428,15 +448,12 @@ class DeterminingIfOrganisationIsTrustController @Inject() (
         logger.warn("Could not get BPR with entered TRN", error)
         errorHandler.errorResult()
 
-      case NameMatchServiceError.NameMatchFailed(unsuccessfulAttempts) =>
-        val form = enterTrnAndNameForm
-          .fill(unsuccessfulAttempts.lastDetailsTried)
-          .withUnsuccessfulAttemptsError(unsuccessfulAttempts)
-        BadRequest(
-          enterTrnAndNamePage(
-            form,
-            onboardingRoutes.DeterminingIfOrganisationIsTrustController.doYouHaveATrn()
-          )
+      case NameMatchServiceError.NameMatchFailed(_) =>
+        logger.info("Name match failed")
+
+        Redirect(
+          onboardingRoutes.DeterminingIfOrganisationIsTrustController
+            .doNotMatch()
         )
 
       case NameMatchServiceError.TooManyUnsuccessfulAttempts() =>
