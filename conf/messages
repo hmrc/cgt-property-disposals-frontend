@@ -4895,6 +4895,9 @@ representeeNameMatchError.title=The details you entered did not match our record
 representeeNameMatchError.p1=The reference number and name you entered for the person did not match the details we hold.
 representeeNameMatchError.p2=Check you have the correct details for the person and try again.
 
+representeeOrganisationNameMatchError.p1=We could not match the details you entered with records held by HMRC.
+representeeOrganisationNameMatchError.p2=If you used the wrong details, you can <a class="govuk-link" href="{0}">try again using different details</a>.
+
 representeeTooManyNameMatchFailures.title=You’ll need to wait and try again
 representeeTooManyNameMatchFailures.p1=You have entered the wrong details too many times.
 representeeTooManyNameMatchFailures.p2=The reference number you entered does not match the name of the person.
