@@ -27,9 +27,10 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
 
   private def getString(key: String): String = servicesConfig.getString(key)
 
-  private val basGatewayFrontendUrl: String = getString("bas-gateway-frontend.url")
-  private val signOutUri: String            = getString("sign-out.uri")
-  private val contactFormServiceIdentifier  = "CGTPD"
+  private val basGatewayFrontendUrl: String        = getString("bas-gateway-frontend.url")
+  private val signOutUri: String                   = getString("sign-out.uri")
+  private val contactFormServiceIdentifier: String = "CGTPD"
+  private val useServiceNavigation: String         = "useServiceNavigation"
 
   val govUkUrl: String                                = getString("external-url.gov-uk")
   val signOutUrl: String                              = s"$basGatewayFrontendUrl$signOutUri"
@@ -88,11 +89,12 @@ class ViewConfig @Inject() (servicesConfig: ServicesConfig) extends Logging {
   val trustsAndCgtWorkoutUrl: String       = getString("external-url.trusts-and-cgt-workout")
   val agentAskClientToAuthoriseUrl: String = getString("external-url.agent-ask-client-to-authorise")
 
-  private val feedbackFeUrl: String   = getString("microservice.services.feedback-frontend.url")
-  val onboardingExitSurveyUrl: String = s"$feedbackFeUrl/CGTPD-REG"
-  val returnsExitSurveyUrl: String    = s"$feedbackFeUrl/CGTPD-RET"
-  val amendsExitSurveyUrl: String     = s"$feedbackFeUrl/CGTPD-AMEND"
-  val generalExistSurveyUrl: String   = s"$feedbackFeUrl/$contactFormServiceIdentifier"
+  private val feedbackFeUrl: String = getString("microservice.services.feedback-frontend.url")
+
+  val onboardingExitSurveyUrl: String = s"$feedbackFeUrl/CGTPD-REG?$useServiceNavigation"
+  val returnsExitSurveyUrl: String    = s"$feedbackFeUrl/CGTPD-RET?$useServiceNavigation"
+  val amendsExitSurveyUrl: String     = s"$feedbackFeUrl/CGTPD-AMEND?$useServiceNavigation"
+  val generalExistSurveyUrl: String   = s"$feedbackFeUrl/$contactFormServiceIdentifier?$useServiceNavigation"
 
   val ggCreateAccountUrl: String =
     "/bas-gateway?" +
