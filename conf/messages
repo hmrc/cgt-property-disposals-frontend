@@ -4180,6 +4180,8 @@ supporting-evidence.upload.p3=If you don’t have a UK bank account, you must al
 supporting-evidence.upload.li10=International Bank Account Number (IBAN)
 supporting-evidence.upload.li11=Bank Identifier Code (BIC, also known as SWIFT code)
 supporting-evidence.upload.li12=account name
+supporting-evidence.upload.thereIsProblem=There is a problem
+supporting-evidence.upload.duplicateFileName=Each document must have a unique file name
 
 file.error.required=Select a file containing your supporting evidence
 
