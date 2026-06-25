@@ -1248,7 +1248,7 @@ class SupportingEvidenceControllerSpec
 
           val upscanSuccess        = sample[UpscanSuccess]
           val updatedUpscanSuccess =
-            upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
+            upscanSuccess.copy(uploadDetails = Map("fileName" -> "new-file.pdf"))
 
           val upscanUpload =
             sample[UpscanUpload].copy(
@@ -1355,6 +1355,72 @@ class SupportingEvidenceControllerSpec
         }
       }
 
+      "show upload supporting evidence page with duplicate filename error" when {
+        "the upscan callback came back with a success status but filename already exists" in {
+          val uploadReference = sample[UploadReference]
+
+          val existingSupportingEvidence =
+            sample[SupportingEvidence].copy(fileName = "same-file.pdf")
+
+          val upscanSuccess =
+            sample[UpscanSuccess].copy(
+              uploadDetails = Map("fileName" -> existingSupportingEvidence.fileName)
+            )
+
+          val completedUpscanUpload =
+            sample[UpscanUpload].copy(
+              uploadReference = uploadReference,
+              upscanCallBack = Some(upscanSuccess)
+            )
+
+          val newUpscanUpload =
+            sample[UpscanUpload].copy(
+              upscanCallBack = None
+            )
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(existingSupportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) =
+            sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
+
+            mockUpscanInitiate(
+              routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
+              routes.SupportingEvidenceController.scanProgress
+            )(Right(newUpscanUpload))
+          }
+
+          checkPageIsDisplayed(
+            performAction(uploadReference),
+            messageFromMessageKey("supporting-evidence.upload.title"),
+            doc => {
+              doc
+                .select(".govuk-error-summary a")
+                .text() shouldBe messageFromMessageKey(
+                "supporting-evidence.upload.duplicateFileName"
+              )
+
+              doc
+                .select(".govuk-error-message")
+                .text() should include(
+                messageFromMessageKey("supporting-evidence.upload.duplicateFileName")
+              )
+
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+      }
+
       "return the user to the check your answers page" when {
 
         "the user has completed their upload of supporting evidences" in {
@@ -1390,7 +1456,7 @@ class SupportingEvidenceControllerSpec
 
           val upscanSuccess        = sample[UpscanSuccess]
           val updatedUpscanSuccess =
-            upscanSuccess.copy(uploadDetails = Map("fileName" -> supportingEvidence.fileName))
+            upscanSuccess.copy(uploadDetails = Map("fileName" -> "new-file.pdf"))
 
           val upscanUpload =
             sample[UpscanUpload].copy(

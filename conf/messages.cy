@@ -4183,6 +4183,8 @@ supporting-evidence.upload.p3=Os nad oes gennych gyfrif banc yn y DU, mae’n rh
 supporting-evidence.upload.li10=y Rhif Cyfrif Banc Rhyngwladol (IBAN)
 supporting-evidence.upload.li11=Cod Adnabod y Banc (BIC, a elwir hefyd yn god SWIFT)
 supporting-evidence.upload.li12=enw’r cyfrif
+supporting-evidence.upload.thereIsProblem=Mae yna broblem
+supporting-evidence.upload.duplicateFileName=Rhaid i bob dogfen gael enw ffeil unigryw
 
 file.error.required=Dewiswch ffeil sy''n cynnwys eich tystiolaeth ategol
 

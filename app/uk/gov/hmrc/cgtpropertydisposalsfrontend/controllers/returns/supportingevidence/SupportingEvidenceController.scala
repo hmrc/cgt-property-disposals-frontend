@@ -17,35 +17,35 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence
 
 import cats.data.EitherT
-import cats.instances.future._
-import cats.syntax.eq._
+import cats.instances.future.*
+import cats.syntax.eq.*
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{DuplicateUpscanFileName, StoreUpscanSuccessResult, StoredUpscanSuccess, UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{supportingevidence => pages}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence as pages
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -294,7 +294,8 @@ class SupportingEvidenceController @Inject() (
                     uploadUpscan,
                     routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
                     f.isAmendReturn,
-                    isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers)
+                    isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers),
+                    hasDuplicateFileNameError = false
                   )
                 )
             )
@@ -325,36 +326,64 @@ class SupportingEvidenceController @Inject() (
           case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
             val result = for {
               upscanUpload <- upscanService.getUpscanUpload(uploadReference)
-              _            <- upscanUpload.upscanCallBack match {
-                                case Some(s: UpscanSuccess) =>
+              storeResult  <- upscanUpload.upscanCallBack match {
+                                case Some(success: UpscanSuccess) =>
                                   storeUpscanSuccess(
                                     upscanUpload,
-                                    s,
+                                    success,
                                     incompleteAnswers,
                                     fillingOutReturn
                                   )
-                                case _                      =>
-                                  EitherT.pure[Future, Error](())
-                              }
-            } yield upscanUpload
 
-            result.fold(
-              e => {
+                                case _ =>
+                                  EitherT.rightT[Future, Error](
+                                    StoredUpscanSuccess: StoreUpscanSuccessResult
+                                  )
+                              }
+            } yield (upscanUpload, storeResult)
+
+            result.value.flatMap {
+              case Left(e) =>
                 logger.warn(s"could not update the status of upscan upload to uploaded : ${e.toString}")
-                errorHandler.errorResult()
-              },
-              upscanUpload =>
-                upscanUpload.upscanCallBack match {
-                  case Some(_: UpscanSuccess) =>
-                    Redirect(
-                      routes.SupportingEvidenceController.checkYourAnswers()
-                    )
-                  case Some(_: UpscanFailure) =>
-                    Redirect(routes.SupportingEvidenceController.handleUpscanCallBackFailures())
-                  case None                   =>
-                    Ok(scanProgressPage(upscanUpload))
+                Future.successful(errorHandler.errorResult())
+
+              case Right((_, DuplicateUpscanFileName)) =>
+                upscanService
+                  .initiate(
+                    routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
+                    routes.SupportingEvidenceController.scanProgress
+                  )
+                  .fold(
+                    { e =>
+                      logger.warn("could not start upload supporting evidence", e)
+                      errorHandler.errorResult()
+                    },
+                    upscanUpload =>
+                      BadRequest(
+                        uploadPage(
+                          upscanUpload,
+                          routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
+                          fillingOutReturn.isAmendReturn,
+                          isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers),
+                          hasDuplicateFileNameError = true
+                        )
+                      )
+                  )
+
+              case Right((upscanUpload, StoredUpscanSuccess)) =>
+                Future.successful {
+                  upscanUpload.upscanCallBack match {
+                    case Some(_: UpscanSuccess) =>
+                      Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+
+                    case Some(_: UpscanFailure) =>
+                      Redirect(routes.SupportingEvidenceController.handleUpscanCallBackFailures())
+
+                    case None =>
+                      Ok(scanProgressPage(upscanUpload))
+                  }
                 }
-            )
+            }
         }
       }
     }
@@ -377,38 +406,48 @@ class SupportingEvidenceController @Inject() (
   )(implicit
     request: RequestWithSessionData[?],
     hc: HeaderCarrier
-  ) = {
-    val newAnswers =
-      upscanCallBack match {
-        case success: UpscanSuccess =>
-          val supportingEvidence =
-            SupportingEvidence(
-              upscanUpload.uploadReference,
-              upscanUpload.upscanUploadMeta,
-              upscanUpload.uploadedOn,
-              success,
-              success.fileName
-            )
-          answers.copy(evidences = supportingEvidence :: answers.evidences)
-      }
+  ): EitherT[Future, Error, StoreUpscanSuccessResult] = {
 
-    val newDraftReturn = fillingOutReturn.draftReturn.fold(
-      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-      _.copy(supportingEvidenceAnswers = Some(newAnswers))
-    )
-    val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
+    val duplicateFileName =
+      answers.evidences.exists(_.fileName == upscanCallBack.fileName)
 
-    for {
-      _ <- returnsService.storeDraftReturn(newJourney)
-      _ <- EitherT(
-             updateSession(sessionStore, request.toSession)(
-               _.copy(journeyStatus = Some(newJourney))
+    if (duplicateFileName) {
+      EitherT.rightT[Future, Error](
+        DuplicateUpscanFileName: StoreUpscanSuccessResult
+      )
+    } else {
+      val newAnswers =
+        upscanCallBack match {
+          case success: UpscanSuccess =>
+            val supportingEvidence =
+              SupportingEvidence(
+                upscanUpload.uploadReference,
+                upscanUpload.upscanUploadMeta,
+                upscanUpload.uploadedOn,
+                success,
+                success.fileName
+              )
+            answers.copy(evidences = supportingEvidence :: answers.evidences)
+        }
+
+      val newDraftReturn = fillingOutReturn.draftReturn.fold(
+        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+        _.copy(supportingEvidenceAnswers = Some(newAnswers))
+      )
+      val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
+
+      for {
+        _ <- returnsService.storeDraftReturn(newJourney)
+        _ <- EitherT(
+               updateSession(sessionStore, request.toSession)(
+                 _.copy(journeyStatus = Some(newJourney))
+               )
              )
-           )
-    } yield ()
+      } yield StoredUpscanSuccess: StoreUpscanSuccessResult
+    }
   }
 
   def deleteSupportingEvidence(
