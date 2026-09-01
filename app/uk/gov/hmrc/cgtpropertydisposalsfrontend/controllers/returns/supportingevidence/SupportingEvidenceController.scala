@@ -34,11 +34,12 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingev
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn.duplicateEvidenceCheck
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{DuplicateUpscanFileName, StoreUpscanSuccessResult, StoredUpscanSuccess, UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
@@ -103,7 +104,21 @@ class SupportingEvidenceController @Inject() (
         )
         maybeSupportingEvidenceAnswers.fold[Future[Result]](
           f(s, r, IncompleteSupportingEvidenceAnswers.empty)
-        )(f(s, r, _))
+        ) {
+          case incomplete: IncompleteSupportingEvidenceAnswers =>
+            f(s, r, incomplete)
+
+          case complete: CompleteSupportingEvidenceAnswers =>
+            f(
+              s,
+              r,
+              IncompleteSupportingEvidenceAnswers(
+                doYouWantToUploadSupportingEvidence = Some(complete.doYouWantToUploadSupportingEvidence),
+                evidences = complete.evidences,
+                expiredEvidences = List.empty
+              )
+            )
+        }
       case _                                   => Redirect(controllers.routes.StartController.start())
     }
 
@@ -407,37 +422,29 @@ class SupportingEvidenceController @Inject() (
     request: RequestWithSessionData[?],
     hc: HeaderCarrier
   ): EitherT[Future, Error, StoreUpscanSuccessResult] = {
+    val supportingEvidence =
+      SupportingEvidence(
+        upscanUpload.uploadReference,
+        upscanUpload.upscanUploadMeta,
+        upscanUpload.uploadedOn,
+        upscanCallBack,
+        upscanCallBack.fileName
+      )
+    val newAnswers         = answers.copy(evidences = supportingEvidence :: answers.evidences)
+    val newDraftReturn     = fillingOutReturn.draftReturn.fold(
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers)),
+      _.copy(supportingEvidenceAnswers = Some(newAnswers))
+    )
 
-    val duplicateFileName =
-      answers.evidences.exists(_.fileName == upscanCallBack.fileName)
-
-    if (duplicateFileName) {
+    if (duplicateEvidenceCheck(newDraftReturn)) {
       EitherT.rightT[Future, Error](
         DuplicateUpscanFileName: StoreUpscanSuccessResult
       )
     } else {
-      val newAnswers =
-        upscanCallBack match {
-          case success: UpscanSuccess =>
-            val supportingEvidence =
-              SupportingEvidence(
-                upscanUpload.uploadReference,
-                upscanUpload.upscanUploadMeta,
-                upscanUpload.uploadedOn,
-                success,
-                success.fileName
-              )
-            answers.copy(evidences = supportingEvidence :: answers.evidences)
-        }
-
-      val newDraftReturn = fillingOutReturn.draftReturn.fold(
-        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-        _.copy(supportingEvidenceAnswers = Some(newAnswers)),
-        _.copy(supportingEvidenceAnswers = Some(newAnswers))
-      )
-      val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
+      val newJourney = fillingOutReturn.copy(draftReturn = newDraftReturn)
 
       for {
         _ <- returnsService.storeDraftReturn(newJourney)
@@ -511,71 +518,78 @@ class SupportingEvidenceController @Inject() (
       }
     }
 
-  def checkYourAnswers(): Action[AnyContent] =
+  def checkYourAnswers(
+    hasDuplicateFileNameError: Boolean = false
+  ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, _, answers) =>
-        checkYourAnswersHandler(answers)
+        checkYourAnswersHandler(answers, hasDuplicateFileNameError)
       }
     }
 
   def checkYourAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
-        val updatedAnswers: SupportingEvidenceAnswers = answers match {
-          case IncompleteSupportingEvidenceAnswers(None, _, _) =>
-            sys.error(
-              "Could not find answer to 'do you want to upload?' question in incomplete supporting evidence answers"
-            )
+        if (duplicateEvidenceCheck(fillingOutReturn.draftReturn)) {
+          checkYourAnswersHandler(answers, hasDuplicateFileNameError = true)
+        } else {
+          val updatedAnswers: SupportingEvidenceAnswers = answers match {
+            case IncompleteSupportingEvidenceAnswers(None, _, _) =>
+              sys.error(
+                "Could not find answer to 'do you want to upload?' question in incomplete supporting evidence answers"
+              )
 
-          case IncompleteSupportingEvidenceAnswers(
-                Some(doYouWantToUploadSupportingEvidence),
-                evidences,
-                _
-              ) =>
-            CompleteSupportingEvidenceAnswers(
-              doYouWantToUploadSupportingEvidence,
-              evidences
-            )
-          case CompleteSupportingEvidenceAnswers(
+            case IncompleteSupportingEvidenceAnswers(
+                  Some(doYouWantToUploadSupportingEvidence),
+                  evidences,
+                  _
+                ) =>
+              CompleteSupportingEvidenceAnswers(
                 doYouWantToUploadSupportingEvidence,
                 evidences
-              ) =>
-            CompleteSupportingEvidenceAnswers(
-              doYouWantToUploadSupportingEvidence,
-              evidences
-            )
-        }
+              )
+            case CompleteSupportingEvidenceAnswers(
+                  doYouWantToUploadSupportingEvidence,
+                  evidences
+                ) =>
+              CompleteSupportingEvidenceAnswers(
+                doYouWantToUploadSupportingEvidence,
+                evidences
+              )
+          }
 
-        val newDraftReturn = fillingOutReturn.draftReturn.fold(
-          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-          _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
-          _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
-        )
-        val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
+          val newDraftReturn = fillingOutReturn.draftReturn.fold(
+            _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+            _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+            _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+            _.copy(supportingEvidenceAnswers = Some(updatedAnswers)),
+            _.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          )
+          val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
 
-        val result = for {
-          _ <- returnsService.storeDraftReturn(newJourney)
-          _ <- EitherT(
-                 updateSession(sessionStore, request.toSession)(
-                   _.copy(journeyStatus = Some(newJourney))
+          val result = for {
+            _ <- returnsService.storeDraftReturn(newJourney)
+            _ <- EitherT(
+                   updateSession(sessionStore, request.toSession)(
+                     _.copy(journeyStatus = Some(newJourney))
+                   )
                  )
-               )
-        } yield ()
+          } yield ()
 
-        result.fold(
-          { e =>
-            logger.warn("Could not update session", e)
-            errorHandler.errorResult()
-          },
-          _ => Redirect(controllers.returns.routes.TaskListController.taskList())
-        )
+          result.fold(
+            { e =>
+              logger.warn("Could not update session", e)
+              errorHandler.errorResult()
+            },
+            _ => Redirect(controllers.returns.routes.TaskListController.taskList())
+          )
+        }
       }
     }
 
   private def checkYourAnswersHandler(
-    answers: SupportingEvidenceAnswers
+    answers: SupportingEvidenceAnswers,
+    hasDuplicateFileNameError: Boolean
   )(implicit request: RequestWithSessionData[?]) =
     answers match {
       case IncompleteSupportingEvidenceAnswers(_, _, expiredEvidences) if expiredEvidences.nonEmpty =>
@@ -607,7 +621,8 @@ class SupportingEvidenceController @Inject() (
               doYouWantToUploadSupportingEvidence,
               supportingEvidences
             ),
-            maxUploads
+            maxUploads,
+            hasDuplicateFileNameError
           )
         )
 
@@ -621,7 +636,8 @@ class SupportingEvidenceController @Inject() (
               doYouWantToUploadSupportingEvidenceAnswer,
               supportingEvidences
             ),
-            maxUploads
+            maxUploads,
+            hasDuplicateFileNameError
           )
         )
     }

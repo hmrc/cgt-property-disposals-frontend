@@ -17,11 +17,13 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns
 
 import cats.Eq
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.TimeUtils
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 
 import java.time.LocalDate
 import java.util.UUID
@@ -33,6 +35,7 @@ sealed trait DraftReturn extends Product with Serializable {
   val yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
   val representeeAnswers: Option[RepresenteeAnswers]
   val exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers]
+  val supportingEvidenceAnswers: Option[SupportingEvidenceAnswers]
 }
 
 final case class DraftSingleDisposalReturn(
@@ -248,6 +251,33 @@ object DraftReturn {
     def representativeType(): Option[RepresentativeType] =
       triageAnswers().fold(_.representativeType(), _.representativeType())
 
+  }
+
+  private def supportingEvidence(draftReturn: DraftReturn): List[SupportingEvidence] =
+    draftReturn.supportingEvidenceAnswers.fold(List.empty) {
+      case completeSupportingEvidenceAnswers: CompleteSupportingEvidenceAnswers     =>
+        completeSupportingEvidenceAnswers.evidences
+      case incompleteSupportingEvidenceAnswers: IncompleteSupportingEvidenceAnswers =>
+        incompleteSupportingEvidenceAnswers.evidences
+    }
+
+  private def mandatoryEvidence(draftReturn: DraftReturn): Option[MandatoryEvidence] =
+    draftReturn.yearToDateLiabilityAnswers.fold(None: Option[MandatoryEvidence]) {
+      case incompleteNonCalc: NonCalculatedYTDAnswers.IncompleteNonCalculatedYTDAnswers =>
+        incompleteNonCalc.mandatoryEvidence
+      case completeNonCalc: NonCalculatedYTDAnswers.CompleteNonCalculatedYTDAnswers     =>
+        completeNonCalc.mandatoryEvidence
+      case incompleteCalc: CalculatedYTDAnswers.IncompleteCalculatedYTDAnswers          =>
+        incompleteCalc.mandatoryEvidence
+      case completeCalc: CalculatedYTDAnswers.CompleteCalculatedYTDAnswers              =>
+        completeCalc.mandatoryEvidence
+    }
+
+  def duplicateEvidenceCheck(draftReturn: DraftReturn): Boolean = {
+    val fileNames = mandatoryEvidence(draftReturn).map(_.fileName).toList ++
+      supportingEvidence(draftReturn).map(_.fileName)
+
+    fileNames.distinct.size != fileNames.size
   }
 
   implicit val eq: Eq[DraftReturn] = Eq.fromUniversalEquals

@@ -54,6 +54,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DisposalDetail
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExampleCompanyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExamplePropertyDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ExemptionsAndLossesAnswersGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FurtherReturnCalculationGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.*
@@ -67,7 +68,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReturnGen.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SingleMixedUseDetailsAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.SubscribedDetailsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.*
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, CgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -86,6 +87,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnsw
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.{NoReferenceId, RepresenteeCgtReference}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SubmitReturnResponse.{DeltaCharge, ReturnCharge}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
@@ -1390,6 +1392,38 @@ class CheckAllAnswersAndSubmitControllerSpec
       )
 
       behave like incompleteSingleDisposalJourneyBehaviour(() => performAction(), completeDraftReturnNoRepresentee)
+
+      "redirect to supporting evidence without submitting" when {
+        "an existing draft contains duplicate attachment filenames" in {
+          val fileName                        = "same-file.pdf"
+          val mandatoryEvidence               = sample[MandatoryEvidence].copy(fileName = fileName)
+          val ytdAnswersWithMandatoryEvidence = completeDraftReturnNoRepresentee.yearToDateLiabilityAnswers.map {
+            case answers: CompleteNonCalculatedYTDAnswers =>
+              answers.copy(mandatoryEvidence = Some(mandatoryEvidence))
+            case answers: CompleteCalculatedYTDAnswers    =>
+              answers.copy(mandatoryEvidence = Some(mandatoryEvidence))
+            case answers                                  => answers
+          }
+          val supportingEvidence              = sample[SupportingEvidence].copy(fileName = fileName)
+          val duplicateDraftReturn            = completeDraftReturnNoRepresentee.copy(
+            yearToDateLiabilityAnswers = ytdAnswersWithMandatoryEvidence,
+            supportingEvidenceAnswers = Some(CompleteSupportingEvidenceAnswers(true, List(supportingEvidence)))
+          )
+          val fillingOutReturn                =
+            completeFillingOutReturnNoRepresentee.copy(draftReturn = duplicateDraftReturn)
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(sessionWithJourney(fillingOutReturn))
+          }
+
+          checkIsRedirect(
+            performAction(),
+            supportingevidence.routes.SupportingEvidenceController
+              .checkYourAnswers(hasDuplicateFileNameError = true)
+          )
+        }
+      }
 
       "show an error page" when {
         "there is an error updating the session after a successful submission" in {

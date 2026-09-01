@@ -17,7 +17,6 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence
 import cats.data.EitherT
 import cats.instances.future.*
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -26,18 +25,23 @@ import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{AuthSupport, ControllerSpec, SessionSupport, returns}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.DraftReturnGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.amountInPenceGen
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.{completeCalculatedYTDLiabilityAnswersGen, mandatoryEvidenceGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.{DraftMultipleDisposalsReturn, DraftSingleDisposalReturn, SupportingEvidenceAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
@@ -141,6 +145,22 @@ class SupportingEvidenceControllerSpec
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
     val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
       supportingEvidenceAnswers = supportingEvidenceAnswers
+    )
+    val journey     = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+    (
+      SessionData.empty.copy(
+        journeyStatus = Some(journey)
+      ),
+      journey,
+      draftReturn
+    )
+  }
+
+  def sessionWithMultipleDisposalsStateAndMandatoryEvidence(
+    yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+  ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
+    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+      yearToDateLiabilityAnswers = yearToDateLiabilityAnswers
     )
     val journey     = sample[FillingOutReturn].copy(draftReturn = draftReturn)
     (
@@ -902,6 +922,28 @@ class SupportingEvidenceControllerSpec
 
       "display the check your answers page" when {
 
+        "a legacy draft contains duplicate attachment filenames" in {
+          val answers = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            List(sample[SupportingEvidence])
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkPageIsDisplayed(
+            controller.checkYourAnswers(hasDuplicateFileNameError = true)(FakeRequest()),
+            messageFromMessageKey("supporting-evidence.check-your-answers.title"),
+            doc =>
+              doc.select(".govuk-error-summary a").text() shouldBe
+                messageFromMessageKey("supporting-evidence.upload.duplicateFileName")
+          )
+        }
+
         "the user has completed the supporting evidence section" in {
 
           val answers = CompleteSupportingEvidenceAnswers(
@@ -1391,7 +1433,67 @@ class SupportingEvidenceControllerSpec
             mockAuthWithNoRetrievals()
             mockGetSession(session)
             mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
+            mockUpscanInitiate(
+              routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
+              routes.SupportingEvidenceController.scanProgress
+            )(Right(newUpscanUpload))
+          }
 
+          checkPageIsDisplayed(
+            performAction(uploadReference),
+            messageFromMessageKey("supporting-evidence.upload.title"),
+            doc => {
+              doc
+                .select(".govuk-error-summary a")
+                .text() shouldBe messageFromMessageKey(
+                "supporting-evidence.upload.duplicateFileName"
+              )
+
+              doc
+                .select(".govuk-error-message")
+                .text() should include(
+                messageFromMessageKey("supporting-evidence.upload.duplicateFileName")
+              )
+
+              doc.title() should startWith("Error:")
+            },
+            BAD_REQUEST
+          )
+        }
+
+        "the same file already exists in mandatory evidence" in {
+          val uploadReference           = sample[UploadReference]
+          val existingMandatoryEvidence =
+            sample[MandatoryEvidence].copy(fileName = "same-file.pdf")
+
+          val upscanSuccess =
+            sample[UpscanSuccess].copy(
+              uploadDetails = Map("fileName" -> existingMandatoryEvidence.fileName)
+            )
+
+          val completedUpscanUpload =
+            sample[UpscanUpload].copy(
+              uploadReference = uploadReference,
+              upscanCallBack = Some(upscanSuccess)
+            )
+
+          val newUpscanUpload =
+            sample[UpscanUpload].copy(
+              upscanCallBack = None
+            )
+
+          val completeAnswers = sample[CompleteCalculatedYTDAnswers].copy(
+            personalAllowance = Some(sample[AmountInPence]),
+            mandatoryEvidence = Some(existingMandatoryEvidence)
+          )
+
+          val (session, _, _) =
+            sessionWithMultipleDisposalsStateAndMandatoryEvidence(Some(completeAnswers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
             mockUpscanInitiate(
               routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
               routes.SupportingEvidenceController.scanProgress
@@ -1424,28 +1526,56 @@ class SupportingEvidenceControllerSpec
       "return the user to the check your answers page" when {
 
         "the user has completed their upload of supporting evidences" in {
-
-          val uploadReference    = sample[UploadReference]
-          val supportingEvidence =
+          val uploadReference                 = sample[UploadReference]
+          val supportingEvidence              =
             sample[SupportingEvidence].copy(uploadReference = uploadReference)
-
-          val answers = CompleteSupportingEvidenceAnswers(
+          val upscanSuccess                   =
+            sample[UpscanSuccess].copy(
+              uploadDetails = Map("fileName" -> "file.txt")
+            )
+          val completedUpscanUpload           =
+            sample[UpscanUpload].copy(
+              uploadReference = uploadReference,
+              upscanCallBack = Some(upscanSuccess)
+            )
+          val answers                         = CompleteSupportingEvidenceAnswers(
             doYouWantToUploadSupportingEvidence = true,
             List(supportingEvidence)
           )
-
-          val (session, _, _) = sessionWithMultipleDisposalsState(Some(answers))
+          val (session, journey, draftReturn) =
+            sessionWithMultipleDisposalsState(Some(answers))
+          val newSupportingEvidence           = SupportingEvidence(
+            completedUpscanUpload.uploadReference,
+            completedUpscanUpload.upscanUploadMeta,
+            completedUpscanUpload.uploadedOn,
+            upscanSuccess,
+            upscanSuccess.fileName
+          )
+          val updatedAnswers                  = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences = newSupportingEvidence :: answers.evidences,
+            expiredEvidences = List.empty
+          )
+          val updatedDraftReturn              =
+            draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedSession: SessionData     =
+            session.copy(journeyStatus = Some(updatedJourney))
 
           inSequence {
             mockAuthWithNoRetrievals()
             mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
+            mockStoreDraftReturn(
+              journey.copy(draftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers)))
+            )(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
           }
 
           checkIsRedirect(
             performAction(uploadReference),
             routes.SupportingEvidenceController.checkYourAnswers()
           )
-
         }
 
         "the upscan call back came back with a success status" in {

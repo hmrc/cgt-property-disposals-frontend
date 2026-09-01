@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns
 
 import cats.data.EitherT
-import cats.instances.future._
+import cats.instances.future.*
 import com.google.inject.{Inject, Singleton}
 import play.api.i18n.{Lang, Messages}
 import play.api.mvc.{Action, AnyContent, MessagesControllerComponents, Result}
@@ -27,19 +27,20 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{Authenticat
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.CheckAllAnswersAndSubmitController.SubmitReturnResult.{SubmitReturnError, SubmitReturnSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.acquisitiondetails.RebasingEligibilityUtil
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes => baseRoutes}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.{SessionUpdates, routes as baseRoutes}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, JustSubmittedReturn, SubmitReturnFailed, SubmittingReturn, Subscribed}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.CompleteReturn.{CompleteMultipleDisposalsReturn, CompleteMultipleIndirectDisposalReturn, CompleteSingleDisposalReturn, CompleteSingleIndirectDisposalReturn, CompleteSingleMixedUseDisposalReturn}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn.duplicateEvidenceCheck
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeReferenceId.NoReferenceId
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{B64Html, Error, SessionData}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.onboarding.SubscriptionService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, PaymentsService, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.{returns => pages}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns as pages
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -111,95 +112,105 @@ class CheckAllAnswersAndSubmitController @Inject() (
   def checkAllAnswersSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withCompleteDraftReturn(request) { (_, fillingOutReturn, completeReturn) =>
-        withGeneratedCGTReference(completeReturn) { updatedCompleteReturn =>
-          withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) { furtherOrAmendReturnCalculationEligibility =>
-            val cyaPageB64Html =
-              B64Html(
-                new String(
-                  Base64.getEncoder.encode(
-                    checkAllAnswersPage(
-                      updatedCompleteReturn,
-                      rebasingEligibilityUtil,
-                      fillingOutReturn,
-                      showSubmissionDetails = true,
-                      fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
-                      furtherOrAmendReturnCalculationEligibility
-                    )(using request, explicitEnglishMessage)
-                      .toString()
-                      .getBytes
+        if (duplicateEvidenceCheck(fillingOutReturn.draftReturn)) {
+          Future.successful(
+            Redirect(
+              supportingevidence.routes.SupportingEvidenceController
+                .checkYourAnswers(hasDuplicateFileNameError = true)
+            )
+          )
+        } else {
+          withGeneratedCGTReference(completeReturn) { updatedCompleteReturn =>
+            withFurtherReturnCalculationEligibilityCheck(fillingOutReturn) {
+              furtherOrAmendReturnCalculationEligibility =>
+                val cyaPageB64Html =
+                  B64Html(
+                    new String(
+                      Base64.getEncoder.encode(
+                        checkAllAnswersPage(
+                          updatedCompleteReturn,
+                          rebasingEligibilityUtil,
+                          fillingOutReturn,
+                          showSubmissionDetails = true,
+                          fillingOutReturn.amendReturnData.exists(_.preserveEstimatesAnswer),
+                          furtherOrAmendReturnCalculationEligibility
+                        )(using request, explicitEnglishMessage)
+                          .toString()
+                          .getBytes
+                      )
+                    )
                   )
-                )
-              )
 
-            val result =
-              for {
-                _               <- EitherT(
-                                     updateSession(sessionStore, request.toSession)(
-                                       _.copy(journeyStatus =
-                                         Some(
-                                           SubmittingReturn(
+                val result =
+                  for {
+                    _               <- EitherT(
+                                         updateSession(sessionStore, request.toSession)(
+                                           _.copy(journeyStatus =
+                                             Some(
+                                               SubmittingReturn(
+                                                 fillingOutReturn.subscribedDetails,
+                                                 fillingOutReturn.ggCredId,
+                                                 fillingOutReturn.agentReferenceNumber
+                                               )
+                                             )
+                                           )
+                                         )
+                                       )
+                    response        <- EitherT.liftF(
+                                         submitReturn(
+                                           updatedCompleteReturn,
+                                           fillingOutReturn,
+                                           cyaPageB64Html,
+                                           request.authenticatedRequest.request.messages.lang
+                                         )
+                                       )
+                    newJourneyStatus = response match {
+                                         case _: SubmitReturnError =>
+                                           SubmitReturnFailed(
                                              fillingOutReturn.subscribedDetails,
                                              fillingOutReturn.ggCredId,
                                              fillingOutReturn.agentReferenceNumber
                                            )
+                                         case SubmitReturnSuccess(
+                                               submitReturnResponse
+                                             ) =>
+                                           JustSubmittedReturn(
+                                             fillingOutReturn.subscribedDetails,
+                                             fillingOutReturn.ggCredId,
+                                             fillingOutReturn.agentReferenceNumber,
+                                             updatedCompleteReturn,
+                                             submitReturnResponse,
+                                             fillingOutReturn.amendReturnData
+                                           )
+                                       }
+                    _               <- EitherT(
+                                         updateSession(sessionStore, request.toSession)(
+                                           _.copy(journeyStatus = Some(newJourneyStatus))
                                          )
                                        )
-                                     )
-                                   )
-                response        <- EitherT.liftF(
-                                     submitReturn(
-                                       updatedCompleteReturn,
-                                       fillingOutReturn,
-                                       cyaPageB64Html,
-                                       request.authenticatedRequest.request.messages.lang
-                                     )
-                                   )
-                newJourneyStatus = response match {
-                                     case _: SubmitReturnError =>
-                                       SubmitReturnFailed(
-                                         fillingOutReturn.subscribedDetails,
-                                         fillingOutReturn.ggCredId,
-                                         fillingOutReturn.agentReferenceNumber
-                                       )
-                                     case SubmitReturnSuccess(
-                                           submitReturnResponse
-                                         ) =>
-                                       JustSubmittedReturn(
-                                         fillingOutReturn.subscribedDetails,
-                                         fillingOutReturn.ggCredId,
-                                         fillingOutReturn.agentReferenceNumber,
-                                         updatedCompleteReturn,
-                                         submitReturnResponse,
-                                         fillingOutReturn.amendReturnData
-                                       )
-                                   }
-                _               <- EitherT(
-                                     updateSession(sessionStore, request.toSession)(
-                                       _.copy(journeyStatus = Some(newJourneyStatus))
-                                     )
-                                   )
-              } yield response
+                  } yield response
 
-            result.fold(
-              { e =>
-                logger.warn("Error while trying to update session", e)
-                errorHandler.errorResult()
-              },
-              {
-                case SubmitReturnError(e) =>
-                  logger.warn(s"Could not submit return", e)
-                  Redirect(
-                    routes.CheckAllAnswersAndSubmitController.submissionError()
-                  )
+                result.fold(
+                  { e =>
+                    logger.warn("Error while trying to update session", e)
+                    errorHandler.errorResult()
+                  },
+                  {
+                    case SubmitReturnError(e) =>
+                      logger.warn(s"Could not submit return", e)
+                      Redirect(
+                        routes.CheckAllAnswersAndSubmitController.submissionError()
+                      )
 
-                case SubmitReturnSuccess(r) =>
-                  logger.info(s"Successfully submitted return with submission id ${r.formBundleId}")
-                  Redirect(
-                    routes.CheckAllAnswersAndSubmitController
-                      .confirmationOfSubmission()
-                  )
-              }
-            )
+                    case SubmitReturnSuccess(r) =>
+                      logger.info(s"Successfully submitted return with submission id ${r.formBundleId}")
+                      Redirect(
+                        routes.CheckAllAnswersAndSubmitController
+                          .confirmationOfSubmission()
+                      )
+                  }
+                )
+            }
           }
         }
       }
