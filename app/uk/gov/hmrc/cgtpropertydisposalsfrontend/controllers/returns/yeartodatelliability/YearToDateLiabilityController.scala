@@ -18,29 +18,31 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatel
 
 import cats.Eq
 import cats.data.EitherT
-import cats.instances.bigDecimal._
-import cats.instances.future._
-import cats.syntax.either._
-import cats.syntax.eq._
+import cats.instances.bigDecimal.*
+import cats.instances.future.*
+import cats.syntax.either.*
+import cats.syntax.eq.*
 import com.google.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.data.Form
 import play.api.data.Forms.{mapping, of}
 import play.api.http.Writeable
-import play.api.mvc._
+import play.api.mvc.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.MoneyUtils.validateAmountOfMoney
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.{AmountInPence, MoneyUtils}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.AcquisitionDetailsAnswers.CompleteAcquisitionDetailsAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DisposalDetailsAnswers.CompleteDisposalDetailsAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.DraftReturn.duplicateEvidenceCheck
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ExemptionAndLossesAnswers.CompleteExemptionAndLossesAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.IndividualUserType.PersonalRepresentativeInPeriodOfAdmin
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.CompleteReliefDetailsAnswers
@@ -48,9 +50,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTri
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.{CompleteCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UpscanCallBack, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
@@ -58,7 +59,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculation
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging.LoggerOps
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.{Logging, given}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.{ytdliability => pages}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.ytdliability as pages
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.frontend.controller.FrontendController
 
@@ -1604,7 +1605,7 @@ class YearToDateLiabilityController @Inject() (
                   requiredPreviousAnswer = _ => Some(()),
                   redirectToIfNoRequiredPreviousAnswer = controllers.returns.routes.TaskListController.taskList()
                 ) { (amount, draftReturn) =>
-                  import cats.instances.option._
+                  import cats.instances.option.*
 
                   val taxableGainOrLoss = AmountInPence.fromPounds(amount)
                   if (
@@ -1976,25 +1977,56 @@ class YearToDateLiabilityController @Inject() (
             newUpscanUpload <- upscanService.getUpscanUpload(
                                  pendingUpscanUpload.uploadReference
                                )
-            _               <- newUpscanUpload.upscanCallBack match {
-                                 case None           => EitherT.pure[Future, Error](())
+            storeResult     <- newUpscanUpload.upscanCallBack match {
+                                 case None           =>
+                                   EitherT.pure[Future, Error](Option.empty[StoreUpscanSuccessResult])
                                  case Some(callback) =>
                                    storeUpscanSuccessOrFailure(
                                      newUpscanUpload,
                                      callback,
                                      answers,
                                      fillingOutReturn
-                                   )
+                                   ).map(Some(_))
                                }
-          } yield newUpscanUpload
+          } yield (newUpscanUpload, storeResult)
 
-          result.fold(
-            { e =>
+          result.value.flatMap {
+            case Left(e) =>
               logger.warn("Error while trying to get and handle an upscan status", e)
-              errorHandler.errorResult()
-            },
-            upscanUpload => handleUpscanCallback(upscanUpload.upscanCallBack)
-          )
+              Future.successful(errorHandler.errorResult())
+
+            case Right((_, Some(DuplicateUpscanFileName))) =>
+              val currentAnswers: YearToDateLiabilityAnswers = answers.fold(identity, identity)
+              val newUpload                                  = for {
+                upscanUpload <- upscanService.initiate(
+                                  routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
+                                  _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+                                )
+                _            <- updatePendingUpscanUpload(currentAnswers, fillingOutReturn, upscanUpload)
+              } yield upscanUpload
+
+              newUpload.fold(
+                { e =>
+                  logger.warn("Could not restart mandatory evidence upload after a duplicate filename", e)
+                  errorHandler.errorResult()
+                },
+                upscanUpload =>
+                  BadRequest(
+                    mandatoryEvidencePage(
+                      upscanUpload,
+                      routes.YearToDateLiabilityController.checkYourAnswers(),
+                      fillingOutReturn.isFurtherOrAmendReturn,
+                      fillingOutReturn.isAmendReturn,
+                      fillingOutReturn.draftReturn.triageAnswers().isLeft,
+                      isReplaymentDue(currentAnswers),
+                      hasDuplicateFileNameError = true
+                    )
+                  )
+              )
+
+            case Right((upscanUpload, _)) =>
+              Future.successful(handleUpscanCallback(upscanUpload.upscanCallBack))
+          }
         }
 
         def handleUpscanCallback(
@@ -2299,7 +2331,7 @@ class YearToDateLiabilityController @Inject() (
                         routes.YearToDateLiabilityController.hasEstimatedDetails()
                       }
                   ) { (amount, draftReturn) =>
-                    import cats.instances.option._
+                    import cats.instances.option.*
 
                     val yearToDateLiability = AmountInPence.fromPounds(amount)
                     if (
@@ -2435,7 +2467,7 @@ class YearToDateLiabilityController @Inject() (
   )(implicit
     request: RequestWithSessionData[?],
     hc: HeaderCarrier
-  ): EitherT[Future, Error, Unit] = {
+  ): EitherT[Future, Error, StoreUpscanSuccessResult] = {
     val newAnswers =
       upscanCallBack match {
         case success: UpscanSuccess =>
@@ -2463,14 +2495,26 @@ class YearToDateLiabilityController @Inject() (
 
     val newDraftReturn = updateDraftReturn(newAnswers, fillingOutReturn.draftReturn)
     val newJourney     = fillingOutReturn.copy(draftReturn = newDraftReturn)
-    for {
-      _ <- returnsService.storeDraftReturn(newJourney)
-      _ <- EitherT(
-             updateSession(sessionStore, request.toSession)(
-               _.copy(journeyStatus = Some(newJourney))
+
+    val hasDuplicateFileName = upscanCallBack match {
+      case _: UpscanSuccess => duplicateEvidenceCheck(newDraftReturn)
+      case _: UpscanFailure => false
+    }
+
+    if (hasDuplicateFileName) {
+      EitherT.rightT[Future, Error](
+        DuplicateUpscanFileName: StoreUpscanSuccessResult
+      )
+    } else {
+      for {
+        _ <- returnsService.storeDraftReturn(newJourney)
+        _ <- EitherT(
+               updateSession(sessionStore, request.toSession)(
+                 _.copy(journeyStatus = Some(newJourney))
+               )
              )
-           )
-    } yield ()
+      } yield StoredUpscanSuccess: StoreUpscanSuccessResult
+    }
   }
 
   def checkYourAnswers(): Action[AnyContent] =
@@ -2701,7 +2745,7 @@ class YearToDateLiabilityController @Inject() (
   ) =
     furtherReturnCalculationEligibility match {
       case Some(Eligible(glarCalculation, _, _)) =>
-        import cats.instances.option._
+        import cats.instances.option.*
 
         val agreedWithGlarCalculation        =
           draftReturn.gainOrLossAfterReliefs.contains(glarCalculation.gainOrLossAfterReliefs)

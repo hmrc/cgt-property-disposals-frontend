@@ -172,11 +172,13 @@ class TaskListController @Inject() (
           )
       )
 
+      val updatedJourney = journey.copy(draftReturn = updatedDraftReturn)
+
       for {
-        _ <- returnsService.storeDraftReturn(journey)
+        _ <- returnsService.storeDraftReturn(updatedJourney)
         _ <- EitherT(
                updateSession(sessionStore, request.toSession)(
-                 _.copy(journeyStatus = Some(journey.copy(draftReturn = updatedDraftReturn)))
+                 _.copy(journeyStatus = Some(updatedJourney))
                )
              )
       } yield updatedDraftReturn

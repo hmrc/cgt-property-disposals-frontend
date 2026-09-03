@@ -4089,6 +4089,8 @@ mandatoryEvidence.scan-failed.bullet3=you uploaded the wrong type of document
 mandatoryEvidence.scan-failed.p2=We only accept these documents types XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT and JPG
 mandatoryEvidence.scan-failed.p3=You’ll need to try again.
 mandatoryEvidence.scan-failed.button.tryAgain=Try again
+mandatoryEvidence.thereIsProblem=There is a problem
+mandatoryEvidence.duplicateFileName=Each document must have a unique file name
 
 repayment.title=Based on the details in this return, are you due a repayment?
 repayment.agent.title=Based on the details in this return, is your client due a repayment?

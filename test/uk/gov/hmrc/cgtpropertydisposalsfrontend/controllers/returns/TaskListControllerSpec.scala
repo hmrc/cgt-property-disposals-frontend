@@ -61,27 +61,30 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.{CompleteRepresenteeAnswers, IncompleteRepresenteeAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns._
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.ReturnsService
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.views.returns.TaskListStatus
 
-import java.time.LocalDate
+import java.time.{LocalDate, LocalDateTime}
 import scala.concurrent.Future
 
 class TaskListControllerSpec
     extends ControllerSpec
     with AuthSupport
     with SessionSupport
+    with ReturnsServiceSupport
     with SampledScalaCheck
     with RedirectToStartBehaviour {
 
   protected override val overrideBindings: List[GuiceableModule] =
     List[GuiceableModule](
       bind[AuthConnector].toInstance(mockAuthConnector),
-      bind[SessionStore].toInstance(mockSessionStore)
+      bind[SessionStore].toInstance(mockSessionStore),
+      bind[ReturnsService].toInstance(mockReturnsService)
     )
 
   private lazy val controller = instanceOf[TaskListController]
@@ -239,6 +242,42 @@ class TaskListControllerSpec
           case _                   => false
         }
       )
+
+      "persist the updated draft return" when {
+        "supporting evidence has expired" in {
+          val expiredEvidence =
+            sample[SupportingEvidence].copy(uploadedOn = LocalDateTime.now().minusDays(6L))
+          val answers         = CompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = true,
+            evidences = List(expiredEvidence)
+          )
+          val draftReturn     = sample[DraftSingleDisposalReturn].copy(
+            yearToDateLiabilityAnswers = None,
+            supportingEvidenceAnswers = Some(answers)
+          )
+          val journey         = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+          val session         = SessionData.empty.copy(journeyStatus = Some(journey))
+
+          val updatedAnswers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences = List.empty,
+            expiredEvidences = List(expiredEvidence)
+          )
+          val updatedJourney = journey.copy(
+            draftReturn = draftReturn.copy(supportingEvidenceAnswers = Some(updatedAnswers))
+          )
+          val updatedSession = session.copy(journeyStatus = Some(updatedJourney))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockStoreDraftReturn(updatedJourney)(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          status(performAction()) shouldBe OK
+        }
+      }
 
       "handling requests to display the single disposal task list page" must {
 

@@ -25,11 +25,13 @@
   summary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.returns.supportingevidence.summary_govuk,
   formWrapper: FormWithCSRF,
   submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+  govukErrorSummary: GovukErrorSummary
 )
 
 @(
   answers: CompleteSupportingEvidenceAnswers,
-  maxUploads: Int
+  maxUploads: Int,
+  hasDuplicateFileNameError: Boolean = false
 )(
   implicit request: RequestWithSessionData[?],
   messages: Messages
@@ -39,7 +41,21 @@
 
 @title = @{messages(s"$key.title")}
 
-@layout(title) {
+@layout(title, hasErrors = hasDuplicateFileNameError) {
+  @if(hasDuplicateFileNameError) {
+    @govukErrorSummary(
+      ErrorSummary(
+        title = Text(messages("supporting-evidence.upload.thereIsProblem")),
+        errorList = Seq(
+          ErrorLink(
+            href = Some("#document-1"),
+            content = Text(messages("supporting-evidence.upload.duplicateFileName"))
+          )
+        )
+      )
+    )
+  }
+
   <span class="govuk-caption-xl">@messages(s"$key.caption")</span>
 
   <h1 class="govuk-heading-xl">@title</h1>

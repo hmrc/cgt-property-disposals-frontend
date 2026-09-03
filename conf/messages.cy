@@ -4092,6 +4092,8 @@ mandatoryEvidence.scan-failed.bullet3=gwnaethoch uwchlwytho’r math anghywir o 
 mandatoryEvidence.scan-failed.p2=Rydym yn derbyn y dogfennau hyn yn unig XLS, XLSX, ODS, PDF, DOC, DOCX, ODT, TXT a JPG
 mandatoryEvidence.scan-failed.p3=Bydd angen i chi roi cynnig arall arni.
 mandatoryEvidence.scan-failed.button.tryAgain=Rhowch gynnig arall arni
+mandatoryEvidence.thereIsProblem=Mae yna broblem
+mandatoryEvidence.duplicateFileName=Rhaid i bob dogfen gael enw ffeil unigryw
 
 repayment.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a oes ad-daliad yn ddyledus i chi?
 repayment.agent.title=Yn seiliedig ar y manylion yn y Ffurflen Dreth hon, a oes ad-daliad yn ddyledus i’ch cleient?

@@ -21,7 +21,6 @@ import cats.instances.future.*
 import cats.syntax.order.*
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.should.Matchers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.http.Status.BAD_REQUEST
 import play.api.i18n.{Lang, Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -29,7 +28,7 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{SampledScalaCheck, controllers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec.{validateCalculatedYearToDateLiabilityPage, validateNonCalculatedYearToDateLiabilityPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{FurtherReturnCalculationEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
@@ -75,7 +74,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.MultipleDisposals
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.ReliefDetailsAnswers.{CompleteReliefDetailsAnswers, IncompleteReliefDetailsAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.RepresenteeAnswers.CompleteRepresenteeAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SingleDisposalTriageAnswers.{CompleteSingleDisposalTriageAnswers, IncompleteSingleDisposalTriageAnswers}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.CompleteSupportingEvidenceAnswers
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.NonCalculatedYTDAnswers.{CompleteNonCalculatedYTDAnswers, IncompleteNonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
@@ -591,6 +590,29 @@ class YearToDateLiabilityControllerSpec
 
   private val completeReliefDetailsAnswersWithNoOtherReliefs =
     sample[CompleteReliefDetailsAnswers].copy(otherReliefs = None)
+
+  private def singleDisposalDraftReturnWithCompleteJourneysWithSupportingEvidence(
+    supportingEvidence: CompleteSupportingEvidenceAnswers,
+    disposalDate: DisposalDate,
+    reliefDetailsAnswers: ReliefDetailsAnswers
+  ) =
+    DraftSingleDisposalReturn(
+      UUID.randomUUID(),
+      sample[CompleteSingleDisposalTriageAnswers].copy(
+        disposalDate = disposalDate
+      ),
+      Some(sample[UkAddress]),
+      Some(sample[CompleteDisposalDetailsAnswers]),
+      Some(sample[CompleteAcquisitionDetailsAnswers]),
+      Some(reliefDetailsAnswers),
+      Some(sample[CompleteExemptionAndLossesAnswers]),
+      Some(sample[YearToDateLiabilityAnswers]),
+      Some(sample[AmountInPence]),
+      Some(supportingEvidence),
+      None,
+      None,
+      TimeUtils.today()
+    )
 
   "YearToDateLiabilityController" when {
     "handling requests to display the estimated income page" must {
@@ -8490,6 +8512,126 @@ class YearToDateLiabilityControllerSpec
           checkIsRedirect(
             performAction("repayment" -> "false"),
             routes.YearToDateLiabilityController.checkYourAnswers()
+          )
+        }
+      }
+    }
+
+    "handling requests in mandatory page with duplicate file error message" must {
+      def performAction(): Future[Result] =
+        controller.scanningMandatoryEvidence()(FakeRequest())
+
+      "display the page with duplicate file error message" when {
+        "the user is on a calculated journey" in {
+
+          val uploadReference            = sample[UploadReference]
+          val existingSupportingEvidence =
+            sample[SupportingEvidence].copy(fileName = "same-file.pdf")
+
+          val upscanSuccess =
+            sample[UpscanSuccess].copy(
+              uploadDetails = Map("fileName" -> existingSupportingEvidence.fileName)
+            )
+
+          val pendingUpscanUpload =
+            sample[UpscanUpload].copy(
+              uploadReference = uploadReference,
+              upscanCallBack = None
+            )
+
+          val completedUpscanUpload =
+            sample[UpscanUpload].copy(
+              uploadReference = uploadReference,
+              upscanCallBack = Some(upscanSuccess)
+            )
+
+          val newUpscanUpload =
+            sample[UpscanUpload].copy(upscanCallBack = None)
+
+          val answers =
+            IncompleteCalculatedYTDAnswers(
+              estimatedIncome = Some(AmountInPence.zero),
+              personalAllowance = None,
+              hasEstimatedDetails = Some(true),
+              calculatedTaxDue = Some(
+                setTaxDue(sample[CalculatedTaxDue], AmountInPence(100L))
+              ),
+              taxDue = Some(AmountInPence(200L)),
+              mandatoryEvidence = None,
+              expiredEvidence = None,
+              pendingUpscanUpload = Some(pendingUpscanUpload)
+            )
+
+          val disposalDate = sample[DisposalDate]
+
+          val draftReturn =
+            singleDisposalDraftReturnWithCompleteJourneysWithSupportingEvidence(
+              CompleteSupportingEvidenceAnswers(
+                doYouWantToUploadSupportingEvidence = true,
+                List(existingSupportingEvidence)
+              ),
+              disposalDate,
+              completeReliefDetailsAnswersWithNoOtherReliefs
+            ).copy(
+              yearToDateLiabilityAnswers = Some(answers)
+            )
+
+          val journey =
+            sample[FillingOutReturn].copy(
+              draftReturn = draftReturn,
+              amendReturnData = None
+            )
+
+          val session =
+            SessionData.empty.copy(
+              journeyStatus = Some(journey)
+            )
+
+          val updatedAnswers     = answers.copy(
+            mandatoryEvidence = None,
+            expiredEvidence = None,
+            pendingUpscanUpload = Some(newUpscanUpload)
+          )
+          val updatedDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers))
+          val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
+          val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
+            mockUpscanInitiate(
+              routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+            )(Right(newUpscanUpload))
+            mockStoreDraftReturn(updatedJourney)(Right(()))
+            mockStoreSession(updatedSession)(Right(()))
+          }
+
+          checkPageIsDisplayed(
+            performAction(),
+            messageFromMessageKey("mandatoryEvidence.title"),
+            doc => {
+              doc
+                .select(".govuk-error-summary a")
+                .text() shouldBe messageFromMessageKey(
+                "mandatoryEvidence.duplicateFileName"
+              )
+
+              doc
+                .select(".govuk-error-message")
+                .text() should include(
+                messageFromMessageKey(
+                  "mandatoryEvidence.duplicateFileName"
+                )
+              )
+
+              doc.title()         should startWith("Error:")
+              doc
+                .select("#content > article > form, #main-content form")
+                .attr("action") shouldBe newUpscanUpload.upscanUploadMeta.uploadRequest.href
+            },
+            BAD_REQUEST
           )
         }
       }

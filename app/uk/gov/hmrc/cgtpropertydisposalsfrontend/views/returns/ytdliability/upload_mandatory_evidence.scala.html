@@ -26,7 +26,8 @@
         caption: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.caption_govuk,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
         govukFileUpload : GovukFileUpload,
-        govukWarningText: GovukWarningText
+        govukWarningText: GovukWarningText,
+        govukErrorSummary: GovukErrorSummary
 )
 
 @(
@@ -35,7 +36,8 @@
     isFurtherOrAmendReturn: Option[Boolean],
     isAmend: Boolean,
     isMultipleDisposal: Boolean,
-    isRepaymentDue: Boolean
+    isRepaymentDue: Boolean,
+    hasDuplicateFileNameError: Boolean = false
 )(implicit request: RequestWithSessionData[?], messages:Messages)
 
     @key = @{ "mandatoryEvidence" }
@@ -69,9 +71,27 @@
         </ul>
       }
     }
+@duplicateFileNameErrorMessage = @{
+        if(hasDuplicateFileNameError)
+            Some(messages(s"$key.duplicateFileName"))
+        else
+            None
+    }
 
-@layout(title, backLinkUrl = Some(backLink.url)) {
-
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasDuplicateFileNameError) {
+    @duplicateFileNameErrorMessage.map { error =>
+        @govukErrorSummary(
+            ErrorSummary(
+                title = Text(messages(s"$key.thereIsProblem")),
+                errorList = Seq(
+                    ErrorLink(
+                    href = Some("#file"),
+                    content = Text(error)
+                    )
+                )
+            )
+        )
+    }
   @caption(messages(s"ytdLiability${if(isFurtherOrAmendReturn.contains(true)) ".furtherReturn" else ""}.caption"))
 
   <h1 class="govuk-heading-xl">@title</h1>
@@ -105,7 +125,10 @@
       hint = Some(Hint(
         content = Text(messages(s"$key.helpText"))
       )),
-      attributes = Map("data-is-mandatory-upload" -> "true")
+      attributes = Map("data-is-mandatory-upload" -> "true"),
+      errorMessage = duplicateFileNameErrorMessage.map(error =>
+      ErrorMessage(content = Text(error))
+      )
     ))
 
     @submitButton(messages(if(isAmend) "button.continue" else "button.saveAndContinue"))
