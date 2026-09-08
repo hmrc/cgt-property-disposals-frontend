@@ -400,9 +400,9 @@ weNeedMoreDetails.title=Mae angen rhagor o wybodaeth arnom
 weNeedMoreDetails.caption=Creu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 weNeedMoreDetails.p=Mae hyn er mwyn i chi allu gwneud y canlynol:
 weNeedMoreDetails.individual.p1=Creu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
-weNeedMoreDetails.organisation.p1=Creu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU ar gyfer eich ymddiriedolaeth neu ystâd
+weNeedMoreDetails.organisation.p1=Creu cyfrif Treth Enillion Cyfalaf ar eiddo yn y DU
 weNeedMoreDetails.individual.p2=Rhoi gwybod am eich Treth Enillion Cyfalaf ar werthiannau neu warediadau o eiddo yn y DU
-weNeedMoreDetails.organisation.p2=Rhoi gwybod am eich Treth Enillion Cyfalaf ar werthiannau neu warediadau o eiddo yn y DU ar gyfer ymddiriedolaeth neu ystâd
+weNeedMoreDetails.organisation.p2=Rhoi gwybod am eich Treth Enillion Cyfalaf ar werthiannau neu warediadau o eiddo yn y DU
 
 # IV Locked Out
 iv.lockedOut.title=Nid oeddem yn gallu cadarnhau pwy ydych

@@ -400,9 +400,9 @@ weNeedMoreDetails.title=We need more details
 weNeedMoreDetails.caption=Create a Capital Gains Tax on UK property account
 weNeedMoreDetails.p=This is so you can:
 weNeedMoreDetails.individual.p1=Create a Capital Gains Tax on UK property account.
-weNeedMoreDetails.organisation.p1=Create a Capital Gains Tax on UK property account for your trust or estate.
+weNeedMoreDetails.organisation.p1=Create a Capital Gains Tax on UK property account.
 weNeedMoreDetails.individual.p2=Report your CGT on UK property sales or disposals.
-weNeedMoreDetails.organisation.p2=Report your CGT on UK property sales or disposals for a trust or estate.
+weNeedMoreDetails.organisation.p2=Report your Capital Gains Tax on UK property sales or disposals.
 
 # IV Locked Out
 iv.lockedOut.title=We were not able to confirm your identity
