@@ -29,4 +29,4 @@ lazy val microservice = Project("cgt-property-disposals-frontend", file("."))
       "-Wconf:msg=Flag.*repeatedly:s"
     )
   )
-  .settings(CodeCoverageSettings.settings *)
+  .settings(CodeCoverageSettings.settings*)
