@@ -16,4 +16,6 @@ POST        /supporting-evidence/check-your-answers                    uk.gov.hm
 
 GET         /supporting-evidence/handle-upscan-error-redirect          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.handleUpscanErrorRedirect()
 GET         /supporting-evidence/document-did-not-upload               uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.documentDidNotUpload()
+GET         /supporting-evidence/upload-failed                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.uploadFailed() 
+
 GET         /supporting-evidence/problem-with-document                 uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.handleUpscanCallBackFailures()

@@ -18,8 +18,13 @@
 @import play.twirl.api.Html
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.RequestWithSessionData
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.routes
+@import uk.gov.hmrc.govukfrontend.views.html.components.FormWithCSRF
 
-@this(layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout)
+@this(
+        layout: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.Layout,
+        submitButton: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.submit_button_govuk,
+        formWrapper: FormWithCSRF
+)
 
 @()(implicit request: RequestWithSessionData[?], messages: Messages)
 
@@ -46,7 +51,9 @@
   </h2>
 
   <p class="govuk-body">
-    @Html(messages("weOnlySupportGG.signIn.p1", routes.StartController.signOutAndSignIn().url))
+      @formWrapper(routes.StartController.signOutAndSignIn()) {
+        @submitButton(messages("weOnlySupportGG.signIn.p1"))
+      }
   </p>
 
 }

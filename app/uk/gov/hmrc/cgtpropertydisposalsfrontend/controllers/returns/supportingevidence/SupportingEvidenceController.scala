@@ -323,6 +323,11 @@ class SupportingEvidenceController @Inject() (
       Redirect(routes.SupportingEvidenceController.documentDidNotUpload())
     }
 
+  def uploadFailed(): Action[AnyContent] =
+    authenticatedActionWithSessionData {
+      Redirect(routes.SupportingEvidenceController.uploadSupportingEvidence())
+    }
+
   def documentDidNotUpload(): Action[AnyContent] =
     authenticatedActionWithSessionData(implicit request => Ok(uploadFailedPage()))
 
