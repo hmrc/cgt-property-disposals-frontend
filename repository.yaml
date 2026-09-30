@@ -1,5 +1,6 @@
 repoVisibility: public_0C3F0CE3E6E6448FAD341E7BFA50FCD333E06A20CFF05FCACE61154DDBBADF71
 digital-service: CGTPD
+serviceNowMapping: SNSVC0005310
 test-repositories:
   - cgt-property-disposals-ui-tests
   - cgt-property-disposals-performance-tests
