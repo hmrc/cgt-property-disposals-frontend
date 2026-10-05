@@ -18,6 +18,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.address
 
 import org.jsoup.nodes.Document
 import org.scalatest.matchers.should.Matchers
+import org.scalatest.prop.TableDrivenPropertyChecks.{Table, forAll => forAllTable}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.SampledScalaCheck
 import play.api.i18n.{Messages, MessagesApi, MessagesImpl}
 import play.api.inject.bind
@@ -81,6 +82,22 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   private val mockUUIDGenerator = mock[UUIDGenerator]
 
   private val emptyAnswers = IncompleteExamplePropertyDetailsAnswers.empty
+
+  private val assetTypesNotRequiringPostcodeQuestion = Table[List[AssetType]](
+    "assetTypes",
+    List(AssetType.Residential),
+    List(AssetType.MixedUse),
+    List(AssetType.Residential, AssetType.NonResidential),
+    List(AssetType.Residential, AssetType.IndirectDisposal),
+    List(AssetType.Residential, AssetType.MixedUse),
+    List(AssetType.MixedUse, AssetType.NonResidential),
+    List(AssetType.IndirectDisposal, AssetType.MixedUse),
+    List(AssetType.Residential, AssetType.NonResidential, AssetType.IndirectDisposal),
+    List(AssetType.Residential, AssetType.NonResidential, AssetType.MixedUse),
+    List(AssetType.Residential, AssetType.IndirectDisposal, AssetType.MixedUse),
+    List(AssetType.NonResidential, AssetType.IndirectDisposal, AssetType.MixedUse),
+    List(AssetType.Residential, AssetType.NonResidential, AssetType.IndirectDisposal, AssetType.MixedUse)
+  )
 
   private val incompleteAnswers =
     emptyAnswers.copy(
@@ -453,52 +470,28 @@ class MultipleDisposalsPropertyDetailsControllerSpec
       "redirect to the enter postcode page" when {
         "the user did not dispose of a non-residential property and" when {
           "the user has not started this section before" in {
-            forAll { (assetTypes: List[AssetType]) =>
-              whenever(
-                assetTypes.contains(AssetType.Residential) ||
-                  assetTypes.toSet === Set(
-                    AssetType.MixedUse,
-                    AssetType.NonResidential
-                  ) ||
-                  assetTypes.toSet === Set(
-                    AssetType.IndirectDisposal,
-                    AssetType.MixedUse
-                  )
-              ) {
-                test(
-                  sample[DraftMultipleDisposalsReturn].copy(
-                    triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                      .copy(assetTypes = assetTypes),
-                    examplePropertyDetailsAnswers = None
-                  ),
-                  routes.PropertyDetailsController.enterPostcode()
-                )
-              }
+            forAllTable(assetTypesNotRequiringPostcodeQuestion) { assetTypes =>
+              test(
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                    .copy(assetTypes = assetTypes),
+                  examplePropertyDetailsAnswers = None
+                ),
+                routes.PropertyDetailsController.enterPostcode()
+              )
             }
           }
 
           "the user has started but not completed this section" in {
-            forAll { (assetTypes: List[AssetType]) =>
-              whenever(
-                assetTypes.contains(AssetType.Residential) ||
-                  assetTypes.toSet === Set(
-                    AssetType.MixedUse,
-                    AssetType.NonResidential
-                  ) ||
-                  assetTypes.toSet === Set(
-                    AssetType.IndirectDisposal,
-                    AssetType.MixedUse
-                  )
-              ) {
-                test(
-                  sample[DraftMultipleDisposalsReturn].copy(
-                    triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
-                      .copy(assetTypes = assetTypes),
-                    examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
-                  ),
-                  routes.PropertyDetailsController.enterPostcode()
-                )
-              }
+            forAllTable(assetTypesNotRequiringPostcodeQuestion) { assetTypes =>
+              test(
+                sample[DraftMultipleDisposalsReturn].copy(
+                  triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers]
+                    .copy(assetTypes = assetTypes),
+                  examplePropertyDetailsAnswers = Some(sample[IncompleteExamplePropertyDetailsAnswers])
+                ),
+                routes.PropertyDetailsController.enterPostcode()
+              )
             }
           }
         }
@@ -3303,43 +3296,31 @@ class MultipleDisposalsPropertyDetailsControllerSpec
   ): Unit =
     "redirect to the check your answers page" when {
       "the asset types being disposed of do not require us to ask if a postcode exists" in {
-        forAll { (assetTypes: List[AssetType]) =>
-          whenever(
-            assetTypes.contains(AssetType.Residential) ||
-              assetTypes.toSet === Set(
-                AssetType.MixedUse,
-                AssetType.NonResidential
-              ) ||
-              assetTypes.toSet === Set(
-                AssetType.IndirectDisposal,
-                AssetType.MixedUse
-              )
-          ) {
-            inSequence {
-              mockAuthWithNoRetrievals()
-              mockGetSession(
-                SessionData.empty.copy(
-                  journeyStatus = Some(
-                    sample[FillingOutReturn].copy(
-                      draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-                        triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
-                          assetTypes = List(AssetType.Residential)
-                        )
-                      ),
-                      subscribedDetails = sample[SubscribedDetails].copy(
-                        name = Right(sample[IndividualName])
+        forAllTable(assetTypesNotRequiringPostcodeQuestion) { assetTypes =>
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(
+              SessionData.empty.copy(
+                journeyStatus = Some(
+                  sample[FillingOutReturn].copy(
+                    draftReturn = sample[DraftMultipleDisposalsReturn].copy(
+                      triageAnswers = sample[CompleteMultipleDisposalsTriageAnswers].copy(
+                        assetTypes = assetTypes
                       )
+                    ),
+                    subscribedDetails = sample[SubscribedDetails].copy(
+                      name = Right(sample[IndividualName])
                     )
                   )
                 )
               )
-            }
-
-            checkIsRedirect(
-              performAction(),
-              routes.PropertyDetailsController.checkYourAnswers()
             )
           }
+
+          checkIsRedirect(
+            performAction(),
+            routes.PropertyDetailsController.checkYourAnswers()
+          )
         }
       }
     }
