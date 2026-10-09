@@ -71,7 +71,12 @@
     classes = "govuk-input--width-20",
     hint = None,
     value = form.data.get(firstNameKey),
-    errorMessage = form.error(firstNameKey).map(e => ErrorMessage(content =Text(messages(s"$firstNameKey.${e.message}")))),
+    errorMessage = form.error(firstNameKey).map(e => 
+      ErrorMessage(
+        content =Text(messages(s"$firstNameKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )
+    )
   ))
   @govukInput(Input(
     id = lastNameKey,
@@ -85,9 +90,14 @@
     classes = "govuk-input--width-20",
     hint = None,
     value = form.data.get(lastNameKey),
-    errorMessage = form.error(lastNameKey).map(e => ErrorMessage(content =Text(messages(s"$lastNameKey.${e.message}")))),
+    errorMessage = form.error(lastNameKey).map(e => 
+      ErrorMessage(
+        content =Text(messages(s"$lastNameKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
+      )
+    )
   ))
-}
+} 
 
 @layout(pageTitle = title, backLinkUrl = Some(backLink.url), hasErrors = hasErrors) {
 
