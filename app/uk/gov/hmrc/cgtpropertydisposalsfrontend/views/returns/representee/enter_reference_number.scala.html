@@ -58,7 +58,8 @@
     )),
     errorMessage = form.error(cgtReferenceKey).map(e =>
       ErrorMessage(
-        content = Text(messages(s"$cgtReferenceKey.${e.message}"))
+        content = Text(messages(s"$cgtReferenceKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
       )
     ),
     classes = "govuk-!-width-one-third",
@@ -80,7 +81,8 @@
     )),
     errorMessage = form.error(ninoKey).map(e =>
       ErrorMessage(
-        content = Text(messages(s"$ninoKey.${e.message}"))
+        content = Text(messages(s"$ninoKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
       )
     ),
     classes = "govuk-!-width-one-third",
@@ -102,7 +104,8 @@
     )),
     errorMessage = form.error(sautrKey).map(e =>
       ErrorMessage(
-        content = Text(messages(s"$sautrKey.${e.message}"))
+        content = Text(messages(s"$sautrKey.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
       )
     ),
     classes = "govuk-!-width-one-third",
@@ -130,7 +133,8 @@
         )),
         errorMessage = form.error(key).map(e =>
           ErrorMessage(
-            content = Text(messages(s"$key.${e.message}"))
+            content = Text(messages(s"$key.${e.message}")),
+            visuallyHiddenText = Some(messages("generic.error"))
           )
         ),
         hint = Some(Hint(
