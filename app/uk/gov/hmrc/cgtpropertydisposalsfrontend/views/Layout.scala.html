@@ -26,7 +26,6 @@
 @import uk.gov.hmrc.hmrcfrontend.views.html.helpers._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.hmrcstandardpage._
 @import uk.gov.hmrc.hmrcfrontend.views.viewmodels.userresearchbanner.UserResearchBanner
-@import views.html.helper.CSPNonce
 @import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.accounts
 
 @this(
@@ -59,8 +58,8 @@
     @hmrcTimeoutDialogHelper(signOutUrl, timeoutUrl = Some(viewConfig.ggTimedOutUrl))
     @autocompleteCss()
   }
-  <link @{CSPNonce.attr} rel="stylesheet" media="screen" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" />
-  <link @{CSPNonce.attr} rel="stylesheet" media="print" href="@{routes.Assets.at("stylesheets/print.css")}" />
+  <link rel="stylesheet" media="screen" href="@{routes.Assets.at("stylesheets/cgtpd.css")}" />
+  <link rel="stylesheet" media="print" href="@{routes.Assets.at("stylesheets/print.css")}" />
 }
 
 @beforeContent = {
@@ -76,7 +75,7 @@
 
 @additionalScripts = {
   @autocompleteJavascript()
-  <script @CSPNonce.attr src="@{routes.Assets.at("javascript/cgtpd.js")}"></script>
+  <script src="@{routes.Assets.at("javascript/cgtpd.js")}"></script>
 }
 
 @content = {
