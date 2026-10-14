@@ -20,7 +20,7 @@ object AppDependencies {
     "org.scalamock"      %% "scalamock"                     % "7.5.5"          % scope,
     "org.scalatest"      %% "scalatest"                     % "3.2.20"         % scope,
     "org.scalacheck"     %% "scalacheck"                    % "1.19.0"         % scope,
-    "io.github.martinhh" %% "scalacheck-derived"            % "0.10.0"          % scope,
+    "io.github.martinhh" %% "scalacheck-derived"            % "0.10.0"         % scope,
     "org.scalatestplus"   % "scalacheck-1-18_3"             % "3.2.19.0"       % scope,
     "uk.gov.hmrc.mongo"  %% s"hmrc-mongo-test-$playVersion" % mongoVersion     % scope,
     "uk.gov.hmrc"        %% s"bootstrap-test-$playVersion"  % bootstrapVersion % scope exclude ("org.playframework", "play-json_2.13")
