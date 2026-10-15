@@ -17,11 +17,11 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
-import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional, text}
-import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
+import play.api.data.Forms.{mapping as formMapping, nonEmptyText, number, of, optional, text}
+import play.api.data.validation.{Constraint, Constraints, Invalid, Valid, ValidationResult}
 import play.api.data.{Form, Mapping}
 import play.api.i18n.Messages
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.BooleanFormatter
 
 sealed trait Address extends Product with Serializable
@@ -102,6 +102,7 @@ object Address {
       }
 
     nonEmptyText
+      .verifying(Constraints.maxLength(addressLineMaxLength))
       .transform[String](_.trim, identity)
       .verifying(Constraint[String](validateAddressLine))
   }

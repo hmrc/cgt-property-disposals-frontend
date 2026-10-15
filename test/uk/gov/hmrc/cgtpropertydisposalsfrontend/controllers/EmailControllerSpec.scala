@@ -17,13 +17,16 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 
 import cats.data.EitherT
-import cats.instances.future._
+import cats.instances.future.*
 import org.scalamock.handlers.CallHandler0
+import org.scalatest.matchers.must.Matchers.mustBe
+import play.api.data.Form
 import play.api.i18n.MessagesApi
 import play.api.inject.bind
 import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
-import play.api.test.Helpers._
+import play.api.test.FakeRequest
+import play.api.test.Helpers.*
 import uk.gov.hmrc.auth.core.AuthConnector
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email.{Email, EmailJourneyType, EmailToBeVerified}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.http.AcceptLanguage
@@ -168,6 +171,15 @@ trait EmailControllerSpec[JourneyType <: EmailJourneyType] extends ControllerSpe
 
       "the email has space" in {
         testEmailError("test @email .com")
+      }
+
+      "Email mapping" should {
+        "reject payloads exceeding 254 characters" in {
+          val excessivePayload = Map("email" -> (("a" * 250) + "@example.com"))
+          val boundForm        = Form("email" -> Email.mapping).bind(excessivePayload)
+          boundForm.hasErrors mustBe true
+          boundForm.errors.head.message mustBe "error.maxLength"
+        }
       }
 
       "the email has characters before and after the '@' character but " +

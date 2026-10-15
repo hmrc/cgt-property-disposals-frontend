@@ -51,19 +51,24 @@ object MoneyUtils {
   )(
     s: String
   ): Either[FormError, BigDecimal] =
-    Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
-      .leftMap(_ => FormError(key, "error.invalid"))
-      .flatMap { d =>
-        if (isTooSmall(d)) {
-          Left(FormError(key, "error.tooSmall", tooSmallArgs))
-        } else if (isTooLarge(d)) {
-          Left(FormError(key, "error.tooLarge", tooLargeArgs))
-        } else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) {
-          Left(FormError(key, "error.tooManyDecimals"))
-        } else {
-          Right(d)
+    val cleaned = cleanupAmountOfMoneyString(s)
+    if (cleaned.length > 20) {
+      Left(FormError(key, "error.invalid"))
+    } else {
+      Try(BigDecimal(cleanupAmountOfMoneyString(s))).toEither
+        .leftMap(_ => FormError(key, "error.invalid"))
+        .flatMap { d =>
+          if (isTooSmall(d)) {
+            Left(FormError(key, "error.tooSmall", tooSmallArgs))
+          } else if (isTooLarge(d)) {
+            Left(FormError(key, "error.tooLarge", tooLargeArgs))
+          } else if (NumberUtils.numberHasMoreThanNDecimalPlaces(d, 2)) {
+            Left(FormError(key, "error.tooManyDecimals"))
+          } else {
+            Right(d)
+          }
         }
-      }
+    }
 
   def validateValueIsLessThan(
     key: String,

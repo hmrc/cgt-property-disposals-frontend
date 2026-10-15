@@ -38,7 +38,7 @@ object CgtReference {
       else if (!regexPredicate.test(s)) { Invalid("error.pattern") }
       else { Valid }
 
-    text
+    text(maxLength = 15)
       .transform[String](_.replace(" ", ""), identity)
       .verifying(Constraint(validateCgtReference(_)))
       .transform[CgtReference](CgtReference(_), _.value)

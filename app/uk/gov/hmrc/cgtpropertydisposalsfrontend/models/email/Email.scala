@@ -17,11 +17,12 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.email
 
 import cats.Eq
-import cats.instances.string._
-import cats.syntax.eq._
+import cats.instances.string.*
+import cats.syntax.eq.*
 import play.api.data.Forms.nonEmptyText
 import play.api.data.Mapping
-import play.api.libs.functional.syntax._
+import play.api.data.validation.Constraints
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.Format
 
 import java.util.function.Predicate
@@ -29,7 +30,7 @@ import java.util.function.Predicate
 final case class Email(value: String) extends AnyVal
 
 object Email {
-
+  val emailMaxLength: Int           = 254
   val emailRegex: Predicate[String] =
     """^[a-zA-Z0-9\.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$""".r.pattern
       .asPredicate()
@@ -41,6 +42,7 @@ object Email {
 
   val mapping: Mapping[Email] =
     nonEmptyText
+      .verifying(Constraints.maxLength(emailMaxLength))
       .transform[Email](s => Email(s), _.value)
       .verifying("invalid", e => emailRegex.test(e.value))
 }

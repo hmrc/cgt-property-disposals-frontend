@@ -1438,7 +1438,7 @@ object AcquisitionDetailsController {
       def validateOtherAcquisitionMethod(
         s: String
       ): Either[FormError, AcquisitionMethod] =
-        if (s.length > 35) {
+        if (s.trim.length > 35) {
           Left(FormError(otherAcquisitionMethodKey, "error.tooLong"))
         } else if (!otherAcquisitionMethodPredicate.test(s)) {
           Left(FormError(otherAcquisitionMethodKey, "error.invalid"))

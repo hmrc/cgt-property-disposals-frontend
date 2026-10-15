@@ -61,17 +61,22 @@ object FormUtils {
           .fold[Either[Seq[FormError], A]](
             Left(Seq(FormError(key, "error.required")))
           ) { stringValue =>
-            Either
-              .fromTry(Try(stringValue.toInt))
-              .leftMap(_ => Seq(invalidError))
-              .flatMap(i =>
-                Either
-                  .fromOption(
-                    optionsZippedWithIndex.find(_._2 === i),
-                    Seq(invalidError)
-                  )
-                  .map(_._1)
-              )
+            if (stringValue.length > 3) {
+              Left(Seq(invalidError))
+            } else {
+              Either
+                .fromTry(Try(stringValue.toInt))
+                .leftMap(_ => Seq(invalidError))
+                .flatMap(i =>
+                  Either
+                    .fromOption(
+                      optionsZippedWithIndex.find(_._2 === i),
+                      Seq(invalidError)
+                    )
+                    .map(_._1)
+                )
+            }
+
           }
       }
 
