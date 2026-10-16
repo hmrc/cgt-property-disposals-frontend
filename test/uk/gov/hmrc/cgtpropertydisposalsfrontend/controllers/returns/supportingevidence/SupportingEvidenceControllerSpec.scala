@@ -157,12 +157,17 @@ class SupportingEvidenceControllerSpec
   }
 
   def sessionWithMultipleDisposalsStateAndMandatoryEvidence(
-    yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+    yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+    supportingEvidenceAnswers: Option[SupportingEvidenceAnswers]
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
-    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-      yearToDateLiabilityAnswers = yearToDateLiabilityAnswers
-    )
-    val journey     = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+    val draftReturn = sample[DraftMultipleDisposalsReturn]
+      .copy(
+        yearToDateLiabilityAnswers = yearToDateLiabilityAnswers
+      )
+      .copy(supportingEvidenceAnswers = supportingEvidenceAnswers)
+
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
     (
       SessionData.empty.copy(
         journeyStatus = Some(journey)
@@ -1487,8 +1492,17 @@ class SupportingEvidenceControllerSpec
             mandatoryEvidence = Some(existingMandatoryEvidence)
           )
 
+          val existingSupportingEvidence =
+            sample[SupportingEvidence].copy(fileName = "any-file.pdf")
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(existingSupportingEvidence),
+            List.empty
+          )
+
           val (session, _, _) =
-            sessionWithMultipleDisposalsStateAndMandatoryEvidence(Some(completeAnswers))
+            sessionWithMultipleDisposalsStateAndMandatoryEvidence(Some(completeAnswers), Some(answers))
 
           inSequence {
             mockAuthWithNoRetrievals()
