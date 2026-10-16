@@ -289,7 +289,6 @@ class SupportingEvidenceController @Inject() (
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, f, answers) =>
-        println("this is the length of files ->" + answers.fold(_.evidences, _.evidences).length)
         if (answers.fold(_.evidences, _.evidences).length >= maxUploads) {
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
         } else {
