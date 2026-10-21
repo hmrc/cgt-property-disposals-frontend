@@ -286,10 +286,13 @@ class SupportingEvidenceController @Inject() (
       }
     }
 
+
+  private def isMaxUpload(answers : SupportingEvidenceAnswers) : Boolean = answers.fold(_.evidences, _.evidences).length >= maxUploads
+
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, f, answers) =>
-        if (answers.fold(_.evidences, _.evidences).length >= maxUploads) {
+        if (isMaxUpload(answers)) {
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
         } else {
           upscanService
@@ -334,71 +337,72 @@ class SupportingEvidenceController @Inject() (
   ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
-        answers match {
-          case _: CompleteSupportingEvidenceAnswers =>
-            Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+        if (isMaxUpload(answers)) {
+          Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+        } else {
+          answers match {
+            case _: CompleteSupportingEvidenceAnswers                   =>
+              Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+            case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
+              val result = for {
+                upscanUpload <- upscanService.getUpscanUpload(uploadReference)
+                storeResult  <- upscanUpload.upscanCallBack match {
+                                  case Some(success: UpscanSuccess) =>
+                                    storeUpscanSuccess(
+                                      upscanUpload,
+                                      success,
+                                      incompleteAnswers,
+                                      fillingOutReturn
+                                    )
+                                  case _                            =>
+                                    EitherT.rightT[Future, Error](
+                                      StoredUpscanSuccess: StoreUpscanSuccessResult
+                                    )
+                                }
+              } yield (upscanUpload, storeResult)
+              result.value.flatMap {
+                case Left(e) =>
+                  logger.warn(s"could not update the status of upscan upload to uploaded : ${e.toString}")
+                  Future.successful(errorHandler.errorResult())
 
-          case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
-            val result = for {
-              upscanUpload <- upscanService.getUpscanUpload(uploadReference)
-              storeResult  <- upscanUpload.upscanCallBack match {
-                                case Some(success: UpscanSuccess) =>
-                                  storeUpscanSuccess(
-                                    upscanUpload,
-                                    success,
-                                    incompleteAnswers,
-                                    fillingOutReturn
-                                  )
-
-                                case _ =>
-                                  EitherT.rightT[Future, Error](
-                                    StoredUpscanSuccess: StoreUpscanSuccessResult
-                                  )
-                              }
-            } yield (upscanUpload, storeResult)
-
-            result.value.flatMap {
-              case Left(e) =>
-                logger.warn(s"could not update the status of upscan upload to uploaded : ${e.toString}")
-                Future.successful(errorHandler.errorResult())
-
-              case Right((_, DuplicateUpscanFileName)) =>
-                upscanService
-                  .initiate(
-                    routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-                    routes.SupportingEvidenceController.scanProgress
-                  )
-                  .fold(
-                    { e =>
-                      logger.warn("could not start upload supporting evidence", e)
-                      errorHandler.errorResult()
-                    },
-                    upscanUpload =>
-                      BadRequest(
-                        uploadPage(
-                          upscanUpload,
-                          routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
-                          fillingOutReturn.isAmendReturn,
-                          isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers),
-                          hasDuplicateFileNameError = true
+                case Right((_, DuplicateUpscanFileName)) =>
+                  upscanService
+                    .initiate(
+                      routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
+                      routes.SupportingEvidenceController.scanProgress
+                    )
+                    .fold(
+                      { e =>
+                        logger.warn("could not start upload supporting evidence", e)
+                        errorHandler.errorResult()
+                      },
+                      upscanUpload =>
+                        BadRequest(
+                          uploadPage(
+                            upscanUpload,
+                            routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
+                            fillingOutReturn.isAmendReturn,
+                            isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers),
+                            hasDuplicateFileNameError = true
+                          )
                         )
-                      )
-                  )
+                    )
 
-              case Right((upscanUpload, StoredUpscanSuccess)) =>
-                Future.successful {
-                  upscanUpload.upscanCallBack match {
-                    case Some(_: UpscanSuccess) =>
-                      Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+                case Right((upscanUpload, StoredUpscanSuccess)) =>
+                  Future.successful {
+                    upscanUpload.upscanCallBack match {
+                      case Some(_: UpscanSuccess) =>
+                        Redirect(routes.SupportingEvidenceController.checkYourAnswers())
 
-                    case Some(_: UpscanFailure) =>
-                      Redirect(routes.SupportingEvidenceController.handleUpscanCallBackFailures())
+                      case Some(_: UpscanFailure) =>
+                        Redirect(routes.SupportingEvidenceController.handleUpscanCallBackFailures())
 
-                    case None =>
-                      Ok(scanProgressPage(upscanUpload))
+                      case None =>
+                        Ok(scanProgressPage(upscanUpload))
+                    }
                   }
-                }
-            }
+              }
+          }
         }
       }
     }
