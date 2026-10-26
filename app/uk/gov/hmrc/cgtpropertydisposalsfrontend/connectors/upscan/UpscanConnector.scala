@@ -22,34 +22,36 @@ import play.api.libs.json.Json
 import play.api.mvc.Call
 import play.api.{ConfigLoader, Configuration}
 import play.mvc.Http.Status
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan._
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan => _, _}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{upscan as _, *}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.Logging
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse, StringContextOps}
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import scala.concurrent.{ExecutionContext, Future}
-
 import play.api.libs.ws.writeableOf_JsValue
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 
 @ImplementedBy(classOf[UpscanConnectorImpl])
 trait UpscanConnector {
   def getUpscanUpload(
-    uploadReference: UploadReference
+    uploadReference: UploadReference,
+    ggCredId: GGCredId
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
-  def saveUpscanUpload(upscanUpload: UpscanUpload)(implicit
+  def saveUpscanUpload(upscanUpload: UpscanUpload, ggCredId: GGCredId)(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
 
   def initiate(
     errorRedirect: Call,
     successRedirect: Call,
-    uploadReference: UploadReference
+    uploadReference: UploadReference,
+    ggCredId: GGCredId
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -83,12 +85,13 @@ class UpscanConnectorImpl @Inject() (
   def initiate(
     errorRedirect: Call,
     successRedirect: Call,
-    uploadReference: UploadReference
+    uploadReference: UploadReference,
+    ggCredId: GGCredId
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val payload = UpscanInitiateRequest(
-      backEndBaseUrl + s"/cgt-property-disposals/upscan-call-back/upload-reference/${uploadReference.value}",
+      backEndBaseUrl + s"/cgt-property-disposals/upscan-call-back/upload-reference/${uploadReference.value}/${ggCredId.value}",
       selfBaseUrl + successRedirect.url,
       selfBaseUrl + errorRedirect.url,
       maximumFileSize = maxFileSize
@@ -122,12 +125,13 @@ class UpscanConnectorImpl @Inject() (
   }
 
   def getUpscanUpload(
-    uploadReference: UploadReference
+    uploadReference: UploadReference,
+    ggCredId: GGCredId
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val url =
-      backEndBaseUrl + s"/cgt-property-disposals/upscan/upload-reference/${uploadReference.value}"
+      backEndBaseUrl + s"/cgt-property-disposals/upscan/upload-reference/${uploadReference.value}/${ggCredId.value}"
 
     EitherT[Future, Error, HttpResponse](
       http
@@ -149,9 +153,10 @@ class UpscanConnectorImpl @Inject() (
   }
 
   def saveUpscanUpload(
-    upscanUpload: UpscanUpload
+    upscanUpload: UpscanUpload,
+    ggCredId: GGCredId
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, HttpResponse] = {
-    val url = backEndBaseUrl + s"/cgt-property-disposals/upscan"
+    val url = backEndBaseUrl + s"/cgt-property-disposals/upscan/upload/${ggCredId.value}"
 
     EitherT[Future, Error, HttpResponse](
       http

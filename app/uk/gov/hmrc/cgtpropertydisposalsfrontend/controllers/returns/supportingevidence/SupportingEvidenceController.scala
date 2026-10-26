@@ -29,8 +29,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.ErrorHandler
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
@@ -292,12 +292,17 @@ class SupportingEvidenceController @Inject() (
         if (answers.fold(_.evidences, _.evidences).length >= maxUploads) {
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
         } else {
-          upscanService
-            .initiate(
-              routes.SupportingEvidenceController
-                .handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.scanProgress
-            )
+          val result = for {
+            upScanUpload <- upscanService
+                              .initiate(
+                                routes.SupportingEvidenceController
+                                  .handleUpscanErrorRedirect(),
+                                routes.SupportingEvidenceController.scanProgress,
+                                request.sessionData
+                              )
+          } yield upScanUpload
+
+          result
             .fold(
               { e =>
                 logger.warn("could not start upload supporting evidence", e)
@@ -340,7 +345,7 @@ class SupportingEvidenceController @Inject() (
 
           case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
             val result = for {
-              upscanUpload <- upscanService.getUpscanUpload(uploadReference)
+              upscanUpload <- upscanService.getUpscanUpload(uploadReference, request.sessionData)
               storeResult  <- upscanUpload.upscanCallBack match {
                                 case Some(success: UpscanSuccess) =>
                                   storeUpscanSuccess(
@@ -363,11 +368,16 @@ class SupportingEvidenceController @Inject() (
                 Future.successful(errorHandler.errorResult())
 
               case Right((_, DuplicateUpscanFileName)) =>
-                upscanService
-                  .initiate(
-                    routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-                    routes.SupportingEvidenceController.scanProgress
-                  )
+                val result = for {
+                  upScanUpload <- upscanService
+                                    .initiate(
+                                      routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
+                                      routes.SupportingEvidenceController.scanProgress,
+                                      request.sessionData
+                                    )
+                } yield upScanUpload
+
+                result
                   .fold(
                     { e =>
                       logger.warn("could not start upload supporting evidence", e)
