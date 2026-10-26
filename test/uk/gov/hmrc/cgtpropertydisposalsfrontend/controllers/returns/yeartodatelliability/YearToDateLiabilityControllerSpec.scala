@@ -60,7 +60,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TaxYearGen.giv
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.TriageQuestionsGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.UserTypeGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.given
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.AgentReferenceNumber
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{AgentReferenceNumber, GGCredId}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.name.{IndividualName, TrustName}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.onboarding.SubscribedDetails
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
@@ -546,17 +546,19 @@ class YearToDateLiabilityControllerSpec
 
   private def mockUpscanInitiate(
     errorRedirectCall: Call,
-    successRedirectCall: UploadReference => Call
+    successRedirectCall: UploadReference => Call,
+    ggCredID: GGCredId
   )(
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .initiate(_: Call, _: UploadReference => Call)(using _: HeaderCarrier))
+      .initiate(_: Call, _: UploadReference => Call, _: GGCredId)(using _: HeaderCarrier))
       .expects(
         where {
           (
             actualErrorRedirectCall: Call,
             actualSuccessRedirectCall: UploadReference => Call,
+            ggCredID,
             _: HeaderCarrier
           ) =>
             val uploadReference = sample[UploadReference]
@@ -574,8 +576,8 @@ class YearToDateLiabilityControllerSpec
     uploadReference: UploadReference
   )(result: Either[Error, UpscanUpload]) =
     (mockUpscanService
-      .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
-      .expects(uploadReference, *)
+      .getUpscanUpload(_: UploadReference, _: GGCredId)(using _: HeaderCarrier))
+      .expects(uploadReference, *, *)
       .returning(EitherT.fromEither(result))
 
   private def setTaxDue(
@@ -4070,6 +4072,7 @@ class YearToDateLiabilityControllerSpec
           )
 
         val upscanUpload   = sample[UpscanUpload]
+        val ggCredID       = sample[GGCredId]
         val newAnswers     = answers.copy(pendingUpscanUpload = Some(upscanUpload))
         val newDraftReturn =
           draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
@@ -4082,7 +4085,8 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence(),
+              ggCredID
             )(Left(Error("")))
           }
 
@@ -4096,7 +4100,8 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence(),
+              ggCredID
             )(Right(upscanUpload))
             mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
@@ -4111,7 +4116,8 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence(),
+              ggCredID
             )(Right(upscanUpload))
             mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
@@ -4233,6 +4239,7 @@ class YearToDateLiabilityControllerSpec
           val newDraftReturn =
             draftReturn.copy(yearToDateLiabilityAnswers = Some(newAnswers))
           val newJourney     = journey.copy(draftReturn = newDraftReturn)
+          val ggCredID       = sample[GGCredId]
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -4243,7 +4250,8 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence(),
+              ggCredID
             )(Right(upscanUpload))
             mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
@@ -8524,7 +8532,8 @@ class YearToDateLiabilityControllerSpec
       "display the page with duplicate file error message" when {
         "the user is on a calculated journey" in {
 
-          val uploadReference            = sample[UploadReference]
+          val uploadReference = sample[UploadReference]
+
           val existingSupportingEvidence =
             sample[SupportingEvidence].copy(fileName = "same-file.pdf")
 
@@ -8595,6 +8604,7 @@ class YearToDateLiabilityControllerSpec
           val updatedDraftReturn = draftReturn.copy(yearToDateLiabilityAnswers = Some(updatedAnswers))
           val updatedJourney     = journey.copy(draftReturn = updatedDraftReturn)
           val updatedSession     = session.copy(journeyStatus = Some(updatedJourney))
+          val ggCredId           = sample[GGCredId]
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -8602,7 +8612,8 @@ class YearToDateLiabilityControllerSpec
             mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
             mockUpscanInitiate(
               routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence(),
+              ggCredId
             )(Right(newUpscanUpload))
             mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))

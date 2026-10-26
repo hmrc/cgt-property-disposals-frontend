@@ -38,7 +38,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.amountInPenceGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.{completeCalculatedYTDLiabilityAnswersGen, mandatoryEvidenceGen}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.{GGCredId, UUIDGenerator}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
@@ -81,19 +81,23 @@ class SupportingEvidenceControllerSpec
 
   implicit lazy val messages: Messages = MessagesImpl(Lang("en"), messagesApi)
 
+  val ggCredId = sample[GGCredId]
+
   private def mockUpscanInitiate(
     errorRedirectCall: Call,
-    successRedirectCall: UploadReference => Call
+    successRedirectCall: UploadReference => Call,
+    ggCredId: GGCredId
   )(
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .initiate(_: Call, _: UploadReference => Call)(using _: HeaderCarrier))
+      .initiate(_: Call, _: UploadReference => Call, _: GGCredId)(using _: HeaderCarrier))
       .expects(
         where {
           (
             actualErrorRedirectCall: Call,
             actualSuccessRedirectCall: UploadReference => Call,
+            ggCredId,
             _: HeaderCarrier
           ) =>
             val uploadReference = sample[UploadReference]
@@ -110,8 +114,8 @@ class SupportingEvidenceControllerSpec
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
-      .expects(uploadReference, *)
+      .getUpscanUpload(_: UploadReference, _: GGCredId)(using _: HeaderCarrier))
+      .expects(uploadReference, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
@@ -571,7 +575,8 @@ class SupportingEvidenceControllerSpec
                 .handleUpscanErrorRedirect(),
               uploadReference =>
                 routes.SupportingEvidenceController
-                  .scanProgress(uploadReference)
+                  .scanProgress(uploadReference),
+              ggCredId
             )(
               Left(Error("some upscan error"))
             )
@@ -607,7 +612,8 @@ class SupportingEvidenceControllerSpec
                 .handleUpscanErrorRedirect(),
               uploadReference =>
                 routes.SupportingEvidenceController
-                  .scanProgress(uploadReference)
+                  .scanProgress(uploadReference),
+              ggCredId
             )(Right(upscanUpload))
           }
 
@@ -1435,7 +1441,8 @@ class SupportingEvidenceControllerSpec
             mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
             mockUpscanInitiate(
               routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.scanProgress
+              routes.SupportingEvidenceController.scanProgress,
+              ggCredId
             )(Right(newUpscanUpload))
           }
 
@@ -1496,7 +1503,8 @@ class SupportingEvidenceControllerSpec
             mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
             mockUpscanInitiate(
               routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.scanProgress
+              routes.SupportingEvidenceController.scanProgress,
+              ggCredId
             )(Right(newUpscanUpload))
           }
 

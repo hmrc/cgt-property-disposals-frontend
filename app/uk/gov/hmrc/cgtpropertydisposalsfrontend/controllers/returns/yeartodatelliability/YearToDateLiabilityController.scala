@@ -32,8 +32,8 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.config.{ErrorHandler, ViewConfig
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.SessionUpdates
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.actions.{AuthenticatedAction, RequestWithSessionData, SessionDataAction, WithAuthAndSessionDataAction}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.StartingToAmendToFillingOutReturnBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityController.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{GGCredIdHelper, StartingToAmendToFillingOutReturnBehaviour}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ConditionalRadioUtils.InnerOption
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.JourneyStatus.{FillingOutReturn, PreviousReturnData, StartingToAmendReturn}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
@@ -52,7 +52,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
@@ -1357,13 +1357,15 @@ class YearToDateLiabilityController @Inject() (
           backLink: Call
         ): Future[Result] = {
           val result = for {
+            ggCredId     <- GGCredIdHelper.getGGCredID(request.sessionData)
             upscanUpload <- upscanService
                               .initiate(
                                 routes.YearToDateLiabilityController
                                   .uploadMandatoryEvidenceFailure(),
                                 _ =>
                                   routes.YearToDateLiabilityController
-                                    .scanningMandatoryEvidence()
+                                    .scanningMandatoryEvidence(),
+                                ggCredId
                               )
             _            <- updatePendingUpscanUpload(
                               answers,
@@ -1974,8 +1976,10 @@ class YearToDateLiabilityController @Inject() (
           answers: Either[IncompleteNonCalculatedYTDAnswers, IncompleteCalculatedYTDAnswers]
         ): Future[Result] = {
           val result = for {
+            ggCredId        <- GGCredIdHelper.getGGCredID(request.sessionData)
             newUpscanUpload <- upscanService.getUpscanUpload(
-                                 pendingUpscanUpload.uploadReference
+                                 pendingUpscanUpload.uploadReference,
+                                 ggCredId
                                )
             storeResult     <- newUpscanUpload.upscanCallBack match {
                                  case None           =>
@@ -1998,9 +2002,11 @@ class YearToDateLiabilityController @Inject() (
             case Right((_, Some(DuplicateUpscanFileName))) =>
               val currentAnswers: YearToDateLiabilityAnswers = answers.fold(identity, identity)
               val newUpload                                  = for {
+                ggCredId     <- GGCredIdHelper.getGGCredID(request.sessionData)
                 upscanUpload <- upscanService.initiate(
                                   routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
-                                  _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+                                  _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence(),
+                                  ggCredId
                                 )
                 _            <- updatePendingUpscanUpload(currentAnswers, fillingOutReturn, upscanUpload)
               } yield upscanUpload
