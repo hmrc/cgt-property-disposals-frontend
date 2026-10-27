@@ -157,12 +157,17 @@ class SupportingEvidenceControllerSpec
   }
 
   def sessionWithMultipleDisposalsStateAndMandatoryEvidence(
-    yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers]
+    yearToDateLiabilityAnswers: Option[YearToDateLiabilityAnswers],
+    supportingEvidenceAnswers: Option[SupportingEvidenceAnswers]
   ): (SessionData, FillingOutReturn, DraftMultipleDisposalsReturn) = {
-    val draftReturn = sample[DraftMultipleDisposalsReturn].copy(
-      yearToDateLiabilityAnswers = yearToDateLiabilityAnswers
-    )
-    val journey     = sample[FillingOutReturn].copy(draftReturn = draftReturn)
+
+    val draftReturn = sample[DraftMultipleDisposalsReturn]
+      .copy(
+        yearToDateLiabilityAnswers = yearToDateLiabilityAnswers
+      )
+      .copy(supportingEvidenceAnswers = supportingEvidenceAnswers)
+
+    val journey = sample[FillingOutReturn].copy(draftReturn = draftReturn)
     (
       SessionData.empty.copy(
         journeyStatus = Some(journey)
@@ -1487,8 +1492,17 @@ class SupportingEvidenceControllerSpec
             mandatoryEvidence = Some(existingMandatoryEvidence)
           )
 
+          val existingSupportingEvidence =
+            sample[SupportingEvidence].copy(fileName = "any-file.pdf")
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(existingSupportingEvidence),
+            List.empty
+          )
+
           val (session, _, _) =
-            sessionWithMultipleDisposalsStateAndMandatoryEvidence(Some(completeAnswers))
+            sessionWithMultipleDisposalsStateAndMandatoryEvidence(Some(completeAnswers), Some(answers))
 
           inSequence {
             mockAuthWithNoRetrievals()
@@ -1747,6 +1761,40 @@ class SupportingEvidenceControllerSpec
               .scanProgress(
                 UploadReference(uploadReference.toString)
               )
+          )
+        }
+      }
+    }
+
+    "handling supporting evidence on Scan Progress page " must {
+      def performAction(uploadReference: UploadReference): Future[Result] =
+        controller.scanProgress(
+          uploadReference
+        )(FakeRequest())
+
+      "redirect the user to the check your answers page" when {
+
+        "the number of uploads have reached the maximum allowed" in {
+
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence = sample[SupportingEvidence]
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            evidences = List.fill(2)(supportingEvidence),
+            expiredEvidences = List.empty
+          )
+
+          val (session, _, _) = sessionWithSingleDisposalState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+          }
+
+          checkIsRedirect(
+            performAction(uploadReference),
+            routes.SupportingEvidenceController.checkYourAnswers()
           )
         }
       }
