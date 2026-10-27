@@ -52,7 +52,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabili
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, SessionData, TaxYear}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{BooleanFormatter, ConditionalRadioUtils, Error, FormUtils, JourneyStatus, SessionData, TaxYear}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
@@ -1363,7 +1363,8 @@ class YearToDateLiabilityController @Inject() (
                                   .uploadMandatoryEvidenceFailure(),
                                 _ =>
                                   routes.YearToDateLiabilityController
-                                    .scanningMandatoryEvidence()
+                                    .scanningMandatoryEvidence(),
+                                request.sessionData
                               )
             _            <- updatePendingUpscanUpload(
                               answers,
@@ -1975,7 +1976,8 @@ class YearToDateLiabilityController @Inject() (
         ): Future[Result] = {
           val result = for {
             newUpscanUpload <- upscanService.getUpscanUpload(
-                                 pendingUpscanUpload.uploadReference
+                                 pendingUpscanUpload.uploadReference,
+                                 request.sessionData
                                )
             storeResult     <- newUpscanUpload.upscanCallBack match {
                                  case None           =>
@@ -1998,9 +2000,11 @@ class YearToDateLiabilityController @Inject() (
             case Right((_, Some(DuplicateUpscanFileName))) =>
               val currentAnswers: YearToDateLiabilityAnswers = answers.fold(identity, identity)
               val newUpload                                  = for {
+
                 upscanUpload <- upscanService.initiate(
                                   routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
-                                  _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+                                  _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence(),
+                                  request.sessionData
                                 )
                 _            <- updatePendingUpscanUpload(currentAnswers, fillingOutReturn, upscanUpload)
               } yield upscanUpload
