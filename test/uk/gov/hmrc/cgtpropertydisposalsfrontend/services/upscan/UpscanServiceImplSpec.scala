@@ -99,8 +99,8 @@ class UpscanServiceImplSpec extends AnyWordSpec with Matchers with SampledScalaC
             )
           )
           (mockConnector
-            .initiate(_: Call, _: Call, _: UploadReference, _: GGCredId)(using _: HeaderCarrier))
-            .expects(mockFailure, mockSuccess, *, *, *)
+            .initiate(_: Call, _: Call, _: UploadReference)(using _: HeaderCarrier))
+            .expects(mockFailure, mockSuccess, *, *)
             .returning(EitherT.fromEither[Future](response))
           (mockConnector
             .saveUpscanUpload(_: UpscanUpload, _: GGCredId)(using _: HeaderCarrier))

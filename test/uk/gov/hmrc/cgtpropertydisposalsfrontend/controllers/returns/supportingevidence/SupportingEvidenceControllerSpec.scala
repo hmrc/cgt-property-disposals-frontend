@@ -1337,6 +1337,32 @@ class SupportingEvidenceControllerSpec
             performAction(uploadReference)
           )
         }
+
+        "getUpscanUpload fails" in {
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence =
+            sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) =
+            sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(uploadReference)
+          )
+        }
+
       }
 
       "show the document did not upload error page" when {

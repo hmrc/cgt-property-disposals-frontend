@@ -85,14 +85,14 @@ class UpscanConnectorImplSpec
       val mockFailure = Call("GET", "/mock-fail")
 
       val payload = UpscanInitiateRequest(
-        s"http://$wireMockHost:$wireMockPort/cgt-property-disposals/upscan-call-back/upload-reference/${reference.value}/${ggCredID.value}",
+        s"http://$wireMockHost:$wireMockPort/cgt-property-disposals/upscan-call-back/upload-reference/${reference.value}",
         s"host1.com${mockSuccess.url}",
         s"host1.com${mockFailure.url}",
         maximumFileSize = 1234
       )
       behave like upscanConnectorBehaviour(
         when(POST, expectedUrl, body = Some(Json.toJson(payload).toString())),
-        () => connector.initiate(mockFailure, mockSuccess, reference, ggCredID)
+        () => connector.initiate(mockFailure, mockSuccess, reference)
       )
     }
 

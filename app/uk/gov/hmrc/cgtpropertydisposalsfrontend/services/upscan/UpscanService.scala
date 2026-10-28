@@ -73,8 +73,7 @@ class UpscanServiceImpl @Inject() (
                             .initiate(
                               errorRedirect,
                               successRedirect(uploadReference),
-                              uploadReference,
-                              ggCredId
+                              uploadReference
                             )
       upscanUploadMeta <- EitherT.fromOption(
                             httpResponse.json.validate[UpscanUploadMeta].asOpt,
@@ -104,7 +103,7 @@ class UpscanServiceImpl @Inject() (
                       }
     } yield upscanUpload
 
-  def getGGCredID(sessionData: Option[SessionData]): EitherT[Future, Error, GGCredId] =
+  private def getGGCredID(sessionData: Option[SessionData]): EitherT[Future, Error, GGCredId] =
     EitherT.fromEither[Future] {
       sessionData.flatMap(_.journeyStatus) match {
         case Some(f: FillingOutReturn) => Right(f.ggCredId)

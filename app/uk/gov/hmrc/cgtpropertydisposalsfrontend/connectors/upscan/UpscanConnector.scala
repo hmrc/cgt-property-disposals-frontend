@@ -50,8 +50,7 @@ trait UpscanConnector {
   def initiate(
     errorRedirect: Call,
     successRedirect: Call,
-    uploadReference: UploadReference,
-    ggCredId: GGCredId
+    uploadReference: UploadReference
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse]
@@ -85,13 +84,12 @@ class UpscanConnectorImpl @Inject() (
   def initiate(
     errorRedirect: Call,
     successRedirect: Call,
-    uploadReference: UploadReference,
-    ggCredId: GGCredId
+    uploadReference: UploadReference
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, HttpResponse] = {
     val payload = UpscanInitiateRequest(
-      backEndBaseUrl + s"/cgt-property-disposals/upscan-call-back/upload-reference/${uploadReference.value}/${ggCredId.value}",
+      backEndBaseUrl + s"/cgt-property-disposals/upscan-call-back/upload-reference/${uploadReference.value}",
       selfBaseUrl + successRedirect.url,
       selfBaseUrl + errorRedirect.url,
       maximumFileSize = maxFileSize
