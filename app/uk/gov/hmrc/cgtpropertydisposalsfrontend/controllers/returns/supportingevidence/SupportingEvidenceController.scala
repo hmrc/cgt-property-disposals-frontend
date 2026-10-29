@@ -286,8 +286,8 @@ class SupportingEvidenceController @Inject() (
       }
     }
 
-
-  private def isMaxUpload(answers : SupportingEvidenceAnswers) : Boolean = answers.fold(_.evidences, _.evidences).length >= maxUploads
+  private def isMaxUpload(answers: SupportingEvidenceAnswers): Boolean =
+    answers.fold(_.evidences, _.evidences).length >= maxUploads
 
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
@@ -299,7 +299,8 @@ class SupportingEvidenceController @Inject() (
             .initiate(
               routes.SupportingEvidenceController
                 .handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.scanProgress
+              routes.SupportingEvidenceController.scanProgress,
+              request.sessionData
             )
             .fold(
               { e =>
@@ -345,7 +346,7 @@ class SupportingEvidenceController @Inject() (
               Redirect(routes.SupportingEvidenceController.checkYourAnswers())
             case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
               val result = for {
-                upscanUpload <- upscanService.getUpscanUpload(uploadReference)
+                upscanUpload <- upscanService.getUpscanUpload(uploadReference, request.sessionData)
                 storeResult  <- upscanUpload.upscanCallBack match {
                                   case Some(success: UpscanSuccess) =>
                                     storeUpscanSuccess(
@@ -366,11 +367,16 @@ class SupportingEvidenceController @Inject() (
                   Future.successful(errorHandler.errorResult())
 
                 case Right((_, DuplicateUpscanFileName)) =>
-                  upscanService
-                    .initiate(
-                      routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-                      routes.SupportingEvidenceController.scanProgress
-                    )
+                  val result = for {
+                    upScanUpload <- upscanService
+                                      .initiate(
+                                        routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
+                                        routes.SupportingEvidenceController.scanProgress,
+                                        request.sessionData
+                                      )
+                  } yield upScanUpload
+
+                  result
                     .fold(
                       { e =>
                         logger.warn("could not start upload supporting evidence", e)

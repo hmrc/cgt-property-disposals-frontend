@@ -28,7 +28,6 @@ import play.api.inject.guice.GuiceableModule
 import play.api.mvc.{Call, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.AuthConnector
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.{SampledScalaCheck, controllers}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.onboarding.RedirectToStartBehaviour
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.yeartodatelliability.YearToDateLiabilityControllerSpec.{validateCalculatedYearToDateLiabilityPage, validateNonCalculatedYearToDateLiabilityPage}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.{FurtherReturnCalculationEligibilityUtilSupport, ReturnsServiceSupport, StartingToAmendToFillingOutReturnSpecBehaviour}
@@ -85,6 +84,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.repos.SessionStore
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.FurtherReturnCalculationEligibility.{Eligible, Ineligible}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.returns.{CgtCalculationService, FurtherReturnCalculationEligibility, FurtherReturnCalculationEligibilityUtil, ReturnsService}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.services.upscan.UpscanService
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.{SampledScalaCheck, controllers}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.LocalDate
@@ -551,12 +551,13 @@ class YearToDateLiabilityControllerSpec
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .initiate(_: Call, _: UploadReference => Call)(using _: HeaderCarrier))
+      .initiate(_: Call, _: UploadReference => Call, _: Option[SessionData])(using _: HeaderCarrier))
       .expects(
         where {
           (
             actualErrorRedirectCall: Call,
             actualSuccessRedirectCall: UploadReference => Call,
+            _: Option[SessionData],
             _: HeaderCarrier
           ) =>
             val uploadReference = sample[UploadReference]
@@ -574,8 +575,8 @@ class YearToDateLiabilityControllerSpec
     uploadReference: UploadReference
   )(result: Either[Error, UpscanUpload]) =
     (mockUpscanService
-      .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
-      .expects(uploadReference, *)
+      .getUpscanUpload(_: UploadReference, _: Option[SessionData])(using _: HeaderCarrier))
+      .expects(uploadReference, *, *)
       .returning(EitherT.fromEither(result))
 
   private def setTaxDue(
@@ -8524,7 +8525,8 @@ class YearToDateLiabilityControllerSpec
       "display the page with duplicate file error message" when {
         "the user is on a calculated journey" in {
 
-          val uploadReference            = sample[UploadReference]
+          val uploadReference = sample[UploadReference]
+
           val existingSupportingEvidence =
             sample[SupportingEvidence].copy(fileName = "same-file.pdf")
 

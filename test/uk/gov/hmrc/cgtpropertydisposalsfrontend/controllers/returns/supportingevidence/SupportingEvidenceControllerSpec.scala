@@ -39,9 +39,9 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.JourneyStatusG
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.MoneyGen.amountInPenceGen
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.YearToDateLiabilityAnswersGen.{completeCalculatedYTDLiabilityAnswersGen, mandatoryEvidenceGen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.UUIDGenerator
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.CalculatedYTDAnswers.CompleteCalculatedYTDAnswers
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UpscanCallBack.{UpscanFailure, UpscanSuccess}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.{Error, SessionData}
@@ -88,12 +88,13 @@ class SupportingEvidenceControllerSpec
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .initiate(_: Call, _: UploadReference => Call)(using _: HeaderCarrier))
+      .initiate(_: Call, _: UploadReference => Call, _: Option[SessionData])(using _: HeaderCarrier))
       .expects(
         where {
           (
             actualErrorRedirectCall: Call,
             actualSuccessRedirectCall: UploadReference => Call,
+            _: Option[SessionData],
             _: HeaderCarrier
           ) =>
             val uploadReference = sample[UploadReference]
@@ -110,8 +111,8 @@ class SupportingEvidenceControllerSpec
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .getUpscanUpload(_: UploadReference)(using _: HeaderCarrier))
-      .expects(uploadReference, *)
+      .getUpscanUpload(_: UploadReference, _: Option[SessionData])(using _: HeaderCarrier))
+      .expects(uploadReference, *, *)
       .returning(EitherT.fromEither[Future](result))
 
   private def redirectToStartBehaviour(performAction: () => Future[Result]): Unit =
@@ -1336,6 +1337,32 @@ class SupportingEvidenceControllerSpec
             performAction(uploadReference)
           )
         }
+
+        "getUpscanUpload fails" in {
+          val uploadReference    = sample[UploadReference]
+          val supportingEvidence =
+            sample[SupportingEvidence].copy(uploadReference = uploadReference)
+
+          val answers = IncompleteSupportingEvidenceAnswers(
+            doYouWantToUploadSupportingEvidence = Some(true),
+            List(supportingEvidence),
+            List.empty
+          )
+
+          val (session, _, _) =
+            sessionWithMultipleDisposalsState(Some(answers))
+
+          inSequence {
+            mockAuthWithNoRetrievals()
+            mockGetSession(session)
+            mockGetUpscanUpload(uploadReference)(Left(Error("")))
+          }
+
+          checkIsTechnicalErrorPage(
+            performAction(uploadReference)
+          )
+        }
+
       }
 
       "show the document did not upload error page" when {

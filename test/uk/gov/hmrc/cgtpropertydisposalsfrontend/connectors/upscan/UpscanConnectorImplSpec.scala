@@ -25,12 +25,13 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, Json}
 import play.api.mvc.Call
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import play.api.{Application, Configuration}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.Error
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.Generators.sample
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen._
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.IdGen.*
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.ids.GGCredId
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.{UploadReference, UpscanInitiateRequest, UpscanUpload}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.util.WireMockMethods
 import uk.gov.hmrc.http.test.WireMockSupport
@@ -75,6 +76,7 @@ class UpscanConnectorImplSpec
   "UpscanConnectorImplSpec" when {
     implicit val hc: HeaderCarrier = HeaderCarrier()
     val reference                  = sample[UploadReference]
+    val ggCredID                   = sample[GGCredId]
     val upload                     = sample[UpscanUpload]
 
     "Initialising" must {
@@ -95,17 +97,21 @@ class UpscanConnectorImplSpec
     }
 
     "getting the upscan upload" must {
-      val expectedUrl = s"/cgt-property-disposals/upscan/upload-reference/${reference.value}"
+      val expectedUrl = s"/cgt-property-disposals/upscan/upload-reference/${reference.value}/${ggCredID.value}"
       behave like upscanConnectorBehaviour(
         when(GET, expectedUrl),
-        () => connector.getUpscanUpload(reference)
+        () => connector.getUpscanUpload(reference, ggCredID)
       )
     }
 
     "saving upscan upload" when {
       behave like upscanConnectorBehaviour(
-        when(POST, "/cgt-property-disposals/upscan", body = Some(Json.toJson(upload).toString())),
-        () => connector.saveUpscanUpload(upload)
+        when(
+          POST,
+          s"/cgt-property-disposals/upscan/upload/${ggCredID.value}",
+          body = Some(Json.toJson(upload).toString())
+        ),
+        () => connector.saveUpscanUpload(upload, ggCredID)
       )
     }
   }
