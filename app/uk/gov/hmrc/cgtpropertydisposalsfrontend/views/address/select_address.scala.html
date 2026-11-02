@@ -118,7 +118,8 @@
          },
          errorMessage = form.error(key).map(e =>
              ErrorMessage(
-                 content = Text(messages(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}.${e.message}"))
+                 content = Text(messages(s"$key${journeyErrorKey.stripSuffix(".")}${userKey.stripSuffix(".")}.${e.message}")),
+                 visuallyHiddenText = Some(messages("generic.error"))
              )
          )
      ))

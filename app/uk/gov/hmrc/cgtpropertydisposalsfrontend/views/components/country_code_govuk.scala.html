@@ -67,7 +67,8 @@
         content = HtmlContent(h)
       )),
       errorMessage = form.error("countryCode").map(e => ErrorMessage(
-        content = Text(messages(s"countryCode.${e.message}"))
+        content = Text(messages(s"countryCode.${e.message}")),
+        visuallyHiddenText = Some(messages("generic.error"))
       )),
       classes = "govuk-!-width-two-thirds",
       attributes = Map("autocomplete" -> "country")

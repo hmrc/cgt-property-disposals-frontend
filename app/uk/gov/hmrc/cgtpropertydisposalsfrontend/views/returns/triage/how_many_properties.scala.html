@@ -133,11 +133,10 @@
         hint = Some(Hint(
           content = Text(messages(s"$key.helpText.p1.text"))
         )),
-        errorMessage = form.error(key).map(e =>
-          ErrorMessage(
-            content = Text(messages(s"$key.${e.message}"))
-          )
-        )
+        errorMessage = form.error("numberOfProperties").map(e => ErrorMessage(
+          content = Text(messages(s"numberOfProperties.${e.message}")),
+          visuallyHiddenText = Some(messages("generic.error"))
+        ))
       ))
 
       @govukDetails(Details(
