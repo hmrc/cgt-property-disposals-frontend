@@ -102,8 +102,30 @@ object Address {
       }
 
     nonEmptyText
-      .transform[String](_.trim, identity)
+      .transform[String](
+        s => Option(s).map(_.trim).getOrElse(""),
+        identity
+      )
       .verifying(Constraint[String](validateAddressLine))
+  }
+
+  val nonUkPostcodeMapping: Mapping[String] = {
+
+    def validatePostcode(s: String): ValidationResult =
+      if (s.length > addressLineMaxLength) {
+        Invalid("error.tooLong")
+      } else if (!s.forall(addressLineAllowedCharacters.contains(_))) {
+        Invalid("error.pattern")
+      } else {
+        Valid
+      }
+
+    nonEmptyText
+      .transform[String](
+        _.trim,
+        identity
+      )
+      .verifying(Constraint[String](validatePostcode))
   }
 
   val ukAddressForm: Form[UkAddress] =
@@ -124,7 +146,7 @@ object Address {
         "nonUkAddress-line2" -> optional(addressLineMapping),
         "nonUkAddress-line3" -> optional(addressLineMapping),
         "nonUkAddress-line4" -> optional(addressLineMapping),
-        "postcode"           -> optional(text),
+        "postcode"           -> optional(nonUkPostcodeMapping),
         "countryCode"        -> of(using Country.formatter)
       )(NonUkAddress.apply)(o => Some((o.line1, o.line2, o.line3, o.line4, o.postcode, o.country)))
     )
