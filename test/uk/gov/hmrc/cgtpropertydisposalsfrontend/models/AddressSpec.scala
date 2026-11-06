@@ -18,10 +18,21 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Postcode
+import play.api.data.Form
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{UkAddress, addressLineMaxLength}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
+import play.api.data.Forms.mapping
 
 class AddressSpec extends AnyWordSpec with Matchers {
+
+  private val form = Form(
+    mapping(
+      "addressLine" -> Address.addressLineMapping
+    )(identity)(Some(_))
+  )
+
+  private def bindAddress(value: String) =
+    form.bind(Map("addressLine" -> value))
 
   "Address" must {
 
@@ -30,6 +41,78 @@ class AddressSpec extends AnyWordSpec with Matchers {
       ukAddress.countryCode shouldBe "GB"
     }
 
+    "accept a valid address" in {
+      val result = bindAddress("123 High Street")
+
+      result.hasErrors shouldBe false
+      result.get       shouldBe "123 High Street"
+    }
+
+    "accept allowed special characters" in {
+      val result = bindAddress("Flat 2, King's Road & 12/14-A.")
+
+      result.hasErrors shouldBe false
+    }
+
+    "reject an address exceeding the maximum length" in {
+      val address = "A" * (Address.addressLineMaxLength + 1)
+
+      val result = bindAddress(address)
+
+      result.hasErrors           shouldBe true
+      result.errors.head.message shouldBe "error.tooLong"
+    }
+
+    "accept an address at the maximum length" in {
+      val address = "A" * Address.addressLineMaxLength
+
+      val result = bindAddress(address)
+
+      result.hasErrors shouldBe false
+    }
+
+    "reject invalid special characters" in {
+      val result = bindAddress("123 High Street @!")
+
+      result.hasErrors           shouldBe true
+      result.errors.head.message shouldBe "error.pattern"
+    }
+
+    "reject HTML script input" in {
+      val result = bindAddress("<script>alert(1)</script>")
+
+      result.hasErrors           shouldBe true
+      result.errors.head.message shouldBe "error.pattern"
+    }
+
+    "trim leading and trailing spaces" in {
+      val result = bindAddress("  123 High Street  ")
+
+      result.hasErrors shouldBe false
+      result.get       shouldBe "123 High Street"
+    }
+
+    "reject an empty address" in {
+      val result = bindAddress("")
+
+      result.hasErrors shouldBe true
+    }
+
+    "reject an address containing only spaces" in {
+      val result = bindAddress("   ")
+
+      result.hasErrors shouldBe true
+    }
+
+    "reject a missing address" in {
+      val result = form.bind(Map.empty[String, String])
+
+      result.hasErrors shouldBe true
+    }
+
+    "reject an empty value" in {
+      bindAddress("").errors.map(_.message) shouldBe Seq("error.required")
+    }
   }
 
 }
