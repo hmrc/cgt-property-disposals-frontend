@@ -286,8 +286,8 @@ class SupportingEvidenceController @Inject() (
       }
     }
 
-
-  private def isMaxUpload(answers : SupportingEvidenceAnswers) : Boolean = answers.fold(_.evidences, _.evidences).length >= maxUploads
+  private def isMaxUpload(answers: SupportingEvidenceAnswers): Boolean =
+    answers.fold(_.evidences, _.evidences).length >= maxUploads
 
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>

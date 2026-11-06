@@ -102,7 +102,10 @@ object Address {
       }
 
     nonEmptyText
-      .transform[String](_.trim, identity)
+      .transform[String](
+        s => Option(s).map(_.trim).getOrElse(""),
+        identity
+      )
       .verifying(Constraint[String](validateAddressLine))
   }
 
