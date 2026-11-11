@@ -33,6 +33,7 @@ object Country {
 
   val uk: Country = Country("GB")
 
+  private val maxLength: Int                   = 10
   implicit val countryFormat: OFormat[Country] = Json.format[Country]
 
   implicit val eq: Eq[Country] = Eq.fromUniversalEquals
@@ -57,9 +58,15 @@ object Country {
       data: Map[String, String]
     ): Either[Seq[FormError], Country] =
       data.get(key).filter(_.nonEmpty) match {
-        case Some(c) =>
-          if (countryCodes.contains(c)) Right(Country(c)) else Left(Seq(FormError(key, "error.notFound")))
-        case None    => Left(Seq(FormError(key, "error.required")))
+        case Some(c) if c.trim.length > maxLength =>
+          Left(Seq(FormError(key, "error.notFound")))
+        case Some(c)                              =>
+          if (countryCodes.contains(c))
+            Right(Country(c))
+          else
+            Left(Seq(FormError(key, "error.notFound")))
+        case None                                 =>
+          Left(Seq(FormError(key, "error.required")))
       }
 
     override def unbind(key: String, value: Country): Map[String, String] =
