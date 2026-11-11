@@ -33,7 +33,7 @@ object Country {
 
   val uk: Country = Country("GB")
 
-  private val maxLength: Int = 10
+  private val maxLength: Int                   = 10
   implicit val countryFormat: OFormat[Country] = Json.format[Country]
 
   implicit val eq: Eq[Country] = Eq.fromUniversalEquals
