@@ -13,7 +13,7 @@ GET        /exit/cannot-check-details                                      uk.go
 
 GET        /start                                                          uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.start()
 GET        /sign-out-and-register-for-gg                                   uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndRegisterForGG()
-GET        /sign-out-and-log-in                                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
+POST       /sign-out-and-log-in                                            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.signOutAndSignIn()
 GET        /exit/we-signed-you-out                                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.timedOut()
 GET        /keep-alive                                                     uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.StartController.keepAlive()
 
