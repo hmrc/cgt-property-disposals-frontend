@@ -517,7 +517,8 @@ class YearToDateLiabilityControllerSpec
       Some(sample[CompleteSupportingEvidenceAnswers]),
       None,
       None,
-      TimeUtils.today()
+      TimeUtils.today(),
+      None
     )
 
   private def mockCalculateTaxDue(
@@ -546,25 +547,21 @@ class YearToDateLiabilityControllerSpec
 
   private def mockUpscanInitiate(
     errorRedirectCall: Call,
-    successRedirectCall: UploadReference => Call
+    successRedirectCall: Call
   )(
     result: Either[Error, UpscanUpload]
   ) =
     (mockUpscanService
-      .initiate(_: Call, _: UploadReference => Call)(using _: HeaderCarrier))
+      .initiate(_: Call, _: Call)(using _: HeaderCarrier))
       .expects(
         where {
           (
             actualErrorRedirectCall: Call,
-            actualSuccessRedirectCall: UploadReference => Call,
+            actualSuccessRedirectCall: Call,
             _: HeaderCarrier
           ) =>
-            val uploadReference = sample[UploadReference]
-
-            actualErrorRedirectCall shouldBe errorRedirectCall
-            actualSuccessRedirectCall(
-              uploadReference
-            )                       shouldBe successRedirectCall(uploadReference)
+            actualErrorRedirectCall   shouldBe errorRedirectCall
+            actualSuccessRedirectCall shouldBe successRedirectCall
             true
         }
       )
@@ -611,7 +608,8 @@ class YearToDateLiabilityControllerSpec
       Some(supportingEvidence),
       None,
       None,
-      TimeUtils.today()
+      TimeUtils.today(),
+      None
     )
 
   "YearToDateLiabilityController" when {
@@ -4082,7 +4080,7 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
             )(Left(Error("")))
           }
 
@@ -4096,7 +4094,7 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
             )(Right(upscanUpload))
             mockStoreDraftReturn(newJourney)(Left(Error("")))
           }
@@ -4111,7 +4109,7 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
             )(Right(upscanUpload))
             mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
@@ -4243,7 +4241,7 @@ class YearToDateLiabilityControllerSpec
             mockUpscanInitiate(
               routes.YearToDateLiabilityController
                 .uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
             )(Right(upscanUpload))
             mockStoreDraftReturn(newJourney)(Right(()))
             mockStoreSession(
@@ -8602,7 +8600,7 @@ class YearToDateLiabilityControllerSpec
             mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
             mockUpscanInitiate(
               routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
-              _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+              routes.YearToDateLiabilityController.scanningMandatoryEvidence()
             )(Right(newUpscanUpload))
             mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))

@@ -40,7 +40,7 @@ trait UpscanService {
 
   def initiate(
     errorRedirect: Call,
-    successRedirect: UploadReference => Call
+    successRedirect: Call
   )(implicit
     hc: HeaderCarrier
   ): EitherT[Future, Error, UpscanUpload]
@@ -60,14 +60,14 @@ class UpscanServiceImpl @Inject() (
 
   override def initiate(
     errorRedirect: Call,
-    successRedirect: UploadReference => Call
+    successRedirect: Call
   )(implicit hc: HeaderCarrier): EitherT[Future, Error, UpscanUpload] =
     for {
       uploadReference  <- EitherT.pure(UploadReference(UUID.randomUUID().toString))
       httpResponse     <- upscanConnector
                             .initiate(
                               errorRedirect,
-                              successRedirect(uploadReference),
+                              successRedirect,
                               uploadReference
                             )
       upscanUploadMeta <- EitherT.fromOption(
