@@ -98,7 +98,8 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController & Se
           None,
           None,
           m.gainOrLossAfterReliefs,
-          now
+          now,
+          None
         )
       case s: CompleteSingleDisposalReturn    =>
         DraftSingleDisposalReturn(
@@ -114,7 +115,8 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController & Se
           None,
           None,
           s.gainOrLossAfterReliefs,
-          now
+          now,
+          None
         )
 
       case s: CompleteSingleIndirectDisposalReturn =>
@@ -129,7 +131,8 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController & Se
           None,
           None,
           s.gainOrLossAfterReliefs,
-          now
+          now,
+          None
         )
 
       case m: CompleteMultipleIndirectDisposalReturn =>
@@ -142,7 +145,8 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController & Se
           None,
           None,
           m.gainOrLossAfterReliefs,
-          now
+          now,
+          None
         )
 
       case s: CompleteSingleMixedUseDisposalReturn =>
@@ -155,7 +159,8 @@ trait StartingToAmendToFillingOutReturnBehaviour { this: FrontendController & Se
           None,
           None,
           s.gainOrLossAfterReliefs,
-          now
+          now,
+          None
         )
     }
 

@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators
 
-import org.scalacheck.{Arbitrary, Gen}
 import io.github.martinhh.derived.scalacheck.{*, given}
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
+import org.scalacheck.{Arbitrary, Gen}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.FileUploadGen.given
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.generators.ReliefDetailsGen.given
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.*
 
 import java.time.LocalDate
 
@@ -69,6 +69,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       representeeAnswers         <- Gen.option(RepresenteeAnswersGen.representeeAnswersGen)
       gainOrLossAfterReliefs     <- Gen.option(MoneyGen.amountInPenceGen)
       lastUpdatedDate            <- Arbitrary.arbitrary[LocalDate]
+      upscanReference            <- Gen.option(IdGen.uploadReferenceGen)
     } yield DraftSingleDisposalReturn(
       id,
       triageAnswers,
@@ -82,7 +83,8 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       supportingEvidenceAnswers,
       representeeAnswers,
       gainOrLossAfterReliefs,
-      lastUpdatedDate
+      lastUpdatedDate,
+      upscanReference
     )
 
   given multipleDisposalDraftReturnGen: Gen[DraftMultipleDisposalsReturn] =
@@ -101,6 +103,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       representeeAnswers            <- Gen.option(RepresenteeAnswersGen.representeeAnswersGen)
       gainOrLossAfterReliefs        <- Gen.option(MoneyGen.amountInPenceGen)
       lastUpdatedDate               <- Arbitrary.arbitrary[LocalDate]
+      upscanReference               <- Gen.option(IdGen.uploadReferenceGen)
     } yield DraftMultipleDisposalsReturn(
       id,
       triageAnswers,
@@ -110,7 +113,8 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       supportingEvidenceAnswers,
       representeeAnswers,
       gainOrLossAfterReliefs,
-      lastUpdatedDate
+      lastUpdatedDate,
+      upscanReference
     )
 
   given multipleIndirectDisposalDraftReturnGen: Gen[DraftMultipleIndirectDisposalsReturn] =
@@ -129,6 +133,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       representeeAnswers           <- Gen.option(RepresenteeAnswersGen.representeeAnswersGen)
       gainOrLossAfterReliefs       <- Gen.option(MoneyGen.amountInPenceGen)
       lastUpdatedDate              <- Arbitrary.arbitrary[LocalDate]
+      upscanReference              <- Gen.option(IdGen.uploadReferenceGen)
     } yield DraftMultipleIndirectDisposalsReturn(
       id,
       triageAnswers,
@@ -138,7 +143,8 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       supportingEvidenceAnswers,
       representeeAnswers,
       gainOrLossAfterReliefs,
-      lastUpdatedDate
+      lastUpdatedDate,
+      upscanReference
     )
 
   given singleIndirectDisposalDraftReturnGen: Gen[DraftSingleIndirectDisposalReturn] =
@@ -154,6 +160,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       representeeAnswers         <- Gen.option(RepresenteeAnswersGen.representeeAnswersGen)
       gainOrLossAfterReliefs     <- Gen.option(MoneyGen.amountInPenceGen)
       lastUpdatedDate            <- Arbitrary.arbitrary[LocalDate]
+      upscanReference            <- Gen.option(IdGen.uploadReferenceGen)
     } yield DraftSingleIndirectDisposalReturn(
       id,
       triageAnswers,
@@ -165,7 +172,8 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       supportingEvidenceAnswers,
       representeeAnswers,
       gainOrLossAfterReliefs,
-      lastUpdatedDate
+      lastUpdatedDate,
+      upscanReference
     )
 
   given singleMixedUseDraftReturnGen: Gen[DraftSingleMixedUseDisposalReturn] =
@@ -184,6 +192,7 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       representeeAnswers             <- Gen.option(RepresenteeAnswersGen.representeeAnswersGen)
       gainOrLossAfterReliefs         <- Gen.option(MoneyGen.amountInPenceGen)
       lastUpdatedDate                <- Arbitrary.arbitrary[LocalDate]
+      upscanReference                <- Gen.option(IdGen.uploadReferenceGen)
     } yield DraftSingleMixedUseDisposalReturn(
       id,
       triageAnswers,
@@ -193,7 +202,8 @@ trait LowerPriorityDraftReturnGen extends GenUtils {
       supportingEvidenceAnswers,
       representeeAnswers,
       gainOrLossAfterReliefs,
-      lastUpdatedDate
+      lastUpdatedDate,
+      upscanReference
     )
 
 }
