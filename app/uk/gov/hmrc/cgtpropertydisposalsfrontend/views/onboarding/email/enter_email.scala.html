@@ -76,6 +76,7 @@
       )),
       value = form.data.get(key),
       autocomplete = Some(AutoCompleteType.Email.value),
+      attributes = Map("maxLength" -> "254", "inputType" -> "email")
     ))
     <input type="hidden" name="resendVerificationEmail" value="false" />
     @viewHelpers.govukButton(Button(
