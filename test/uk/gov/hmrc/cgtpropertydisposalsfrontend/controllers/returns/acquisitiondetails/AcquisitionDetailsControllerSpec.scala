@@ -647,6 +647,23 @@ class AcquisitionDetailsControllerSpec
             }
           }
 
+          "the user enters acquisition method that is too long after trimming" in {
+            forAll(acceptedUserTypeGen, acceptedIndividualUserTypeGen, acceptedAssetTypeGenerator) {
+              (userType: UserType, individualUserType: IndividualUserType, assetType: AssetType) =>
+                val assetTypeKey = assetTypeMessageKey(assetType)
+                val userKey      = userMessageKey(individualUserType, userType)
+                test(
+                  key      -> "3",
+                  otherKey -> (" " + ("a" * 36) + " ")
+                )(s"$otherKey$userKey$assetTypeKey.error.tooLong")(
+                  userType,
+                  individualUserType,
+                  assetType,
+                  userKey + assetTypeKey
+                )
+            }
+          }
+
         }
 
       }
