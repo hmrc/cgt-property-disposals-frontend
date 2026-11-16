@@ -19,7 +19,7 @@ package uk.gov.hmrc.cgtpropertydisposalsfrontend.models
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import play.api.data.Form
-import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.{UkAddress, addressLineMaxLength}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.{Address, Postcode}
 import play.api.data.Forms.mapping
 
@@ -33,15 +33,6 @@ class AddressSpec extends AnyWordSpec with Matchers {
 
   private def bindAddressLine(value: String) =
     addressLineForm.bind(Map("addressLine" -> value))
-
-  private val postcodeForm = Form(
-    mapping(
-      "postcode" -> Address.nonUkPostcodeMapping
-    )(identity)(Some(_))
-  )
-
-  private def bindPostcode(value: String) =
-    postcodeForm.bind(Map("postcode" -> value))
 
   "Address" must {
 
@@ -125,52 +116,6 @@ class AddressSpec extends AnyWordSpec with Matchers {
 
     "reject postcode" in {
       bindAddressLine("").errors.map(_.message) shouldBe Seq("error.required")
-    }
-
-    "nonUkPostcodeMapping" should {
-
-      "accept a valid postcode" in {
-        bindPostcode("12345-ABC").hasErrors shouldBe false
-      }
-
-      "trim leading and trailing spaces before validation" in {
-        bindPostcode("  12345-ABC  ").value shouldBe Some("12345-ABC")
-      }
-
-      "accept a postcode of exactly the maximum length" in {
-        val postcode = "a" * addressLineMaxLength
-
-        bindPostcode(postcode).hasErrors shouldBe false
-      }
-
-      "reject a postcode longer than the maximum length" in {
-        val postcode = "a" * (addressLineMaxLength + 1)
-
-        bindPostcode(postcode).hasErrors           shouldBe true
-        bindPostcode(postcode).errors.head.message shouldBe "error.tooLong"
-      }
-
-      "reject a postcode containing invalid characters" in {
-        val result = bindPostcode("ABC@123")
-
-        result.hasErrors           shouldBe true
-        result.errors.head.message shouldBe "error.pattern"
-      }
-
-      "reject an empty postcode" in {
-        bindPostcode("").hasErrors shouldBe true
-      }
-
-      "reject a postcode containing only spaces" in {
-        bindPostcode("   ").hasErrors shouldBe true
-      }
-
-      "reject characters that are not allowed" in {
-        val result = bindPostcode("<script>alert(1)</script>")
-
-        result.hasErrors           shouldBe true
-        result.errors.head.message shouldBe "error.pattern"
-      }
     }
   }
 }

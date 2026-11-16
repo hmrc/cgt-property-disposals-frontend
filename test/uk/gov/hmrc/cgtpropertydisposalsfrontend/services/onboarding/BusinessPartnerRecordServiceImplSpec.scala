@@ -163,7 +163,6 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           Some("line2, abc$def"),
           Some("line3 + abc"),
           Some("line4 #1"),
-          Some("abc"),
           country
         )
 
@@ -172,7 +171,6 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           Some("line2, abcdef"),
           Some("line3  abc"),
           Some("line4 1"),
-          Some("abc"),
           country
         )
 
@@ -225,7 +223,6 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           Some("line2, abc/def"),
           Some("line3 / abc"),
           Some("line4 / 1"),
-          Some("ab/c"),
           country
         )
 
@@ -234,7 +231,6 @@ class BusinessPartnerRecordServiceImplSpec extends AnyWordSpec with Matchers wit
           Some("line2, abc/def"),
           Some("line3 / abc"),
           Some("line4 / 1"),
-          Some("ab/c"),
           country
         )
 

@@ -38,13 +38,12 @@ object AddressGen extends AddressHigherPriorityGen {
   implicit val countryGen: Gen[Country] = Gen.oneOf(Country.countryCodes.map(Country(_)))
 
   implicit val nonUkAddressGen: Gen[NonUkAddress] = for {
-    line1    <- Generators.stringGen
-    line2    <- Gen.option(Generators.stringGen)
-    line3    <- Gen.option(Generators.stringGen)
-    line4    <- Gen.option(Generators.stringGen)
-    postcode <- Gen.option(Generators.stringGen)
-    country  <- countryGen
-  } yield NonUkAddress(line1, line2, line3, line4, postcode, country)
+    line1   <- Generators.stringGen
+    line2   <- Gen.option(Generators.stringGen)
+    line3   <- Gen.option(Generators.stringGen)
+    line4   <- Gen.option(Generators.stringGen)
+    country <- countryGen
+  } yield NonUkAddress(line1, line2, line3, line4, country)
 
   implicit val addressGen: Gen[Address] = Gen.oneOf(ukAddressGen, nonUkAddressGen)
 

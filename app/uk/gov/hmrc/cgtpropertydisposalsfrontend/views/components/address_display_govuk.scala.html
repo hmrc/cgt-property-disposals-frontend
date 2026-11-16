@@ -46,23 +46,21 @@
      </span>
     }
 
-   case (NonUkAddress(l1,l2,l3,l4,postcode,country), Block) => {
+   case (NonUkAddress(l1,l2,l3,l4,country), Block) => {
     <div class="govuk-body">
      @l1<br />
      @l2.map(l => Html(s"$l<br />"))
      @l3.map(l => Html(s"$l<br />"))
      @l4.map(l => Html(s"$l<br />"))
-     @postcode.map(p => Html(s"$p<br />"))
      @messages.translate(s"country.${country.code}", Seq.empty)
     </div>
    }
-   case (NonUkAddress(l1,l2,l3,l4,postcode,country), Line) => {
+   case (NonUkAddress(l1,l2,l3,l4,country), Line) => {
      <span class="govuk-body">
       @l1,
       @l2.map(l => s"$l, ")
       @l3.map(l => s"$l, ")
       @l4.map(l => s"$l, ")
-      @postcode.map(p => s"$p, ")
       @messages.translate(s"country.${country.code}", Seq.empty)
      </span>
     }

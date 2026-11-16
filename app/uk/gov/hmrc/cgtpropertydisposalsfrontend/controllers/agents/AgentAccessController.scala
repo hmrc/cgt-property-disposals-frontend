@@ -159,7 +159,7 @@ class AgentAccessController @Inject() (
     authenticatedActionWithSessionData.async { implicit request =>
       withVerifierMatchingDetails { case (_, verifierMatchingDetails, _) =>
         verifierMatchingDetails.clientDetails.address match {
-          case NonUkAddress(_, _, _, _, _, country) =>
+          case NonUkAddress(_, _, _, _, country) =>
             val form =
               if (verifierMatchingDetails.correctVerifierSupplied) {
                 countryForm.fill(country)
@@ -183,7 +183,7 @@ class AgentAccessController @Inject() (
               currentUnsuccessfulAttempts
             ) =>
           verifierMatchingDetails.clientDetails.address match {
-            case NonUkAddress(_, _, _, _, _, clientCountry) =>
+            case NonUkAddress(_, _, _, _, clientCountry) =>
               handleSubmittedVerifier(
                 clientCountry
               )(
@@ -195,7 +195,7 @@ class AgentAccessController @Inject() (
                 verifierMatchingDetails,
                 currentUnsuccessfulAttempts
               )
-            case _: UkAddress                               =>
+            case _: UkAddress                            =>
               Redirect(routes.AgentAccessController.enterClientsPostcode())
           }
       }

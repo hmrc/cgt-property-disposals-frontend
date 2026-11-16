@@ -1940,7 +1940,6 @@ class CompanyDetailsControllerSpec
           None,
           None,
           None,
-          None,
           Country("HK")
         )
 
@@ -1991,7 +1990,6 @@ class CompanyDetailsControllerSpec
           val (session, journey, draftReturn) = trustState()
           val address                         = NonUkAddress(
             "The Company",
-            None,
             None,
             None,
             None,
@@ -3132,8 +3130,8 @@ object CompanyDetailsControllerSpec extends Matchers {
         case UkAddress(line1, line2, town, county, postcode) =>
           List(Some(line1), line2, town, county, Some(postcode.value))
         case Address
-              .NonUkAddress(line1, line2, line3, line4, postcode, country) =>
-          List(Some(line1), line2, line3, line4, postcode, messagesApi.translate(s"country.${country.code}", Seq.empty))
+              .NonUkAddress(line1, line2, line3, line4, country) =>
+          List(Some(line1), line2, line3, line4, messagesApi.translate(s"country.${country.code}", Seq.empty))
       }
 
       lines.collect { case Some(s) => s.trim }

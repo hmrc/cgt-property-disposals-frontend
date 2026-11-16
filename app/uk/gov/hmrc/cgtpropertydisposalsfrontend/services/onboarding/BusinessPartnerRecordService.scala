@@ -105,7 +105,6 @@ class BusinessPartnerRecordServiceImpl @Inject() (
           n.line2.map(sanitiseAddressLine),
           n.line3.map(sanitiseAddressLine),
           n.line4.map(sanitiseAddressLine),
-          n.postcode,
           n.country
         )
     }

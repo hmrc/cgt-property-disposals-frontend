@@ -17,7 +17,7 @@
 package uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address
 
 import cats.Eq
-import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional, text}
+import play.api.data.Forms.{mapping => formMapping, nonEmptyText, number, of, optional}
 import play.api.data.validation.{Constraint, Invalid, Valid, ValidationResult}
 import play.api.data.{Form, Mapping}
 import play.api.i18n.Messages
@@ -49,7 +49,6 @@ object Address {
     line2: Option[String],
     line3: Option[String],
     line4: Option[String],
-    postcode: Option[String],
     country: Country
   ) extends Address
 
@@ -109,25 +108,6 @@ object Address {
       .verifying(Constraint[String](validateAddressLine))
   }
 
-  val nonUkPostcodeMapping: Mapping[String] = {
-
-    def validatePostcode(s: String): ValidationResult =
-      if (s.length > addressLineMaxLength) {
-        Invalid("error.tooLong")
-      } else if (!s.forall(addressLineAllowedCharacters.contains(_))) {
-        Invalid("error.pattern")
-      } else {
-        Valid
-      }
-
-    nonEmptyText
-      .transform[String](
-        _.trim,
-        identity
-      )
-      .verifying(Constraint[String](validatePostcode))
-  }
-
   val ukAddressForm: Form[UkAddress] =
     Form(
       formMapping(
@@ -146,9 +126,8 @@ object Address {
         "nonUkAddress-line2" -> optional(addressLineMapping),
         "nonUkAddress-line3" -> optional(addressLineMapping),
         "nonUkAddress-line4" -> optional(addressLineMapping),
-        "postcode"           -> optional(nonUkPostcodeMapping),
         "countryCode"        -> of(using Country.formatter)
-      )(NonUkAddress.apply)(o => Some((o.line1, o.line2, o.line3, o.line4, o.postcode, o.country)))
+      )(NonUkAddress.apply)(o => Some((o.line1, o.line2, o.line3, o.line4, o.country)))
     )
 
   val isUkForm: Form[Boolean] =
