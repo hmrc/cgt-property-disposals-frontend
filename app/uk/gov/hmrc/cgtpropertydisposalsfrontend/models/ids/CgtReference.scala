@@ -31,15 +31,15 @@ object CgtReference {
     val regexPredicate = "^(X[A-Z]CGTP[0-9]{9})$".r.pattern.asPredicate()
 
     def validateCgtReference(s: String): ValidationResult =
-      if (s.length > 15) { Invalid("error.tooLong") }
-      else if (s.isEmpty) { Invalid("error.required") }
+      if (s.trim.isEmpty) { Invalid("error.required") }
+      else if (s.length > 15) { Invalid("error.tooLong") }
       else if (s.length < 15) { Invalid("error.tooShort") }
       else if (s.exists(!_.isLetterOrDigit)) { Invalid("error.invalidCharacters") }
       else if (!regexPredicate.test(s)) { Invalid("error.pattern") }
       else { Valid }
 
     text
-      .transform[String](_.replace(" ", ""), identity)
+      .transform[String](s => Option(s).map(_.replaceAll("\\s+", "")).getOrElse(""), identity)
       .verifying(Constraint(validateCgtReference(_)))
       .transform[CgtReference](CgtReference(_), _.value)
   }
