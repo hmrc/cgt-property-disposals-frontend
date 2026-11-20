@@ -102,9 +102,14 @@
                     isPageHeading = true
                 ))
             )),
-            errorMessage = if(form.hasErrors) Some(ErrorMessage(content = Text(messages(form.errors.map(e => s"$key.${e.message}"))))) else None,
+            errorMessage = if(form.hasErrors) 
+                Some(ErrorMessage(
+                    content = Text(messages(form.errors.map(e => s"$key.${e.message}"))),
+                    visuallyHiddenText = Some(messages("generic.error"))
+                )) 
+            else None,
             items = options
-        ).withFormField(form(key)))
+         ).withFormField(form(key)))
 
         @govukDetails(Details(
             summary = Text(messages(s"$key.link")),

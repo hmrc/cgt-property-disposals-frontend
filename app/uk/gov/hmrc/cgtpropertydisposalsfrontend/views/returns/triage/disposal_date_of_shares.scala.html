@@ -26,6 +26,7 @@
         errorSummary: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.error_summary_govuk,
         returnToSummaryLink: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.return_to_summary_link_govuk,
         formHelper: FormWithCSRF,
+        dateInput: uk.gov.hmrc.cgtpropertydisposalsfrontend.views.html.components.date_input_govuk,
         govukDateInput: GovukDateInput,
         govukButton: GovukButton
 )
@@ -51,40 +52,16 @@
   }
   <span class="govuk-caption-xl">@messages("triage.caption")</span>
   @formHelper(submit) {
-   @govukDateInput(DateInput(
-    id = key,
-    namePrefix = Some(key),
-    hint = Some(Hint(
-     content = Text(messages(s"$key.helpText"))
-    )),
-    errorMessage = errorKey.map(e => ErrorMessage(
-     content = Text(messages(s"${e.key}.${e.message}"))
-    )),
-   items = Seq(
-     InputItem(
-      name = "day",
-      value = form.data.get(s"$key-day"),
-      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}"
-     ),
-     InputItem(
-      name = "month",
-      value = form.data.get(s"$key-month"),
-      classes = s"govuk-input--width-2${if(hasErrors) " govuk-input--error" else ""}"
-     ),
-     InputItem(
-      name = "year",
-      value = form.data.get(s"$key-year"),
-      classes = s"govuk-input--width-4${if(hasErrors) " govuk-input--error" else ""}"
-     )
-   ),
-    fieldset = Some(Fieldset(
-     legend = Some(Legend(
-      content = Text(title),
-      classes = "govuk-fieldset__legend--xl",
-      isPageHeading = true
-     ))
-    ))
-   ))
+    @dateInput(
+    fieldId = key,
+    label = title,
+    dayValue = form.data.get(s"$key-day"),
+    monthValue = form.data.get(s"$key-month"),
+    yearValue = form.data.get(s"$key-year"),
+    helpText = Some(Html(messages(s"$key.helpText"))),
+    errorKey = errorKey.map(e => s"${e.key}.${e.message}"),
+    hasErrors = hasErrors
+    )
    @govukButton(Button(
     attributes = Map("id" -> "submitButton","data-prevent-double-click"->"true"),
     content = Text(messages(if(isAmend) "button.continue" else if (displayReturnToSummaryLink) "button.saveAndContinue" else "button.continue"))
