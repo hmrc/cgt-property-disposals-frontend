@@ -299,7 +299,7 @@ class SupportingEvidenceController @Inject() (
             upscanUpload <- upscanService.initiate(
                               routes.SupportingEvidenceController
                                 .handleUpscanErrorRedirect(),
-                              routes.SupportingEvidenceController.scanProgress()
+                              routes.SupportingEvidenceController.handleUpscanSuccessRedirect()
                             )
             _            <- updatePendingUploadReference(fillingOutReturn, Some(upscanUpload.uploadReference))
           } yield upscanUpload
@@ -361,6 +361,11 @@ class SupportingEvidenceController @Inject() (
       }
     }
 
+  def handleUpscanSuccessRedirect(): Action[AnyContent] =
+    authenticatedActionWithSessionData {
+      Redirect(routes.SupportingEvidenceController.scanProgress())
+    }
+
   def scanProgress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
@@ -401,7 +406,7 @@ class SupportingEvidenceController @Inject() (
                     upscanUpload <- upscanService
                                       .initiate(
                                         routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-                                        routes.SupportingEvidenceController.scanProgress()
+                                        routes.SupportingEvidenceController.handleUpscanSuccessRedirect()
                                       )
                     _            <- updatePendingUploadReference(fillingOutReturn, Some(upscanUpload.uploadReference))
                   } yield upscanUpload

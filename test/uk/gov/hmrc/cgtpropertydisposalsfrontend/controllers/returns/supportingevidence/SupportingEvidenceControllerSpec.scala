@@ -580,7 +580,7 @@ class SupportingEvidenceControllerSpec
               routes.SupportingEvidenceController
                 .handleUpscanErrorRedirect(),
               routes.SupportingEvidenceController
-                .scanProgress()
+                .handleUpscanSuccessRedirect()
             )(
               Left(Error("some upscan error"))
             )
@@ -623,7 +623,7 @@ class SupportingEvidenceControllerSpec
               routes.SupportingEvidenceController
                 .handleUpscanErrorRedirect(),
               routes.SupportingEvidenceController
-                .scanProgress()
+                .handleUpscanSuccessRedirect()
             )(Right(upscanUpload))
             mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
@@ -1520,7 +1520,7 @@ class SupportingEvidenceControllerSpec
             mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
             mockUpscanInitiate(
               routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.scanProgress()
+              routes.SupportingEvidenceController.handleUpscanSuccessRedirect()
             )(Right(newUpscanUpload))
             mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))
@@ -1606,7 +1606,7 @@ class SupportingEvidenceControllerSpec
             mockGetUpscanUpload(uploadReference)(Right(completedUpscanUpload))
             mockUpscanInitiate(
               routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.scanProgress()
+              routes.SupportingEvidenceController.handleUpscanSuccessRedirect()
             )(Right(newUpscanUpload))
             mockStoreDraftReturn(updatedJourney)(Right(()))
             mockStoreSession(updatedSession)(Right(()))

@@ -3,6 +3,7 @@ POST        /supporting-evidence/supporting-evidence                   uk.gov.hm
 
 GET         /supporting-evidence/upload-supporting-evidence            uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.uploadSupportingEvidence()
 
+GET         /supporting-evidence/handle-upscan-success-redirect        uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.handleUpscanSuccessRedirect()
 GET         /supporting-evidence/scan-progress                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgress()
 POST        /supporting-evidence/scan-progress                         uk.gov.hmrc.cgtpropertydisposalsfrontend.controllers.returns.supportingevidence.SupportingEvidenceController.scanProgressSubmit()
 
