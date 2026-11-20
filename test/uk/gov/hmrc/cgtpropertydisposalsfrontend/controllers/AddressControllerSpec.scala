@@ -720,7 +720,6 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             None,
             None,
             None,
-            None,
             Country("NZ")
           )
 
@@ -739,7 +738,6 @@ trait AddressControllerSpec[A <: AddressJourneyType]
       "the address cannot be stored in the session" in {
         val newAddress     = NonUkAddress(
           "House 1",
-          None,
           None,
           None,
           None,
@@ -772,7 +770,6 @@ trait AddressControllerSpec[A <: AddressJourneyType]
             "Flat 1",
             Some("The Street"),
             Some("The Town"),
-            None,
             None,
             Country("NZ")
           )

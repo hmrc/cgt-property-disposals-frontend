@@ -226,7 +226,7 @@ trait AddressController[A <: AddressJourneyType] {
         case Some((_, subscribed: Subscribed)) =>
           subscribed.subscribedDetails.address match {
             case a: NonUkAddress =>
-              Address.nonUkAddressForm.fill(NonUkAddress(a.line1, a.line2, a.line3, a.line4, a.postcode, a.country))
+              Address.nonUkAddressForm.fill(NonUkAddress(a.line1, a.line2, a.line3, a.line4, a.country))
             case _               => Address.nonUkAddressForm
           }
         case _                                 => Address.nonUkAddressForm

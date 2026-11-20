@@ -44,13 +44,13 @@ object AuditAddress {
           Country("GB")
         )
       case Address
-            .NonUkAddress(line1, line2, line3, line4, postcode, country) =>
+            .NonUkAddress(line1, line2, line3, line4, country) =>
         AuditAddress(
           line1,
           line2,
           line3,
           line4,
-          postcode,
+          None,
           country
         )
     }

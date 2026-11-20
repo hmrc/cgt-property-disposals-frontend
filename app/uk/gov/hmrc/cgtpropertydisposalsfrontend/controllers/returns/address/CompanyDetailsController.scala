@@ -242,9 +242,9 @@ class CompanyDetailsController @Inject() (
     answers.fold(
       i =>
         i.address match {
-          case Some(UkAddress(_, _, _, _, _))       => routes.CompanyDetailsController.enterUkAddress()
-          case Some(NonUkAddress(_, _, _, _, _, _)) => routes.CompanyDetailsController.enterNonUkAddress()
-          case None                                 => routes.CompanyDetailsController.isUk()
+          case Some(UkAddress(_, _, _, _, _))    => routes.CompanyDetailsController.enterUkAddress()
+          case Some(NonUkAddress(_, _, _, _, _)) => routes.CompanyDetailsController.enterNonUkAddress()
+          case None                              => routes.CompanyDetailsController.isUk()
         },
       _ => routes.CompanyDetailsController.checkYourAnswers()
     )
