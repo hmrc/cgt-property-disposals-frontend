@@ -29,9 +29,9 @@
 @taxYearStartYear = @{ taxYear.map(_.startDateInclusive.getYear).getOrElse(2020).toString }
 @annualExemptAmountGeneral = @{ taxYear.map(_.annualExemptAmountGeneral.inPounds()).getOrElse(BigDecimal("0")) }
 
-<h4 class="govuk-heading-m">@messages(s"$key.stage-a.step1.example1.headingText")</h4>
+<h3 class="govuk-heading-m">@messages(s"$key.stage-a.step1.example1.headingText")</h3>
 <p class="govuk-body">@messages(s"$key.stage-a.step1.example1.p1")</p>
-<h5 class="govuk-heading-s">@messages(s"$key.stage-a.step1.example1.p2", taxYearStartYear)</h5>
+<h3 class="govuk-heading-s">@messages(s"$key.stage-a.step1.example1.p2", taxYearStartYear)</h3>
 @calcSum(
     List(
         SumPartDisplay(
@@ -73,7 +73,7 @@
     )
 )
 
-<h5 class="govuk-heading-s">@messages(s"$key.stage-a.step1.example1.p3", taxYearStartYear)</h5>
+<h3 class="govuk-heading-s">@messages(s"$key.stage-a.step1.example1.p3", taxYearStartYear)</h3>
 @calcSum(
     List(
         SumPartDisplay(
@@ -115,7 +115,7 @@
     )
 )
 
-<h4 class="govuk-heading-m">@messages(s"$key.stage-a.step2.example1.headingText")</h4>
+<h3 class="govuk-heading-m">@messages(s"$key.stage-a.step2.example1.headingText")</h3>
 <p class="govuk-body">@messages(s"$key.stage-a.step2.example1.p1")</p>
 
 @calcSum(
