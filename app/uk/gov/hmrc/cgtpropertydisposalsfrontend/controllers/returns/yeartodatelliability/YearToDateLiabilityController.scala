@@ -1361,9 +1361,8 @@ class YearToDateLiabilityController @Inject() (
                               .initiate(
                                 routes.YearToDateLiabilityController
                                   .uploadMandatoryEvidenceFailure(),
-                                _ =>
-                                  routes.YearToDateLiabilityController
-                                    .scanningMandatoryEvidence()
+                                routes.YearToDateLiabilityController
+                                  .scanningMandatoryEvidence()
                               )
             _            <- updatePendingUpscanUpload(
                               answers,
@@ -2000,7 +1999,7 @@ class YearToDateLiabilityController @Inject() (
               val newUpload                                  = for {
                 upscanUpload <- upscanService.initiate(
                                   routes.YearToDateLiabilityController.uploadMandatoryEvidenceFailure(),
-                                  _ => routes.YearToDateLiabilityController.scanningMandatoryEvidence()
+                                  routes.YearToDateLiabilityController.scanningMandatoryEvidence()
                                 )
                 _            <- updatePendingUpscanUpload(currentAnswers, fillingOutReturn, upscanUpload)
               } yield upscanUpload
