@@ -318,6 +318,7 @@ nonUkAddress-line3.error.pattern=Address line 3 must only include letters, numbe
 nonUkAddress-line4.error.pattern=Address line 4 must only include letters, numbers, spaces, hyphens, commas, full stops, forward slashes, ampersands and apostrophes
 countryCode.error.required=Select a country
 countryCode.error.notFound=Select a country
+countryCode.error.maxLengthExceeded=Enter a country that is 10 characters or less
 
 countryOfResidence.cyaChange=country of residence
 

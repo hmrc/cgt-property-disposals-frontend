@@ -318,6 +318,7 @@ nonUkAddress-line3.error.pattern=Mae’n rhaid i linell 3 y cyfeiriad gynnwys ll
 nonUkAddress-line4.error.pattern=Mae’n rhaid i linell 4 y cyfeiriad gynnwys llythrennau, rhifau, bylchau, cysylltnodau, comas, atalnodau llawn, blaenslaesau, ampersandau a chollnodau yn unig
 countryCode.error.required=Dewiswch wlad
 countryCode.error.notFound=Dewiswch wlad
+countryCode.error.maxLengthExceeded=Nodwch enw gwlad sy’n cynnwys 10 cymeriad neu lai
 
 countryOfResidence.cyaChange=gwlad breswyl
 
