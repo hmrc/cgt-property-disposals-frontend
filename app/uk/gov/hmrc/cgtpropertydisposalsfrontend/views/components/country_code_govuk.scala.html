@@ -61,7 +61,10 @@
       label = Label(
         content = Text(label),
         isPageHeading = labelAsHeading,
-        classes = labelClass
+        classes = labelClass,
+        attributes = Map(
+        "id" -> "countryCode-label"
+        )
       ),
       hint = helpText.map(h => Hint(
         content = HtmlContent(h)
@@ -70,7 +73,7 @@
         content = Text(messages(s"countryCode.${e.message}"))
       )),
       classes = "govuk-!-width-two-thirds",
-      attributes = Map("autocomplete" -> "country")
+      attributes = Map("autocomplete" -> "country", "aria-labelledby" -> "countryCode-label")
   ).asAccessibleAutocomplete(Some(AccessibleAutocomplete(
         showAllValues = true,
         autoSelect = true,
