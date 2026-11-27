@@ -664,7 +664,8 @@ class MultipleDisposalsTriageControllerSpec
                 yearToDateLiabilityAnswers = None,
                 supportingEvidenceAnswers = None,
                 gainOrLossAfterReliefs = None,
-                lastUpdatedDate = TimeUtils.today()
+                lastUpdatedDate = TimeUtils.today(),
+                pendingUploadRef = None
               )
               val updatedJourney     = journey.copy(
                 draftReturn = updatedDraftReturn,
@@ -766,7 +767,8 @@ class MultipleDisposalsTriageControllerSpec
           yearToDateLiabilityAnswers = None,
           supportingEvidenceAnswers = None,
           gainOrLossAfterReliefs = None,
-          lastUpdatedDate = TimeUtils.today()
+          lastUpdatedDate = TimeUtils.today(),
+          pendingUploadRef = None
         )
         val updatedJourney                  = journey.copy(draftReturn = updatedDraftReturn)
 

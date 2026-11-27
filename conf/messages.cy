@@ -4187,6 +4187,7 @@ supporting-evidence.upload.li11=Cod Adnabod y Banc (BIC, a elwir hefyd yn god SW
 supporting-evidence.upload.li12=enw’r cyfrif
 supporting-evidence.upload.thereIsProblem=Mae yna broblem
 supporting-evidence.upload.duplicateFileName=Rhaid i bob dogfen gael enw ffeil unigryw
+supporting-evidence.upload.pendingUploadRefExists=Mae uwchlwytho dogfen eisoes ar y gweill mewn tab arall. Cwblhewch hynny cyn dechrau uwchlwytho dogfen newydd.
 
 file.error.required=Dewiswch ffeil sy''n cynnwys eich tystiolaeth ategol
 

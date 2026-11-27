@@ -71,6 +71,7 @@ object CompleteReturn {
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
               gainOrLossAfterReliefs,
+              _,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -128,6 +129,7 @@ object CompleteReturn {
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
               g,
+              _,
               _
             ) =>
           val hasAttachments =
@@ -162,6 +164,7 @@ object CompleteReturn {
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
               g,
+              _,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -228,6 +231,7 @@ object CompleteReturn {
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
               g,
+              _,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -280,6 +284,7 @@ object CompleteReturn {
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
               g,
+              _,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>
@@ -329,6 +334,7 @@ object CompleteReturn {
               Some(u: CompleteSupportingEvidenceAnswers),
               representeeAnswers,
               g,
+              _,
               _
             ) =>
           validRepresenteeAnswers(t.individualUserType, representeeAnswers).map(maybeCompleteRepresenteeAnswers =>

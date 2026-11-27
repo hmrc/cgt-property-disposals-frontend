@@ -4184,6 +4184,7 @@ supporting-evidence.upload.li11=Bank Identifier Code (BIC, also known as SWIFT c
 supporting-evidence.upload.li12=account name
 supporting-evidence.upload.thereIsProblem=There is a problem
 supporting-evidence.upload.duplicateFileName=Each document must have a unique file name
+supporting-evidence.upload.pendingUploadRefExists=A document upload is already in progress in another tab. Please complete it before starting a new upload
 
 file.error.required=Select a file containing your supporting evidence
 
