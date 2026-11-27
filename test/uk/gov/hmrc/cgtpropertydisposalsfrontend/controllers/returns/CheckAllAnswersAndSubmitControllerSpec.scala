@@ -261,7 +261,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
           None,
-          TimeUtils.today()
+          TimeUtils.today(),
+          None
         )
 
         val completeFillingOutReturn =
@@ -386,7 +387,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(completeReturn.supportingDocumentAnswers),
               completeReturn.representeeAnswers,
               completeReturn.gainOrLossAfterReliefs,
-              TimeUtils.today()
+              TimeUtils.today(),
+              None
             )
 
             val taxYearStartYear: String =
@@ -457,7 +459,8 @@ class CheckAllAnswersAndSubmitControllerSpec
               Some(completeReturn.supportingDocumentAnswers),
               completeReturn.representeeAnswers,
               completeReturn.gainOrLossAfterReliefs,
-              TimeUtils.today()
+              TimeUtils.today(),
+              None
             )
 
             val completeFillingOutReturn = sample[FillingOutReturn].copy(
@@ -597,7 +600,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
           None,
-          TimeUtils.today()
+          TimeUtils.today(),
+          None
         )
 
         val completeFillingOutReturn =
@@ -763,7 +767,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
           None,
-          TimeUtils.today()
+          TimeUtils.today(),
+          None
         )
 
         val completeFillingOutReturn =
@@ -934,7 +939,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
           None,
-          TimeUtils.today()
+          TimeUtils.today(),
+          None
         )
 
         val completeFillingOutReturn =
@@ -1098,7 +1104,8 @@ class CheckAllAnswersAndSubmitControllerSpec
           Some(completeReturn.supportingDocumentAnswers),
           completeReturn.representeeAnswers,
           None,
-          TimeUtils.today()
+          TimeUtils.today(),
+          None
         )
 
         val completeFillingOutReturn =
@@ -1270,7 +1277,8 @@ class CheckAllAnswersAndSubmitControllerSpec
         Some(completeReturn.supportingDocumentAnswers),
         None,
         completeReturn.gainOrLossAfterReliefs,
-        TimeUtils.today()
+        TimeUtils.today(),
+        None
       )
 
       val completeDraftReturnRepresenteWithNoReference =

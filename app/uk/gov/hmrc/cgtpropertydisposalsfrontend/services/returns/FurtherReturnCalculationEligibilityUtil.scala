@@ -310,6 +310,7 @@ class FurtherReturnCalculationEligibilityUtilImpl @Inject() (
             _,
             _,
             _,
+            _,
             _
           ) =>
         if (!fillingOutReturn.subscribedDetails.isATrust && !triageAnswers.individualUserType.contains(Self)) {

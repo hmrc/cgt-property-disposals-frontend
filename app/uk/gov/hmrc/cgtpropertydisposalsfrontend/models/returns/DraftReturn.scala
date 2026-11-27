@@ -24,6 +24,7 @@ import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.address.Address.UkAddress
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.finance.AmountInPence
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.SupportingEvidenceAnswers.{CompleteSupportingEvidenceAnswers, IncompleteSupportingEvidenceAnswers, SupportingEvidence}
 import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.returns.YearToDateLiabilityAnswers.{CalculatedYTDAnswers, NonCalculatedYTDAnswers}
+import uk.gov.hmrc.cgtpropertydisposalsfrontend.models.upscan.UploadReference
 
 import java.time.LocalDate
 import java.util.UUID
@@ -36,6 +37,7 @@ sealed trait DraftReturn extends Product with Serializable {
   val representeeAnswers: Option[RepresenteeAnswers]
   val exemptionAndLossesAnswers: Option[ExemptionAndLossesAnswers]
   val supportingEvidenceAnswers: Option[SupportingEvidenceAnswers]
+  val pendingUploadRef: Option[UploadReference]
 }
 
 final case class DraftSingleDisposalReturn(
@@ -51,7 +53,8 @@ final case class DraftSingleDisposalReturn(
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
   gainOrLossAfterReliefs: Option[AmountInPence],
-  lastUpdatedDate: LocalDate
+  lastUpdatedDate: LocalDate,
+  pendingUploadRef: Option[UploadReference]
 ) extends DraftReturn
 
 object DraftSingleDisposalReturn {
@@ -77,7 +80,8 @@ object DraftSingleDisposalReturn {
       None,
       representeeAnswers,
       None,
-      TimeUtils.today()
+      TimeUtils.today(),
+      None
     )
 
 }
@@ -91,7 +95,8 @@ final case class DraftMultipleDisposalsReturn(
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
   gainOrLossAfterReliefs: Option[AmountInPence],
-  lastUpdatedDate: LocalDate
+  lastUpdatedDate: LocalDate,
+  pendingUploadRef: Option[UploadReference]
 ) extends DraftReturn
 
 object DraftMultipleDisposalsReturn {
@@ -110,7 +115,8 @@ object DraftMultipleDisposalsReturn {
       None,
       representeeAnswers,
       None,
-      TimeUtils.today()
+      TimeUtils.today(),
+      None
     )
 
 }
@@ -126,7 +132,8 @@ final case class DraftSingleIndirectDisposalReturn(
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
   gainOrLossAfterReliefs: Option[AmountInPence],
-  lastUpdatedDate: LocalDate
+  lastUpdatedDate: LocalDate,
+  pendingUploadRef: Option[UploadReference]
 ) extends DraftReturn
 
 object DraftSingleIndirectDisposalReturn {
@@ -147,7 +154,8 @@ object DraftSingleIndirectDisposalReturn {
       None,
       representeeAnswers,
       None,
-      TimeUtils.today()
+      TimeUtils.today(),
+      None
     )
 
 }
@@ -161,7 +169,8 @@ final case class DraftMultipleIndirectDisposalsReturn(
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
   gainOrLossAfterReliefs: Option[AmountInPence],
-  lastUpdatedDate: LocalDate
+  lastUpdatedDate: LocalDate,
+  pendingUploadRef: Option[UploadReference]
 ) extends DraftReturn
 
 object DraftMultipleIndirectDisposalsReturn {
@@ -180,7 +189,8 @@ object DraftMultipleIndirectDisposalsReturn {
       None,
       representeeAnswers,
       None,
-      TimeUtils.today()
+      TimeUtils.today(),
+      None
     )
 
 }
@@ -194,7 +204,8 @@ final case class DraftSingleMixedUseDisposalReturn(
   supportingEvidenceAnswers: Option[SupportingEvidenceAnswers],
   representeeAnswers: Option[RepresenteeAnswers],
   gainOrLossAfterReliefs: Option[AmountInPence],
-  lastUpdatedDate: LocalDate
+  lastUpdatedDate: LocalDate,
+  pendingUploadRef: Option[UploadReference]
 ) extends DraftReturn
 
 object DraftSingleMixedUseDisposalReturn {
@@ -213,7 +224,8 @@ object DraftSingleMixedUseDisposalReturn {
       None,
       representeeAnswers,
       None,
-      TimeUtils.today()
+      TimeUtils.today(),
+      None
     )
 
 }

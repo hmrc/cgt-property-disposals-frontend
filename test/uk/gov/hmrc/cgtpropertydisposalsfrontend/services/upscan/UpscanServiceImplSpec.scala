@@ -101,7 +101,7 @@ class UpscanServiceImplSpec extends AnyWordSpec with Matchers with SampledScalaC
             .returning(EitherT.fromEither[Future](Right(HttpResponse(OK, emptyJsonBody))))
           await(
             service
-              .initiate(mockFailure, (_: UploadReference) => mockSuccess)
+              .initiate(mockFailure, mockSuccess)
               .value
           ).isRight shouldBe true
         }

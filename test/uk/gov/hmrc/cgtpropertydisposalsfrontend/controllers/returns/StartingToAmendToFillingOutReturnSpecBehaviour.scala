@@ -95,7 +95,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
-          LocalDate.now(Clock.systemUTC())
+          LocalDate.now(Clock.systemUTC()),
+          None
         )
 
         test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
@@ -116,7 +117,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
-          LocalDate.now(Clock.systemUTC())
+          LocalDate.now(Clock.systemUTC()),
+          None
         )
 
         test(
@@ -139,7 +141,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
-          LocalDate.now(Clock.systemUTC())
+          LocalDate.now(Clock.systemUTC()),
+          None
         )
 
         test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
@@ -156,7 +159,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
-          LocalDate.now(Clock.systemUTC())
+          LocalDate.now(Clock.systemUTC()),
+          None
         )
 
         test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
@@ -173,7 +177,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
-          LocalDate.now(Clock.systemUTC())
+          LocalDate.now(Clock.systemUTC()),
+          None
         )
 
         test(completeReturn, draftReturn, shouldDisplayGainOrLossAfterReliefs = true)
@@ -194,7 +199,8 @@ trait StartingToAmendToFillingOutReturnSpecBehaviour {
           None,
           None,
           completeReturn.gainOrLossAfterReliefs,
-          LocalDate.now(Clock.systemUTC())
+          LocalDate.now(Clock.systemUTC()),
+          None
         )
 
         val startingToAmend = sample[StartingToAmendReturn].copy(

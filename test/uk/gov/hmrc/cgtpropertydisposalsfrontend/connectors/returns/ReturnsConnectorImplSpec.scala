@@ -134,7 +134,8 @@ class ReturnsConnectorImplSpec extends AnyWordSpec with Matchers with ConnectorS
             supportingEvidenceAnswers = None,
             representeeAnswers = None,
             gainOrLossAfterReliefs = None,
-            lastUpdatedDate = LocalDate.now()
+            lastUpdatedDate = LocalDate.now(),
+            pendingUploadRef = None
           )
         )
       )

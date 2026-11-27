@@ -175,7 +175,7 @@ class SupportingEvidenceController @Inject() (
       }
     }
 
-  def doYouWantToUploadSupportingEvidenceSubmit(): Action[AnyContent] =
+  def doYouWantToUploadSupportingEvidenceSubmit(): Action[AnyContent]  =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
         doYouWantToUploadForm
@@ -285,22 +285,50 @@ class SupportingEvidenceController @Inject() (
           )
       }
     }
-
-
-  private def isMaxUpload(answers : SupportingEvidenceAnswers) : Boolean = answers.fold(_.evidences, _.evidences).length >= maxUploads
+  private def isMaxUpload(answers: SupportingEvidenceAnswers): Boolean =
+    answers.fold(_.evidences, _.evidences).length >= maxUploads
 
   def uploadSupportingEvidence(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withUploadSupportingEvidenceAnswers { (_, f, answers) =>
+      withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
         if (isMaxUpload(answers)) {
           Redirect(routes.SupportingEvidenceController.checkYourAnswers())
+        } else if (fillingOutReturn.draftReturn.pendingUploadRef.isDefined) {
+          val result = for {
+            uploadReference <- EitherT.fromOption[Future](
+                                 fillingOutReturn.draftReturn.pendingUploadRef,
+                                 Error("Failed to get pending upload reference")
+                               )
+            upscanUpload    <- upscanService.getUpscanUpload(uploadReference)
+          } yield upscanUpload
+
+          result.fold(
+            { e =>
+              logger.warn("could not get existing upload reference", e)
+              errorHandler.errorResult()
+            },
+            upscanUpload =>
+              BadRequest(
+                uploadPage(
+                  upscanUpload,
+                  routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
+                  fillingOutReturn.isAmendReturn,
+                  isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers),
+                  isPendingReferenceAlreadyExists = true
+                )
+              )
+          )
         } else {
-          upscanService
-            .initiate(
-              routes.SupportingEvidenceController
-                .handleUpscanErrorRedirect(),
-              routes.SupportingEvidenceController.scanProgress
-            )
+
+          val result = for {
+            upscanUpload <- upscanService.initiate(
+                              routes.SupportingEvidenceController
+                                .handleUpscanErrorRedirect(),
+                              routes.SupportingEvidenceController.handleUpscanSuccessRedirect()
+                            )
+            _            <- updatePendingUploadReference(fillingOutReturn, Some(upscanUpload.uploadReference))
+          } yield upscanUpload
+          result
             .fold(
               { e =>
                 logger.warn("could not start upload supporting evidence", e)
@@ -311,8 +339,8 @@ class SupportingEvidenceController @Inject() (
                   uploadPage(
                     uploadUpscan,
                     routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
-                    f.isAmendReturn,
-                    isReplaymentDue(f.draftReturn.yearToDateLiabilityAnswers),
+                    fillingOutReturn.isAmendReturn,
+                    isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers),
                     hasDuplicateFileNameError = false
                   )
                 )
@@ -322,19 +350,75 @@ class SupportingEvidenceController @Inject() (
     }
 
   def handleUpscanErrorRedirect(): Action[AnyContent] =
-    authenticatedActionWithSessionData {
-      Redirect(routes.SupportingEvidenceController.documentDidNotUpload())
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, _) =>
+        (request.getQueryString("key"), fillingOutReturn.draftReturn.pendingUploadRef) match {
+          case (Some(key), Some(uploadReference)) =>
+            val result = for {
+              upscanUpload <- upscanService.getUpscanUpload(uploadReference)
+              _            <- if (upscanUpload.upscanUploadMeta.reference == key)
+                                updatePendingUploadReference(fillingOutReturn, None)
+                              else
+                                EitherT.rightT[Future, Error](())
+            } yield ()
+
+            result.fold(
+              { e =>
+                logger.warn("could not handle upscan error redirect", e)
+                errorHandler.errorResult()
+              },
+              _ => Redirect(routes.SupportingEvidenceController.documentDidNotUpload())
+            )
+          case _                                  =>
+            Redirect(routes.SupportingEvidenceController.documentDidNotUpload())
+        }
+      }
     }
 
   def documentDidNotUpload(): Action[AnyContent] =
     authenticatedActionWithSessionData(implicit request => Ok(uploadFailedPage()))
 
   def handleUpscanCallBackFailures(): Action[AnyContent] =
-    authenticatedActionWithSessionData(implicit request => Ok(scanFailedPage()))
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, _) =>
+        if (fillingOutReturn.draftReturn.pendingUploadRef.isDefined) {
+          updatePendingUploadReference(fillingOutReturn, None).fold(
+            e => {
+              logger.warn("Could not remove pending upscan upload", e)
+              errorHandler.errorResult()
+            },
+            _ => Ok(scanFailedPage())
+          )
+        } else {
+          Ok(scanFailedPage())
+        }
+      }
+    }
+  def handleUpscanSuccessRedirect(): Action[AnyContent]  =
+    authenticatedActionWithSessionData.async { implicit request =>
+      withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, _) =>
+        (request.getQueryString("key"), fillingOutReturn.draftReturn.pendingUploadRef) match {
+          case (Some(key), Some(uploadReference)) =>
+            upscanService
+              .getUpscanUpload(uploadReference)
+              .fold(
+                { e =>
+                  logger.warn("could not get existing upload reference", e)
+                  errorHandler.errorResult()
+                },
+                upscanUpload =>
+                  if (upscanUpload.upscanUploadMeta.reference == key)
+                    Redirect(routes.SupportingEvidenceController.scanProgress())
+                  else
+                    Redirect(routes.SupportingEvidenceController.documentDidNotUpload())
+              )
+          case _                                  =>
+            Redirect(routes.SupportingEvidenceController.documentDidNotUpload())
+        }
+      }
+    }
 
-  def scanProgress(
-    uploadReference: UploadReference
-  ): Action[AnyContent] =
+  def scanProgress(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
       withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
         if (isMaxUpload(answers)) {
@@ -345,20 +429,24 @@ class SupportingEvidenceController @Inject() (
               Redirect(routes.SupportingEvidenceController.checkYourAnswers())
             case incompleteAnswers: IncompleteSupportingEvidenceAnswers =>
               val result = for {
-                upscanUpload <- upscanService.getUpscanUpload(uploadReference)
-                storeResult  <- upscanUpload.upscanCallBack match {
-                                  case Some(success: UpscanSuccess) =>
-                                    storeUpscanSuccess(
-                                      upscanUpload,
-                                      success,
-                                      incompleteAnswers,
-                                      fillingOutReturn
-                                    )
-                                  case _                            =>
-                                    EitherT.rightT[Future, Error](
-                                      StoredUpscanSuccess: StoreUpscanSuccessResult
-                                    )
-                                }
+                uploadReference <- EitherT.fromOption[Future](
+                                     fillingOutReturn.draftReturn.pendingUploadRef,
+                                     Error("Failed to get pending upload reference")
+                                   )
+                upscanUpload    <- upscanService.getUpscanUpload(uploadReference)
+                storeResult     <- upscanUpload.upscanCallBack match {
+                                     case Some(success: UpscanSuccess) =>
+                                       storeUpscanSuccess(
+                                         upscanUpload,
+                                         success,
+                                         incompleteAnswers,
+                                         fillingOutReturn
+                                       )
+                                     case _                            =>
+                                       EitherT.rightT[Future, Error](
+                                         StoredUpscanSuccess: StoreUpscanSuccessResult
+                                       )
+                                   }
               } yield (upscanUpload, storeResult)
               result.value.flatMap {
                 case Left(e) =>
@@ -366,27 +454,31 @@ class SupportingEvidenceController @Inject() (
                   Future.successful(errorHandler.errorResult())
 
                 case Right((_, DuplicateUpscanFileName)) =>
-                  upscanService
-                    .initiate(
-                      routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
-                      routes.SupportingEvidenceController.scanProgress
-                    )
-                    .fold(
-                      { e =>
-                        logger.warn("could not start upload supporting evidence", e)
-                        errorHandler.errorResult()
-                      },
-                      upscanUpload =>
-                        BadRequest(
-                          uploadPage(
-                            upscanUpload,
-                            routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
-                            fillingOutReturn.isAmendReturn,
-                            isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers),
-                            hasDuplicateFileNameError = true
-                          )
+                  val result = for {
+                    upscanUpload <- upscanService
+                                      .initiate(
+                                        routes.SupportingEvidenceController.handleUpscanErrorRedirect(),
+                                        routes.SupportingEvidenceController.handleUpscanSuccessRedirect()
+                                      )
+                    _            <- updatePendingUploadReference(fillingOutReturn, Some(upscanUpload.uploadReference))
+                  } yield upscanUpload
+
+                  result.fold(
+                    { e =>
+                      logger.warn("could not start upload supporting evidence", e)
+                      errorHandler.errorResult()
+                    },
+                    upscanUpload =>
+                      BadRequest(
+                        uploadPage(
+                          upscanUpload,
+                          routes.SupportingEvidenceController.doYouWantToUploadSupportingEvidence(),
+                          fillingOutReturn.isAmendReturn,
+                          isReplaymentDue(fillingOutReturn.draftReturn.yearToDateLiabilityAnswers),
+                          hasDuplicateFileNameError = true
                         )
-                    )
+                      )
+                  )
 
                 case Right((upscanUpload, StoredUpscanSuccess)) =>
                   Future.successful {
@@ -398,7 +490,7 @@ class SupportingEvidenceController @Inject() (
                         Redirect(routes.SupportingEvidenceController.handleUpscanCallBackFailures())
 
                       case None =>
-                        Ok(scanProgressPage(upscanUpload))
+                        Ok(scanProgressPage())
                     }
                   }
               }
@@ -406,14 +498,39 @@ class SupportingEvidenceController @Inject() (
         }
       }
     }
+  private def updatePendingUploadReference(
+    currentJourney: FillingOutReturn,
+    uploadReference: Option[UploadReference]
+  )(implicit
+    request: RequestWithSessionData[?]
+  ): EitherT[Future, Error, Unit] = {
+    val newDraftReturn = updateDraftReturn(uploadReference, currentJourney.draftReturn)
+    val newJourney     = currentJourney.copy(draftReturn = newDraftReturn)
+    for {
+      _ <- returnsService.storeDraftReturn(newJourney)
+      _ <- EitherT(
+             updateSession(sessionStore, request.toSession)(_.copy(journeyStatus = Some(newJourney)))
+           )
+    } yield ()
+  }
 
-  def scanProgressSubmit(
-    uploadReference: String
-  ): Action[AnyContent] =
+  private def updateDraftReturn(
+    uploadReference: Option[UploadReference],
+    draftReturn: DraftReturn
+  ): DraftReturn =
+    draftReturn.fold(
+      _.copy(pendingUploadRef = uploadReference),
+      _.copy(pendingUploadRef = uploadReference),
+      _.copy(pendingUploadRef = uploadReference),
+      _.copy(pendingUploadRef = uploadReference),
+      _.copy(pendingUploadRef = uploadReference)
+    )
+
+  def scanProgressSubmit(): Action[AnyContent] =
     authenticatedActionWithSessionData.async { _ =>
       Redirect(
         routes.SupportingEvidenceController
-          .scanProgress(UploadReference(uploadReference))
+          .scanProgress()
       )
     }
 
@@ -526,8 +643,19 @@ class SupportingEvidenceController @Inject() (
     hasDuplicateFileNameError: Boolean = false
   ): Action[AnyContent] =
     authenticatedActionWithSessionData.async { implicit request =>
-      withUploadSupportingEvidenceAnswers { (_, _, answers) =>
-        checkYourAnswersHandler(answers, hasDuplicateFileNameError)
+      withUploadSupportingEvidenceAnswers { (_, fillingOutReturn, answers) =>
+        if (fillingOutReturn.draftReturn.pendingUploadRef.isDefined) {
+          updatePendingUploadReference(fillingOutReturn, None).fold(
+            e => {
+              logger.warn("Could not remove pending upscan upload", e)
+              errorHandler.errorResult()
+            },
+            _ => checkYourAnswersHandler(answers, hasDuplicateFileNameError)
+          )
+        } else {
+          checkYourAnswersHandler(answers, hasDuplicateFileNameError)
+        }
+
       }
     }
 

@@ -34,7 +34,8 @@
     backLink: Call,
     isAmend: Boolean,
     isReplaymentDue: Boolean,
-    hasDuplicateFileNameError: Boolean = false
+    hasDuplicateFileNameError: Boolean = false,
+    isPendingReferenceAlreadyExists: Boolean = false
 )(implicit request: RequestWithSessionData[?], messages: Messages)
 
 @key = @{"supporting-evidence.upload"}
@@ -84,8 +85,14 @@
     else
         None
 }
+@PendingSupportingEvidenceErrorMessage = @{
+    if(isPendingReferenceAlreadyExists)
+        Some(messages(s"$key.pendingUploadRefExists"))
+    else
+        None
+}
 
-@layout(title, backLinkUrl = Some(backLink.url), hasErrors = hasDuplicateFileNameError) {
+@layout(title, backLinkUrl = Some(backLink.url), hasErrors = (hasDuplicateFileNameError || isPendingReferenceAlreadyExists)) {
     @duplicateFileNameErrorMessage.map { error =>
         @govukErrorSummary(
             ErrorSummary(
@@ -99,6 +106,18 @@
             )
         )
     }
+    @PendingSupportingEvidenceErrorMessage.map{  error =>
+        @govukErrorSummary(
+            ErrorSummary(
+                title = Text(messages(s"$key.thereIsProblem")),
+                errorList = Seq(
+                    ErrorLink(
+                    content = Text(error))
+                )
+            )
+        )
+    }
+
   @caption(messages(s"$key.caption"))
   <h1 class="govuk-heading-xl">@title</h1>
   @if(isReplaymentDue) {
